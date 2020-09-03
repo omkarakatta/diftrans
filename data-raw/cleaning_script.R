@@ -19,6 +19,23 @@
 ###
 ###
 
+# import raw data
+bmp_raw <- import_rawdata(rawdata_path)
+
+# prepare data depending on version
+temp_nrow <- nrow(bmp_raw)
+if (version == "v1"){
+  bmp_raw <- bmp_raw %>% # remove Dec 2010
+    dplyr::filter(!(year == 2010 & month == 12))
+  stopifnot(nrow(bmp_raw) < temp_nrow)
+}
+if (version == "v2"){
+  bmp_raw <- bmp_raw %>% # remove Dec 2010, Jan 2011, Feb 2011
+    dplyr::filter(!(year == 2010 & month == 12)) %>%
+    dplyr::filter(!(year == 2011 & month %in% c(1, 2)))
+  stopifnot(nrow(bmp_raw) < temp_nrow)
+}
+
 
 # filter `MSRP` to be within limits
 # create unique identifier

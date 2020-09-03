@@ -24,7 +24,7 @@ library(magrittr)
 
 # NEED TO CHANGE
 rawdata_path <- "/Users/omkar_katta/BFI/3_BMP_GP/data-raw/GuisChineseCities (1).csv"
-version <- "original"
+version <- "v2"
 
 MSRP_lowerlim <- 0
 MSRP_upperlim <- 5e6
@@ -35,40 +35,15 @@ Tianjin_treatment_date <- "2014-01-01"
 
 source(here::here("data-raw", "cleaning_functions.R"))
 
-### Prepare Data ---------------------------
-
-bmp_raw <- import_rawdata(rawdata_path)
-temp_nrow <- nrow(bmp_raw)
-if (version == "v1"){
-  bmp_raw <- bmp_raw %>% # remove Dec 2010
-    dplyr::filter(!(year == 2010 & month == 12))
-  stopifnot(nrow(bmp_raw) < temp_nrow)
-}
-if (version == "v2"){
-  bmp_raw <- bmp_raw %>% # remove Dec 2010, Jan 2011, Feb 2011
-    dplyr::filter(!(year == 2010 & month == 12)) %>%
-    dplyr::filter(!(year == 2011 & month %in% c(1, 2)))
-  stopifnot(nrow(bmp_raw) < temp_nrow)
-}
-
-### Clean Data ---------------------------
+### Import Clean Data ---------------------------
 
 source(here::here("data-raw", "cleaning_script.R"))
 
 ### Save Data ---------------------------
 
-name <- paste(version, "Beijing", sep = "_")
-assign(name, Beijing, envir = .GlobalEnv)
-
-name <- paste(version, "Tianjin", sep = "_")
-assign(name, Tianjin, envir = .GlobalEnv)
-
-name <- paste(version, "Shijiazhuang", sep = "_")
-assign(name, Shijiazhuang, envir = .GlobalEnv)
-
-# usethis::use_data(get(name, envir = .GlobalEnv), overwrite = T)
-rm(list = setdiff(ls(), c(ls(pattern = version), ls(pattern = "version"))))
-save.image(file = here::here("data", paste(version, ".RData", sep = "")))
+save(Beijing, file = here::here("data", paste(version, "Beijing.RData", sep = "_")))
+save(Tianjin, file = here::here("data", paste(version, "Tianjin.RData", sep = "_")))
+save(Shijiazhuang, file = here::here("data", paste(version, "Shijiazhuang.RData", sep = "_")))
 
 ### Save Defaults ---------------------------
 
