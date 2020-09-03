@@ -16,6 +16,9 @@
 ###     - `"v1"`, i.e., exclude December 2010
 ###     - `"v2"`, i.e., exclude December 2010, January 2011, and February 2011
 ###
+###   To save data, note that the name of the object should correspond to the version.
+###   This must be user-specified.
+###
 ###
 
 ### Preliminaries ---------------------------
@@ -24,8 +27,8 @@ library(magrittr)
 
 # NEED TO CHANGE
 rawdata_path <- "/Users/omkar_katta/BFI/3_BMP_GP/data-raw/GuisChineseCities (1).csv"
-version <- "original"
 
+version <- "original"
 MSRP_lowerlim <- 0
 MSRP_upperlim <- 5e6
 Beijing_treatment_date <- "2011-01-01"
@@ -51,9 +54,9 @@ name <- paste(version, "Shijiazhuang", sep = "_")
 assign(name, Shijiazhuang, envir = .GlobalEnv)
 
 # NEED TO CHANGE depending on version
-save(original_Beijing, file = here::here("data", paste(version, "Beijing.RData", sep = "_")))
-save(original_Tianjin, file = here::here("data", paste(version, "Tianjin.RData", sep = "_")))
-save(original_Shijiazhuang, file = here::here("data", paste(version, "Shijiazhuang.RData", sep = "_")))
+save(original_Beijing, file = here::here("data", paste(version, "Beijing.RData", sep = "_")), compress = "xz")
+save(original_Tianjin, file = here::here("data", paste(version, "Tianjin.RData", sep = "_")), compress = "xz")
+save(original_Shijiazhuang, file = here::here("data", paste(version, "Shijiazhuang.RData", sep = "_")), compress = "xz")
 
 ### Save Defaults ---------------------------
 
