@@ -60,17 +60,17 @@ source(here::here("data-raw", "cleaning_script.R"))
 name <- paste(version, "Beijing", sep = "_")
 assign(name, Beijing, envir = .GlobalEnv)
 # usethis::use_data(get(name, envir = .GlobalEnv), overwrite = T)
-save(name, file = here::here("data", paste(name, ".RData", sep = "")))
+saveRDS(get(name, envir = .GlobalEnv), file = here::here("data", paste(name, ".rds", sep = "")))
 
 name <- paste(version, "Tianjin", sep = "_")
 assign(name, Tianjin, envir = .GlobalEnv)
 # usethis::use_data(get(name, envir = .GlobalEnv), overwrite = T)
-save(name, file = here::here("data", paste(name, ".RData", sep = "")))
+saveRDS(get(name, envir = .GlobalEnv), file = here::here("data", paste(name, ".rds", sep = "")))
 
 name <- paste(version, "Shijiazhuang", sep = "_")
 assign(name, Shijiazhuang, envir = .GlobalEnv)
 # usethis::use_data(get(name, envir = .GlobalEnv), overwrite = T)
-save(name, file = here::here("data", paste(name, ".RData", sep = "")))
+saveRDS(get(name, envir = .GlobalEnv), file = here::here("data", paste(name, ".rds", sep = "")))
 
 ### Save Defaults ---------------------------
 
