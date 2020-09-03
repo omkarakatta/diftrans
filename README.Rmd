@@ -1,0 +1,39 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# diftrans
+
+<!-- badges: start -->
+![status](https://img.shields.io/badge/status-under%20construction-yellow)
+<!-- badges: end -->
+
+The goal of the `diftrans` package is to compute the differences-in-transports estimator introduced in Daljford, Hu, Pouliot, and Xiao (2020). Currently, the package is in development.
+
+<!-- ## Installation -->
+
+<!-- You can install the `diftrans` from [GitHub](https://github.com/) with: -->
+
+<!-- ``` r -->
+<!-- # install.packages("devtools") -->
+<!-- devtools::install_github("omkarakatta/diftrans") -->
+<!-- ``` -->
+<!-- ## Example -->
+
+<!-- This is a basic example which shows you how to solve a common problem: -->
+
+<!-- ```{r example} -->
+<!-- # library(diftrans) -->
+<!-- ## basic example code -->
+<!-- ``` -->
