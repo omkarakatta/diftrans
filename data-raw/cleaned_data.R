@@ -19,6 +19,9 @@
 ###   To save data, note that the name of the object should correspond to the version.
 ###   This must be user-specified.
 ###
+###   Note that the defaults were not saved to the package because they only
+###   clutter the workspace.
+###
 ###
 
 ### Preliminaries ---------------------------
@@ -103,4 +106,4 @@ show_diff_in_diff <- F
 
 suffix <- "_"
 
-save.image(here::here("data", "defaults.RData"))
+# save.image(here::here("data", "defaults.RData"))
