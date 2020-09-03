@@ -24,7 +24,7 @@ library(magrittr)
 
 # NEED TO CHANGE
 rawdata_path <- "/Users/omkar_katta/BFI/3_BMP_GP/data-raw/GuisChineseCities (1).csv"
-version <- "v2"
+version <- "original"
 
 MSRP_lowerlim <- 0
 MSRP_upperlim <- 5e6
@@ -41,9 +41,19 @@ source(here::here("data-raw", "cleaning_script.R"))
 
 ### Save Data ---------------------------
 
-save(Beijing, file = here::here("data", paste(version, "Beijing.RData", sep = "_")))
-save(Tianjin, file = here::here("data", paste(version, "Tianjin.RData", sep = "_")))
-save(Shijiazhuang, file = here::here("data", paste(version, "Shijiazhuang.RData", sep = "_")))
+name <- paste(version, "Beijing", sep = "_")
+assign(name, Beijing, envir = .GlobalEnv)
+
+name <- paste(version, "Tianjin", sep = "_")
+assign(name, Tianjin, envir = .GlobalEnv)
+
+name <- paste(version, "Shijiazhuang", sep = "_")
+assign(name, Shijiazhuang, envir = .GlobalEnv)
+
+# NEED TO CHANGE depending on version
+save(original_Beijing, file = here::here("data", paste(version, "Beijing.RData", sep = "_")))
+save(original_Tianjin, file = here::here("data", paste(version, "Tianjin.RData", sep = "_")))
+save(original_Shijiazhuang, file = here::here("data", paste(version, "Shijiazhuang.RData", sep = "_")))
 
 ### Save Defaults ---------------------------
 
