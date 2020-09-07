@@ -79,8 +79,9 @@ theme_bmp <- function(legend.direction = "vertical",
                       xangle = NULL,
                       sizefont = fontsize,
                       axissizefont = fontsizeaxis){
-  ggplot2::theme_classic() +
-    ggplot2::theme_replace(
+  '%+replace%' <- ggplot2::'%+replace%'
+  ggplot2::theme_classic() %+replace%
+    ggplot2::theme(
       panel.border = ggplot2::element_rect(color = "black", fill=NA, size=0.5),
       legend.background = ggplot2::element_rect(fill="transparent", color=NA),
       legend.key = ggplot2::element_rect(fill="transparent", color=NA),
