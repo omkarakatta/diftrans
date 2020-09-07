@@ -1,0 +1,13 @@
+utils::globalVariables(c("grayscale",
+                         "waiver",
+                         "MSRP",
+                         "count",
+                         "from",
+                         "to",
+                         "mass",
+                         "cost",
+                         "fontsize",
+                         "fontsizeaxis",
+                         "sales",
+                         "temp",
+                         "ym"))
