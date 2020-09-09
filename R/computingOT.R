@@ -10,8 +10,6 @@
 ###
 ###
 
-### Preliminaries ---------------------------
-
 ### Cost Matrix ---------------------------
 
 build_costmatrix <- function(support, bandwidth = 0){
@@ -95,6 +93,8 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
   prop_cost <- tot_cost / sum(post)
   list("num_bribe" = tot_cost, "prop_bribe" = prop_cost, "bandwidth" = bandwidth)
 }
+
+### Compute Results ---------------------------
 
 get_results <- function(pre_main = NULL, post_main = NULL,
                         pre_control = NULL, post_control = NULL,
