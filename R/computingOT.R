@@ -37,6 +37,7 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0){
 ### Compute Transport Cost ---------------------------
 
 #' @importFrom transport transport
+#' @export
 get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSRP){
   # given pre-data and post-data, compute optimal transport cost given bandwidth
   pre <- pre_df$count
@@ -96,6 +97,7 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 
 ### Compute Results ---------------------------
 
+#' @export
 get_results <- function(pre_main = NULL, post_main = NULL,
                         pre_control = NULL, post_control = NULL,
                         bandwidth_seq = seq(0, 40000, 1000),

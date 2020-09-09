@@ -23,6 +23,7 @@ filter_date <- function(data, datevar, lowerdate, upperdate, format = "%Y-%m-%d"
 #' @importFrom tidyr replace_na
 #' @importFrom tibble as_tibble
 #' @importFrom rlang enquo
+#' @export
 prep_data <- function(data, prep,
                          var = MSRP,
                          support = NA,

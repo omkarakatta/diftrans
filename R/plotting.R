@@ -14,6 +14,7 @@
 
 ### Color Palette ---------------------------
 
+#' @export
 get_color_palette <- function(number, grayscale = grayscale){
   # colors: http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
   orange <- "#E69F00"
@@ -73,6 +74,7 @@ get_color_palette <- function(number, grayscale = grayscale){
 
 ### Theme  ---------------------------
 
+#' @export
 theme_bmp <- function(legend.direction = "vertical",
                       legend.position = c(0.8, 0.8),
                       legend.title = ggplot2::element_blank(),
@@ -100,6 +102,7 @@ theme_bmp <- function(legend.direction = "vertical",
 
 ### Plotting  ---------------------------
 
+#' @export
 bmp_plot <- function(data,
                      color = NULL, colorgray = grayscale,
                      fill = NULL,
@@ -162,6 +165,7 @@ bmp_plot <- function(data,
   )
 }
 
+#' @export
 bmp_point <- function(x, y, data,
                       color = NULL,
                       size = 1,
@@ -178,6 +182,7 @@ bmp_point <- function(x, y, data,
   )
 }
 
+#' @export
 bmp_twohist <- function(data1, data2,
                         x, scale,
                         binwidth = NULL,
@@ -201,6 +206,7 @@ bmp_twohist <- function(data1, data2,
   )
 }
 
+#' @export
 bmp_vline <- function(xint, color = "#bcbcbc", linetype = 5){
   list(
     ggplot2::geom_vline(xintercept = xint,
