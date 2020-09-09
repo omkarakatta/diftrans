@@ -47,23 +47,27 @@ source(here::here("data-raw", "cleaning_script.R"))
 
 ### Save Data ---------------------------
 
-# name <- paste(version, "Beijing", sep = "_")
+# name <- paste(version, "Beijing", "cleaned", sep = "_")
 # assign(name, Beijing, envir = .GlobalEnv)
 #
-# name <- paste(version, "Tianjin", sep = "_")
+# name <- paste(version, "Tianjin", "cleaned", sep = "_")
 # assign(name, Tianjin, envir = .GlobalEnv)
 #
-# name <- paste(version, "Shijiazhuang", sep = "_")
+# name <- paste(version, "Shijiazhuang", "cleaned", sep = "_")
 # assign(name, Shijiazhuang, envir = .GlobalEnv)
 
 # NEED TO CHANGE depending on version
-# save(original_Beijing, file = here::here("data", paste(version, "Beijing.RData", sep = "_")), compress = "xz")
-# save(original_Tianjin, file = here::here("data", paste(version, "Tianjin.RData", sep = "_")), compress = "xz")
-# save(original_Shijiazhuang, file = here::here("data", paste(version, "Shijiazhuang.RData", sep = "_")), compress = "xz")
+# save(original_Beijing_cleaned, file = here::here("data", paste(version, "Beijing.RData", sep = "_")), compress = "xz")
+# save(original_Tianjin_cleaned, file = here::here("data", paste(version, "Tianjin.RData", sep = "_")), compress = "xz")
+# save(original_Shijiazhuang_cleaned, file = here::here("data", paste(version, "Shijiazhuang.RData", sep = "_")), compress = "xz")
 
-save(Beijing, file = here::here("data", "Beijing.RData"), compress = "xz")
-save(Tianjin, file = here::here("data", "Tianjin.RData"), compress = "xz")
-save(Shijiazhuang, file = here::here("data", "Shijiazhuang.RData"), compress = "xz")
+Beijing_cleaned <- Beijing
+Tianjin_cleaned <- Tianjin
+Shijiazhuang_cleaned <- Shijiazhuang
+
+save(Beijing_cleaned, file = here::here("data", "Beijing_cleaned.RData"), compress = "xz")
+save(Tianjin_cleaned, file = here::here("data", "Tianjin_cleaned.RData"), compress = "xz")
+save(Shijiazhuang_cleaned, file = here::here("data", "Shijiazhuang_cleaned.RData"), compress = "xz")
 
 ### Save Defaults ---------------------------
 
