@@ -66,7 +66,7 @@ message("`BTS` is created.")
 Beijing <- filter_cities(BTS,
                          cities = c("Beijing"),
                          create_dummy = F) %>%
-  dplyr::select(id, year, month, ym, MSRP, sales, color, noticenum,
+  dplyr::select(id, year, month, ym, MSRP, sales, swtprice, color, noticenum,
                 postBeijing, postTianjin, Beijing, Tianjin, Shijiazhuang, policy_dummy)
 
 message("`Beijing` is created.")
@@ -74,7 +74,7 @@ message("`Beijing` is created.")
 Tianjin <- filter_cities(BTS,
                          cities = c("Tianjin"),
                          create_dummy = F) %>%
-  dplyr::select(id, year, month, ym, MSRP, sales, color, noticenum,
+  dplyr::select(id, year, month, ym, MSRP, sales, swtprice, color, noticenum,
                 postBeijing, postTianjin, Beijing, Tianjin, Shijiazhuang, policy_dummy)
 
 message("`Tianjin` is created.")
@@ -82,7 +82,7 @@ message("`Tianjin` is created.")
 Shijiazhuang <- filter_cities(BTS,
                               cities = c("Shijiazhuang"),
                               create_dummy = F) %>%
-  dplyr::select(id, year, month, ym, MSRP, sales, color, noticenum,
+  dplyr::select(id, year, month, ym, MSRP, sales, swtprice, color, noticenum,
                 postBeijing, postTianjin, Beijing, Tianjin, Shijiazhuang, policy_dummy)
 
 message("`Shijiazhuang` is created.")
