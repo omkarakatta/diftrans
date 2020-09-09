@@ -18,6 +18,7 @@
 library(diftrans)
 library(magrittr)
 library(ggplot2)
+library(gridExtra)
 library(dplyr)
 library(tidyr)
 
@@ -89,24 +90,24 @@ if (version == "original"){
 } else if (version == "v1"){
   # filter out Dec 2010
   Beijing <- Beijing_cleaned %>%
-    dplyr::filter(!(year == 2010 & month == 12))
+    filter(!(year == 2010 & month == 12))
   Tianjin <- Tianjin_cleaned %>%
-    dplyr::filter(!(year == 2010 & month == 12))
+    filter(!(year == 2010 & month == 12))
   Shijiazhuang <- Shijiazhuang_cleaned %>%
-    dplyr::filter(!(year == 2010 & month == 12))
+    filter(!(year == 2010 & month == 12))
   seedplus <- 1
   message(paste("Version: ", version, sep = ""))
 } else if (version == "v2"){
   # filter out Dec 2010, Jan 2011, and Feb 2011
   Beijing <- Beijing_cleaned %>%
-    dplyr::filter(!(year == 2010 & month == 12)) %>%
-    dplyr::filter(!(year == 2011 & month %in% c(1, 2)))
+    filter(!(year == 2010 & month == 12)) %>%
+    filter(!(year == 2011 & month %in% c(1, 2)))
   Tianjin <- Tianjin_cleaned %>%
-    dplyr::filter(!(year == 2010 & month == 12)) %>%
-    dplyr::filter(!(year == 2011 & month %in% c(1, 2)))
+    filter(!(year == 2010 & month == 12)) %>%
+    filter(!(year == 2011 & month %in% c(1, 2)))
   Shijiazhuang <- Shijiazhuang_cleaned %>%
-    dplyr::filter(!(year == 2010 & month == 12)) %>%
-    dplyr::filter(!(year == 2011 & month %in% c(1, 2)))
+    filter(!(year == 2010 & month == 12)) %>%
+    filter(!(year == 2011 & month %in% c(1, 2)))
   seedplus <- 2
   message(paste("Version: ", version, sep = ""))
 } else {
@@ -202,4 +203,564 @@ if (show_fig | show_fig2){
 }
 message(paste("Figure ", fignum, " is complete.", sep = ""))
 
+### Figure 3 ---------------------------
+fignum <- 3
+if (show_fig | show_fig3){
+  pre <- prep_data(Beijing, prep = "dist",
+                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  post <- prep_data(Beijing, prep = "dist",
+                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  fig3_plot <- ggplot() +
+    bmp_twohist(data1 = pre, data2 = post,
+                scale = 1000,
+                x = MSRP, binwidth = 20) +
+    bmp_plot(data = Beijing,
+             color = policy_dummy,
+             fill = policy_dummy,
+             legendlabels = c("pre-lottery", "post-lottery"),
+             xtype = "continuous",
+             xbreaks = seq(0, 1400, by = 100),
+             ytype = "continuous",
+             ybreaks = seq(0, 0.008, by = 0.002),
+             xlab = "MSRP (RMB 1000)",
+             ylab = "Density",
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5))
+  if (save_fig | save_fig3){
+    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width, height = default_height+1, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+}
+message(paste("Figure ", fignum, " is complete.", sep = ""))
+
+### Figure 4 ---------------------------
+fignum <- 4
+if (show_fig | show_fig4){
+  pre <- prep_data(Beijing, prep = "pmf",
+                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  post <- prep_data(Beijing, prep = "pmf",
+                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
+
+  scalex <- 1000
+
+  color_fig4a <- ifelse(grayscale,
+                        get_color_palette(2, grayscale)[[1]],
+                        get_color_palette(2, grayscale)[[1]])
+  fig4a_OK <- ggplot() +
+    geom_segment(data = pre,
+                 mapping = aes(x = MSRP / scalex, xend = MSRP / scalex,
+                               y = 0, yend = count),
+                 alpha = 0.5,
+                 color = color_fig4a) +
+    bmp_plot(data = Beijing,
+             xtype = "continuous",
+             xbreaks = seq(0, max(Beijing$MSRP, na.rm = T)/scalex, by = 200000/scalex),
+             ytype = "continuous",
+             ybreaks = seq(0, max(pre$count, post$count), by = 5000),
+             ylims = c(0, max(pre$count, post$count)),
+             ylab = "Probability Mass Function",
+             xlab = "MSRP (RMB 1000)",
+             ggtitle = "Pre-Lottery",
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5))
+  color_fig4b <- ifelse(grayscale,
+                        get_color_palette(3, grayscale)[[2]],
+                        get_color_palette(2, grayscale)[[2]])
+  fig4b_OK <- ggplot() +
+    geom_segment(data = post,
+                 mapping = aes(x = MSRP / scalex, xend = MSRP / scalex,
+                               y = 0, yend = count),
+                 alpha = 0.5,
+                 color = color_fig4b) +
+    bmp_plot(data = Beijing,
+             xtype = "continuous",
+             xbreaks = seq(0, max(Beijing$MSRP, na.rm = T)/scalex, by = 200000/scalex),
+             ytype = "continuous",
+             ybreaks = seq(0, max(pre$count, post$count), by = 5000),
+             ylims = c(0, max(pre$count, post$count)),
+             # ylab = "Probability Mass Function",
+             xlab = "MSRP (RMB 1000)",
+             ggtitle = "Post-Lottery",
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5))
+  fig4_plot_show <- grid.arrange(fig4a_OK, fig4b_OK, ncol = 2)
+  fig4_plot <- arrangeGrob(fig4a_OK, fig4b_OK, ncol = 2)
+  if (save_fig | save_fig4){
+    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), fig4_plot, path = img_path,
+           width = default_width, height = default_height+1, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+}
+message(paste("Figure ", fignum, " is complete.", sep = ""))
+
+### Figure 5 ---------------------------
+fignum <- 5
+if (show_fig | show_fig5){
+  pre <- prep_data(Beijing, prep = "dist",
+                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  post <- prep_data(Beijing, prep = "dist",
+                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
+
+  upperxlim <- 1400000
+  scale <- 1000
+
+  da <- 30000 / scale
+  fig5a_OK <- ggplot() +
+    bmp_twohist(data1 = pre, data2 = post,
+                x = MSRP, scale = scale, binwidth = da) +
+    bmp_plot(data = Beijing,
+             color = policy_dummy,
+             fill = policy_dummy,
+             legendlabels = c("pre-lottery", "post-lottery"),
+             xtype = "continuous",
+             xbreaks = seq(0, upperxlim / scale, by = 100000 / scale),
+             xlims = c(0, upperxlim/scale),
+             ytype = "continuous",
+             ybreaks = seq(0, 0.008, by = 0.002),
+             # xlab = "MSRP (RMB 1000)",
+             ylab = "Density",
+             xangle = 45,
+             ggtitle = paste("d = ", da*scale, sep = ""),
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5))
+  # fig5a_OK
+
+  db <- 50000 / scale
+  fig5b_OK <- ggplot() +
+    bmp_twohist(data1 = pre, data2 = post,
+                x = MSRP, scale = scale, binwidth = db) +
+    bmp_plot(data = Beijing,
+             color = policy_dummy,
+             fill = policy_dummy,
+             legendlabels = c("pre-lottery", "post-lottery"),
+             xtype = "continuous",
+             xbreaks = seq(0, upperxlim / scale, by = 100000 / scale),
+             xlims = c(0, upperxlim/scale),
+             ytype = "continuous",
+             ybreaks = seq(0, 0.008, by = 0.002),
+             # xlab = "MSRP (RMB 1000)",
+             # ylab = "Density",
+             xangle = 45,
+             ggtitle = paste("d = ", db*scale, sep = ""),
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5))
+  # fig5b_OK
+
+  dc <- 70000 / scale
+  fig5c_OK <- ggplot() +
+    bmp_twohist(data1 = pre, data2 = post,
+                x = MSRP, scale = scale, binwidth = dc) +
+    bmp_plot(data = Beijing,
+             color = policy_dummy,
+             fill = policy_dummy,
+             legendlabels = c("pre-lottery", "post-lottery"),
+             xtype = "continuous",
+             xbreaks = seq(0, upperxlim / scale, by = 100000 / scale),
+             xlims = c(0, upperxlim/scale),
+             ytype = "continuous",
+             ybreaks = seq(0, 0.008, by = 0.001),
+             xlab = "MSRP (RMB 1000)",
+             ylab = "Density",
+             xangle = 45,
+             ggtitle = paste("d = ", dc*scale, sep = ""),
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5))
+  # fig5c_OK
+
+  dd <- 90000 / scale
+  fig5d_OK <- ggplot() +
+    bmp_twohist(data1 = pre, data2 = post,
+                x = MSRP, scale = scale, binwidth = dd) +
+    bmp_plot(data = Beijing,
+             color = policy_dummy,
+             fill = policy_dummy,
+             legendlabels = c("pre-lottery", "post-lottery"),
+             xtype = "continuous",
+             xbreaks = seq(0, upperxlim / scale, by = 100000 / scale),
+             xlims = c(0, upperxlim/scale),
+             ytype = "continuous",
+             ybreaks = seq(0, 0.008, by = 0.001),
+             xlab = "MSRP (RMB 1000)",
+             # ylab = "Density",
+             xangle = 45,
+             ggtitle = paste("d = ", dd*scale, sep = ""),
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5))
+  # fig5d_OK
+  fig5_plot_show <- grid.arrange(fig5a_OK, fig5b_OK,
+                                 fig5c_OK, fig5d_OK,
+                                 nrow = 2)
+  fig5_plot <- arrangeGrob(fig5a_OK, fig5b_OK,
+                           fig5c_OK, fig5d_OK,
+                           nrow = 2)
+
+  if (save_fig | save_fig5){
+    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), fig5_plot, path = img_path,
+           width = default_width, height = default_height+5, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+}
+message(paste("Figure ", fignum, " is complete.", sep = ""))
+
+### Figure 6 ---------------------------
+fignum <- 6
+if (show_fig | show_fig6){
+  set.seed(11 + seedplus)
+  support <- prep_data(data = Beijing, prep = "support")
+
+  pre <- prep_data(Beijing, prep = "pmf",
+                   support = support,
+                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  post <- prep_data(Beijing, prep = "pmf",
+                    support = support,
+                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
+
+  synth_pre1 <- data.frame(MSRP = pre$MSRP,
+                           count = rmultinom(1, sum(pre$count), pre$count))
+  synth_pre2 <- data.frame(MSRP = pre$MSRP,
+                           count = rmultinom(1, sum(pre$count), pre$count))
+
+  bandwidth_seq = seq(0, 100000, 1000)
+
+  real <- get_results(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
+  placebo <- get_results(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
+
+  bandwidth_selection <- left_join(real, placebo, by = "bandwidth", suffix = c("_real", "_placebo")) %>%
+    mutate(ratio = main_real / main_placebo) %>%
+    mutate(order2 = ratio > 100)
+
+  d1000 <- bandwidth_selection %>%
+    filter(bandwidth == 10000) %>%
+    .$main_real
+
+  message(paste("Figure 6 analysis: the tranport cost at d = 10000 is ", d1000, sep = ""))
+
+  d_table <- bandwidth_selection %>%
+    filter(bandwidth %in% seq(10000, 90000, by = 10000))
+
+  fig6_plot <- ggplot(data = bandwidth_selection, aes(x = bandwidth)) +
+    geom_smooth(aes(y = 100*main_real, color = "0", linetype = "0"),
+                method = loess,
+                se = F,
+                size = 0.5) +
+    geom_line(aes(y = 100*main_real, color = "1", linetype = "1")) +
+    geom_line(aes(y = 100*main_placebo, color = "2", linetype = "2")) +
+    scale_color_manual(values = get_color_palette(3, grayscale),
+                       labels = c("smoothed", "real", "placebo"),
+                       name = "") +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
+                          labels = c("smoothed", "real", "placebo"),
+                          name = "") +
+    xlab("d") +
+    ylab("Transport Cost (%)") +
+    theme_bmp(sizefont = (fontsize - 8),
+              axissizefont = (fontsizeaxis - 5)) +
+    scale_y_continuous(breaks = seq(0, 100, 10)) +
+    scale_x_continuous(breaks = seq(0, 100000, 10000))
+
+  if (save_fig | save_fig6){
+    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+}
+message(paste("Figure ", fignum, " is complete.", sep = ""))
+
+### Figure 7 ---------------------------
+fignum <- 7
+if (show_fig | show_fig7){
+  pre <- prep_data(Tianjin, prep = "dist",
+                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  post <- prep_data(Tianjin, prep = "dist",
+                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  fig7_plot <- ggplot() +
+    bmp_twohist(data1 = pre,
+                data2 = post,
+                x = MSRP,
+                scale = 1000,
+                binwidth = 20) +
+    bmp_plot(data = Tianjin,
+             color = postBeijing,
+             fill = postBeijing,
+             legendlabels = c("pre-lottery", "post-lottery"),
+             xtype = "continuous",
+             xbreaks = seq(0, 1400, by = 100),
+             ytype = "continuous",
+             ybreaks = seq(0, 0.008, by = 0.002),
+             xlab = "MSRP (RMB 1000)",
+             ylab = "Density",
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5))
+
+  if (save_fig | save_fig7){
+    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+}
+message(paste("Figure ", fignum, " is complete.", sep = ""))
+
+### Figure 8 ---------------------------
+fignum <- 8
+if (show_fig | show_fig8){
+  set.seed(16 + seedplus)
+  BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
+  year_count <- BTS %>%
+    group_by(city, year) %>%
+    count()
+  n_2012_Beijing <- year_count[year_count$city == "Beijing" & year_count$year == 2012, "n"] %>% as.numeric
+  n_2011_Beijing <- year_count[year_count$city == "Beijing" & year_count$year == 2011, "n"] %>% as.numeric
+  n_2012_Tianjin <- year_count[year_count$city == "Tianjin" & year_count$year == 2012, "n"] %>% as.numeric
+  n_2011_Tianjin <- year_count[year_count$city == "Tianjin" & year_count$year == 2011, "n"] %>% as.numeric
+
+  supportB <- prep_data(BTS %>% filter(city == "Beijing"),
+                        prep = "support")
+  supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
+                        prep = "support")
+
+  B2012 <- prep_data(Beijing, prep = "pmf",
+                     support = supportB,
+                     lowerdate = "2012-01-01", upperdate = "2013-01-01")
+  T2012 <- prep_data(Tianjin, prep = "pmf",
+                     support = supportT,
+                     lowerdate = "2012-01-01", upperdate = "2013-01-01")
+
+
+  bandwidth_seq = seq(0, 15000, 500)
+  numsim <- 100
+  placeboB_prop <- matrix(NA_real_, numsim, length(bandwidth_seq))
+  placeboT_prop <- matrix(NA_real_, numsim, length(bandwidth_seq))
+
+  for (i in seq_len(numsim)){
+    B2012_n2012 <- data.frame(MSRP = B2012$MSRP,
+                              count = rmultinom(1, n_2012_Beijing, B2012$count))
+    B2012_n2011 <- data.frame(MSRP = B2012$MSRP,
+                              count = rmultinom(1, n_2011_Beijing, B2012$count))
+    T2012_n2012 <- data.frame(MSRP = T2012$MSRP,
+                              count = rmultinom(1, n_2012_Tianjin, T2012$count))
+    T2012_n2011 <- data.frame(MSRP = T2012$MSRP,
+                              count = rmultinom(1, n_2011_Tianjin, T2012$count))
+    cat("\n")
+    print(paste("Simulation Number ", i, sep = ""))
+    pb <- txtProgressBar(max = length(bandwidth_seq))
+    for (j in seq_along(bandwidth_seq)){
+      setTxtProgressBar(pb, j)
+      bandwidth <- bandwidth_seq[j]
+      placeboB <- get_OTcost(B2012_n2011, B2012_n2012, supportB, bandwidth = 2*bandwidth)
+      placeboT <- get_OTcost(T2012_n2011, T2012_n2012, supportT, bandwidth = bandwidth)
+      placeboB_prop[i, j] <- placeboB$prop_bribe
+      placeboT_prop[i, j] <- placeboT$prop_bribe
+    }
+  }
+
+  diffprop <- placeboB_prop - placeboT_prop
+
+  bandwidth_selection <- data.frame(bandwidth = bandwidth_seq,
+                                    diffprop = apply(diffprop, 2, mean)) %>%
+    mutate(diffprop_lag = lag(diffprop, 1)) %>%
+    mutate(diffprop_diff = abs(diffprop - diffprop_lag)) %>%
+    mutate(closetozero = diffprop_diff < 1e-3) %>%
+    mutate(closetozero_lag1 = lag(closetozero)) %>%
+    mutate(closetozero_lag2 = lag(closetozero, 2)) %>%
+    mutate(valid = closetozero*closetozero_lag1*closetozero_lag2)
+
+
+  # d_a = first time that the difference in the mean cost at a particular bandwidth and the previous bandwidth is less than 1e-3 three times for consecutive bandwidth choices
+  d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
+                             "bandwidth"]
+  meancost_d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
+                                      "diffprop"]
+
+  message(paste("Figure 8 analysis: d_a = ", d_a, " with cost = ", meancost_d_a, sep = ""))
+
+  fig8_plot <- ggplot() +
+    bmp_vline(xint = d_a / 2) +
+    bmp_vline(xint = d_a) +
+    geom_smooth(data = bandwidth_selection,
+                mapping = aes(x = bandwidth, y = diffprop),
+                method = loess,
+                se = F,
+                color = black,
+                size = 0.5) +
+    bmp_plot(data = bandwidth_selection,
+             xlab = "d",
+             ylab = "Mean Cost",
+             xtype = "continuous",
+             xbreaks = seq(0, 15000, 1000),
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5)) # +
+  # geom_line(data = bandwidth_selection,
+  #           mapping = aes(x = bandwidth, y = diffprop),
+  #           color = get_color_palette(2, grayscale)[[2]],
+  #           linetype = linetype1)
+
+  if (save_fig | save_fig8){
+    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width+2, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+}
+message(paste("Figure ", fignum, " is complete.", sep = ""))
+
+### Figure 9 ---------------------------
+fignum <- 9
+if (show_fig | show_fig9){
+  BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
+  supportB <- prep_data(BTS %>% dplyr::filter(city == "Beijing"),
+                        prep = "support")
+  supportT <- prep_data(BTS %>% dplyr::filter(city == "Tianjin"),
+                        prep = "support")
+
+
+  post_Bpmf <- prep_data(Beijing, prep = "pmf",
+                         support = supportB,
+                         lowerdate = "2015-01-01", upperdate = "2016-01-01")
+  pre_Bpmf <- prep_data(Beijing, prep = "pmf",
+                        support = supportB,
+                        lowerdate = "2014-01-01", upperdate = "2015-01-01")
+  post_Tpmf <- prep_data(Tianjin, prep = "pmf",
+                         support = supportT,
+                         lowerdate = "2015-01-01", upperdate = "2016-01-01")
+  pre_Tpmf <- prep_data(Tianjin, prep = "pmf",
+                        support = supportT,
+                        lowerdate = "2014-01-01", upperdate = "2015-01-01")
+
+  bandwidth_seq = seq(0, 40000, 1000)
+
+  placeboB <- get_results(pre_Bpmf, post_Bpmf, bandwidth_seq = bandwidth_seq, conservative = T)
+  placeboT <- get_results(pre_Tpmf, post_Tpmf, bandwidth_seq = bandwidth_seq, conservative = F)
+
+  bandwidth_selection <- dplyr::left_join(placeboB, placeboT, by = "bandwidth", suffix = c("_B", "_T")) %>%
+    dplyr::mutate(diffprop = main_B - main_T) %>%
+    dplyr::select(-maincons_prop) %>%
+    tidyr::pivot_longer(cols = c(main_B,
+                                 main_T,
+                                 diffprop),
+                        names_to = "type",
+                        values_to = "diffprop")
+
+  fig9_plot <- ggplot(data = bandwidth_selection,
+                       aes(x = bandwidth)) +
+    geom_line(aes(y = diffprop*100, color = type, linetype = type)) +
+    bmp_plot(data = bandwidth_selection,
+             color = type,
+             legendlabels = c("Difference", "Beijing placebo", "Tianjin placebo"),
+             xlab = "d",
+             ylab = "Transport Cost (%)",
+             ytype = "continuous",
+             ybreaks = seq(-50, 100, 10),
+             xtype = "continuous",
+             xbreaks = seq(0, 40000, 5000),
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5)) +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
+                          labels = c("Difference", "Beijing placebo", "Tianjin placebo"),
+                          name = "")
+
+  if (save_fig | save_fig9){
+    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+}
+message(paste("Figure ", fignum, " is complete.", sep = ""))
+
+### Figure 10 ---------------------------
+fignum <- 10
+if (show_fig | show_fig10){
+  BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
+  supportB <- prep_data(BTS %>% dplyr::filter(city == "Beijing"),
+                        prep = "support")
+  supportT <- prep_data(BTS %>% dplyr::filter(city == "Tianjin"),
+                        prep = "support")
+
+  post_Bpmf <- prep_data(Beijing, prep = "pmf",
+                         support = supportB,
+                         lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  pre_Bpmf <- prep_data(Beijing, prep = "pmf",
+                        support = supportB,
+                        lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  post_Tpmf <- prep_data(Tianjin, prep = "pmf",
+                         support = supportT,
+                         lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  pre_Tpmf <- prep_data(Tianjin, prep = "pmf",
+                        support = supportT,
+                        lowerdate = "2010-01-01", upperdate = "2011-01-01")
+
+
+  bandwidth_seq = seq(0, 40000, 1000)
+
+  placeboB <- get_results(pre_Bpmf, post_Bpmf, bandwidth_seq = bandwidth_seq, conservative = T)
+  placeboT <- get_results(pre_Tpmf, post_Tpmf, bandwidth_seq = bandwidth_seq, conservative = F)
+
+  temp <- left_join(placeboB, placeboT, by = "bandwidth", suffix = c("_B", "_T")) %>%
+    mutate(a = main_B - main_T,
+                  b = maincons_prop - main_T)
+  diffprop <- temp$a
+  diffprop2 <- temp$b
+  bandwidth_selection <- temp %>%
+    select(-maincons_prop)  %>%
+    pivot_longer(cols = c(main_B,
+                          main_T,
+                          a,
+                          b),
+                 names_to = "type",
+                 values_to = "diffprop")
+
+  whichmax <- which.max(diffprop)
+  diffintransp <- diffprop[whichmax]
+  mostinform <- bandwidth_seq[whichmax]
+
+  message(paste("Figure 10, d-d analysis: most informative d = ", mostinform,
+                " with diff-in-transport = ", diffintransp, sep = ""))
+
+  whichmax2 <- which.max(diffprop2)
+  diffintransp2 <- diffprop2[whichmax2]
+  mostinform2 <- bandwidth_seq[whichmax2]
+
+  message(paste("Figure 10, 2d-d analysis: most informative d = ", mostinform2,
+                " with diff-in-transport = ", diffintransp2, sep = ""))
+
+  fig10_plot <- ggplot(data = bandwidth_selection %>%
+                         dplyr::filter(type != "b"), # control d-d or 2d-d
+                       aes(x = bandwidth,
+                           linetype = type)) +
+    bmp_vline(xint = mostinform) +
+    bmp_vline(xint = mostinform2) +
+    geom_line(aes(y = diffprop*100, color = type)) +
+    bmp_plot(data = bandwidth_selection %>%
+               dplyr::filter(type != "b"),
+             color = type,
+             legendlabels = c("Difference", "Beijing", "Tianjin"),
+             xlab = "d",
+             ylab = "Transport Cost (%)",
+             ytype = "continuous",
+             ybreaks = seq(-50, 100, 10),
+             xtype = "continuous",
+             xbreaks = seq(0, 40000, 5000),
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5)) +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
+                          labels = c("Difference", "Beijing", "Tianjin"),
+                          name = "")
+  if (save_fig | save_fig10){
+    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+}
+message(paste("Figure ", fignum, " is complete.", sep = ""))
+
 ### Miscellaneous ---------------------------
+
+# Original Figure 3 (Comparing prices of car models between 2010 and 2011)
+fig3_prep <- Beijing %>%
+  filter(ym < as.Date("2012-01-01")) %>%
+  pivot_wider(id_cols = c(month, color, noticenum),
+                     names_from = year,
+                     values_from = MSRP) %>%
+  filter(!(is.na(`2010`) | is.na(`2011`))) %>%
+  mutate(diff = `2011` - `2010`)
+nrow(fig3_prep)
+summary(fig3_prep$diff)
