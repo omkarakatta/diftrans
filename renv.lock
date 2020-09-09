@@ -44,6 +44,13 @@
       "Repository": "CRAN",
       "Hash": "125dc7a0ed375eb68c0ce533b48d291f"
     },
+    "RcppEigen": {
+      "Package": "RcppEigen",
+      "Version": "0.3.3.7.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "c6faf038ba4346b1de19ad7c99b8f94a"
+    },
     "assertthat": {
       "Package": "assertthat",
       "Version": "0.2.1",
@@ -435,6 +442,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "a4b9662282097d1033c60420dcb83350"
+    },
+    "transport": {
+      "Package": "transport",
+      "Version": "0.12-2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "df93eb933fc43d76c1413a93fdb4cc47"
     },
     "utf8": {
       "Package": "utf8",
