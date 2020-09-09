@@ -21,6 +21,7 @@ library(ggplot2)
 library(gridExtra)
 library(dplyr)
 library(tidyr)
+library(stargazer)
 
 # What data do you want to use?
 # Option 1: "original" i.e. use entire data set
@@ -581,7 +582,7 @@ if (show_fig | show_fig8){
                 mapping = aes(x = bandwidth, y = diffprop),
                 method = loess,
                 se = F,
-                color = black,
+                color = "black",
                 size = 0.5) +
     bmp_plot(data = bandwidth_selection,
              xlab = "d",
@@ -607,9 +608,9 @@ message(paste("Figure ", fignum, " is complete.", sep = ""))
 fignum <- 9
 if (show_fig | show_fig9){
   BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
-  supportB <- prep_data(BTS %>% dplyr::filter(city == "Beijing"),
+  supportB <- prep_data(BTS %>% filter(city == "Beijing"),
                         prep = "support")
-  supportT <- prep_data(BTS %>% dplyr::filter(city == "Tianjin"),
+  supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
                         prep = "support")
 
 
@@ -631,10 +632,10 @@ if (show_fig | show_fig9){
   placeboB <- get_results(pre_Bpmf, post_Bpmf, bandwidth_seq = bandwidth_seq, conservative = T)
   placeboT <- get_results(pre_Tpmf, post_Tpmf, bandwidth_seq = bandwidth_seq, conservative = F)
 
-  bandwidth_selection <- dplyr::left_join(placeboB, placeboT, by = "bandwidth", suffix = c("_B", "_T")) %>%
-    dplyr::mutate(diffprop = main_B - main_T) %>%
-    dplyr::select(-maincons_prop) %>%
-    tidyr::pivot_longer(cols = c(main_B,
+  bandwidth_selection <- left_join(placeboB, placeboT, by = "bandwidth", suffix = c("_B", "_T")) %>%
+    mutate(diffprop = main_B - main_T) %>%
+    select(-maincons_prop) %>%
+    pivot_longer(cols = c(main_B,
                                  main_T,
                                  diffprop),
                         names_to = "type",
@@ -670,9 +671,9 @@ message(paste("Figure ", fignum, " is complete.", sep = ""))
 fignum <- 10
 if (show_fig | show_fig10){
   BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
-  supportB <- prep_data(BTS %>% dplyr::filter(city == "Beijing"),
+  supportB <- prep_data(BTS %>% filter(city == "Beijing"),
                         prep = "support")
-  supportT <- prep_data(BTS %>% dplyr::filter(city == "Tianjin"),
+  supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
                         prep = "support")
 
   post_Bpmf <- prep_data(Beijing, prep = "pmf",
@@ -723,14 +724,14 @@ if (show_fig | show_fig10){
                 " with diff-in-transport = ", diffintransp2, sep = ""))
 
   fig10_plot <- ggplot(data = bandwidth_selection %>%
-                         dplyr::filter(type != "b"), # control d-d or 2d-d
+                         filter(type != "b"), # control d-d or 2d-d
                        aes(x = bandwidth,
                            linetype = type)) +
     bmp_vline(xint = mostinform) +
     bmp_vline(xint = mostinform2) +
     geom_line(aes(y = diffprop*100, color = type)) +
     bmp_plot(data = bandwidth_selection %>%
-               dplyr::filter(type != "b"),
+               filter(type != "b"),
              color = type,
              legendlabels = c("Difference", "Beijing", "Tianjin"),
              xlab = "d",
@@ -764,3 +765,59 @@ fig3_prep <- Beijing %>%
   mutate(diff = `2011` - `2010`)
 nrow(fig3_prep)
 summary(fig3_prep$diff)
+
+# Diff-in-diff
+if (show_diff_in_diff){
+  did_BT <- do.call("rbind", list(Beijing, Tianjin)) %>%
+    filter(ym < "2012-01-01") %>%
+    filter(city == "Beijing" | city == "Tianjin") %>%
+    mutate(Beijing = ifelse(city == "Beijing", 1, 0)) %>%
+    group_by(Beijing, postBeijing, MSRP) %>%
+    summarise(sum = sum(sales)) %>%
+    uncount(sum)
+  did_BT_reg <- lm(log(MSRP) ~ postBeijing + Beijing + postBeijing*Beijing, data = did_BT)
+
+  did_BS <- do.call("rbind", list(Beijing, Shijiazhuang)) %>%
+    filter(ym < "2012-01-01") %>%
+    filter(city == "Beijing" | city == "Shijiazhuang") %>%
+    mutate(Beijing = ifelse(city == "Beijing", 1, 0)) %>%
+    group_by(Beijing, postBeijing, MSRP) %>%
+    summarise(sum = sum(sales)) %>%
+    uncount(sum)
+  did_BS_reg <- lm(log(MSRP) ~ postBeijing + Beijing + postBeijing*Beijing, data = did_BS)
+
+  did_BST <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang)) %>%
+    filter(ym < "2012-01-01") %>%
+    filter(city == "Beijing" | city == "Shijiazhuang" | city == "Tianjin") %>%
+    mutate(Beijing = ifelse(city == "Beijing", 1, 0)) %>%
+    group_by(Beijing, postBeijing, MSRP) %>%
+    summarise(sum = sum(sales)) %>%
+    uncount(sum)
+  did_BST_reg <- lm(log(MSRP) ~ postBeijing + Beijing + postBeijing*Beijing, data = did_BST)
+
+  stargazer(did_BT_reg, did_BS_reg, did_BST_reg,
+            label = "tab:eight",
+            type = "latex",
+            # covariate.labels = c("post", "Beijing", "Beijing $\\times$ post", "Constant"),
+            order = c(2, 1, 3, 4),
+            covariate.labels = c("Beijing", "post", "Beijing $\\times$ post", "Constant"),
+            keep.stat = c("rsq","n"),
+            align = T,
+            p.auto = FALSE,
+            se = list(summary(did_BT_reg)$coefficients[,"t value"],
+                      summary(did_BS_reg)$coefficients[,"t value"],
+                      summary(did_BST_reg)$coefficients[,"t value"]),
+            column.labels = c("Tianjin", "Shijiazhuang", "Both"),
+            model.numbers = FALSE,
+            dep.var.caption = "",
+            dep.var.labels.include = FALSE,
+            # single.row = TRUE,
+            notes = c("t-statistics are in parentheses."))
+
+  # add caption
+  # add \hline after header row
+  # change label as necessary
+  # change float as necessary
+
+}
+
