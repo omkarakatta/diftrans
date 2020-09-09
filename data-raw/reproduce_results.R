@@ -28,7 +28,7 @@ library(stargazer)
 # Option 2: "v1" i.e. exclude December 2010
 # Option 3: "v2" i.e. exclude December 2010, January 2011, and February 2012
 
-version <- "v2" # options are: "original" "v1" "v2"
+version <- "original" # options are: "original" "v1" "v2"
 
 # Do you want to see figures?
 show_fig <- TRUE
@@ -42,7 +42,6 @@ show_fig7 <- FALSE
 show_fig8 <- FALSE
 show_fig9 <- FALSE
 show_fig10 <- FALSE
-show_fig11 <- FALSE
 
 # Do you want to save figures?
 save_fig <- FALSE
@@ -56,10 +55,9 @@ save_fig7 <- FALSE
 save_fig8 <- FALSE
 save_fig9 <- FALSE
 save_fig10 <- FALSE
-save_fig11 <- FALSE
 
 # Do you want to run diff-in-diff analysis
-show_diff_in_diff <- F
+show_diff_in_diff <- FALSE
 
 # Plotting Preferences
 
@@ -157,8 +155,9 @@ if (show_fig | show_fig1){
            width = default_width, height = default_height+1, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
+
+  message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
-message(paste("Figure ", fignum, " is complete.", sep = ""))
 
 ### Figure 2 ---------------------------
 fignum <- 2
@@ -201,8 +200,9 @@ if (show_fig | show_fig2){
            width = default_width, height = default_height+1, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
+
+  message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
-message(paste("Figure ", fignum, " is complete.", sep = ""))
 
 ### Figure 3 ---------------------------
 fignum <- 3
@@ -232,8 +232,9 @@ if (show_fig | show_fig3){
            width = default_width, height = default_height+1, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
+
+  message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
-message(paste("Figure ", fignum, " is complete.", sep = ""))
 
 ### Figure 4 ---------------------------
 fignum <- 4
@@ -292,8 +293,9 @@ if (show_fig | show_fig4){
            width = default_width, height = default_height+1, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
+
+  message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
-message(paste("Figure ", fignum, " is complete.", sep = ""))
 
 ### Figure 5 ---------------------------
 fignum <- 5
@@ -401,8 +403,9 @@ if (show_fig | show_fig5){
            width = default_width, height = default_height+5, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
+
+  message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
-message(paste("Figure ", fignum, " is complete.", sep = ""))
 
 ### Figure 6 ---------------------------
 fignum <- 6
@@ -465,8 +468,9 @@ if (show_fig | show_fig6){
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
+
+  message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
-message(paste("Figure ", fignum, " is complete.", sep = ""))
 
 ### Figure 7 ---------------------------
 fignum <- 7
@@ -499,8 +503,9 @@ if (show_fig | show_fig7){
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
+
+  message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
-message(paste("Figure ", fignum, " is complete.", sep = ""))
 
 ### Figure 8 ---------------------------
 fignum <- 8
@@ -601,8 +606,9 @@ if (show_fig | show_fig8){
            width = default_width+2, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
+
+  message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
-message(paste("Figure ", fignum, " is complete.", sep = ""))
 
 ### Figure 9 ---------------------------
 fignum <- 9
@@ -664,8 +670,9 @@ if (show_fig | show_fig9){
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
+
+  message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
-message(paste("Figure ", fignum, " is complete.", sep = ""))
 
 ### Figure 10 ---------------------------
 fignum <- 10
@@ -750,8 +757,10 @@ if (show_fig | show_fig10){
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
+
+  message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
-message(paste("Figure ", fignum, " is complete.", sep = ""))
+
 
 ### Miscellaneous ---------------------------
 
