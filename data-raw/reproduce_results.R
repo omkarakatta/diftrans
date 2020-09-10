@@ -13,7 +13,31 @@
 
 ### Preliminaries ---------------------------
 
-# Install Packages
+# Install Packages (as needed)
+if (!require(diftrans, quietly = T)){
+  if (!require(devtools, quietly = T)){
+    install.packages("devtools")
+  }
+  devtools::install_github("omkarakatta/diftrans")
+}
+if (!require(magrittr, quietly = T)){
+  install.packages("magrittr")
+}
+if (!require(ggplot2, quietly = T)){
+  install.packages("ggplot2")
+}
+if (!require(gridExtra, quietly = T)){
+  install.packages("gridExtra")
+}
+if (!require(dplyr, quietly = T)){
+  install.packages("dplyr")
+}
+if (!require(tidyr, quietly = T)){
+  install.packages("tidyr")
+}
+if (!require(stargazer, quietly = T)){
+  install.packages("stargazer")
+}
 
 library(diftrans)
 library(magrittr)
@@ -28,7 +52,7 @@ library(stargazer)
 # Option 2: "v1" i.e. exclude December 2010
 # Option 3: "v2" i.e. exclude December 2010, January 2011, and February 2012
 
-version <- "original" # options are: "original" "v1" "v2"
+version <- "original" # options are: "original" "v1" "v2". See comments above.
 
 # Do you want to see figures?
 show_fig <- TRUE
