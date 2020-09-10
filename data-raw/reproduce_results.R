@@ -573,16 +573,16 @@ if (show_fig | show_fig8){
     T2012_n2011 <- data.frame(MSRP = T2012$MSRP,
                               count = rmultinom(1, n_2011_Tianjin, T2012$count))
     cat("\n")
-    print(paste("Simulation Number ", i, sep = ""))
-    pb <- txtProgressBar(max = length(bandwidth_seq))
-    for (j in seq_along(bandwidth_seq)){
-      setTxtProgressBar(pb, j)
-      bandwidth <- bandwidth_seq[j]
-      placeboB <- get_OTcost(B2012_n2011, B2012_n2012, supportB, bandwidth = 2*bandwidth)
-      placeboT <- get_OTcost(T2012_n2011, T2012_n2012, supportT, bandwidth = bandwidth)
-      placeboB_prop[i, j] <- placeboB$prop_bribe
-      placeboT_prop[i, j] <- placeboT$prop_bribe
-    }
+    print(paste("Simulation Number ", i, " out of ", numsim, sep = ""))
+
+    placeboB <- get_results(B2012_n2011, B2012_n2012, bandwidth = bandwidth_seq,
+                            conservative = T,
+                            quietly = T)
+    placeboT <- get_results(T2012_n2011, T2012_n2012, bandwidth = bandwidth_seq,
+                            quietly = T)
+
+    placeboB_prop[i, ] <- placeboB$maincons_prop
+    placeboT_prop[i, ] <- placeboT$main
   }
 
   diffprop <- placeboB_prop - placeboT_prop
@@ -660,8 +660,17 @@ if (show_fig | show_fig9){
 
   bandwidth_seq = seq(0, 40000, 1000)
 
-  placeboB <- get_results(pre_Bpmf, post_Bpmf, bandwidth_seq = bandwidth_seq, conservative = T)
-  placeboT <- get_results(pre_Tpmf, post_Tpmf, bandwidth_seq = bandwidth_seq, conservative = F)
+  temp <- get_results(pre_Bpmf, post_Bpmf, pre_Tpmf, post_Tpmf,
+                      bandwidth_seq = bandwidth_seq,
+                      conservative = F,
+                      quietly = T)
+  temp2 <- temp %>%
+    pivot_longer(cols = c(main, control, diff),
+                 names_to = "type",
+                 values_to = "diffprop") %>%
+    mutate(type = case_when(type == "main" ~ "Beijing",
+                            type == "control" ~ "Tianjin",
+                            type == "diff" ~ "a"))
 
   bandwidth_selection <- left_join(placeboB, placeboT, by = "bandwidth", suffix = c("_B", "_T")) %>%
     mutate(diffprop = main_B - main_T) %>%
@@ -672,7 +681,7 @@ if (show_fig | show_fig9){
                         names_to = "type",
                         values_to = "diffprop")
 
-  fig9_plot <- ggplot(data = bandwidth_selection,
+  fig9_plot <- ggplot(data = temp2,
                        aes(x = bandwidth)) +
     geom_line(aes(y = diffprop*100, color = type, linetype = type)) +
     bmp_plot(data = bandwidth_selection,
@@ -702,12 +711,11 @@ if (show_fig | show_fig9){
 ### Figure 10 ---------------------------
 fignum <- 10
 if (show_fig | show_fig10){
-  BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
-  supportB <- prep_data(BTS %>% filter(city == "Beijing"),
+  # BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
+  supportB <- prep_data(Beijing,
                         prep = "support")
-  supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
+  supportT <- prep_data(Tianjin,
                         prep = "support")
-
   post_Bpmf <- prep_data(Beijing, prep = "pmf",
                          support = supportB,
                          lowerdate = "2011-01-01", upperdate = "2012-01-01")
@@ -721,39 +729,36 @@ if (show_fig | show_fig10){
                         support = supportT,
                         lowerdate = "2010-01-01", upperdate = "2011-01-01")
 
-
   bandwidth_seq = seq(0, 40000, 1000)
 
-  placeboB <- get_results(pre_Bpmf, post_Bpmf, bandwidth_seq = bandwidth_seq, conservative = T)
-  placeboT <- get_results(pre_Tpmf, post_Tpmf, bandwidth_seq = bandwidth_seq, conservative = F)
+  cons_dit <- get_results(pre_Bpmf, post_Bpmf, pre_Tpmf, post_Tpmf,
+                          bandwidth_seq = bandwidth_seq,
+                          conservative = T)
+  dit <- get_results(pre_Bpmf, post_Bpmf, pre_Tpmf, post_Tpmf,
+                     bandwidth_seq = bandwidth_seq,
+                     conservative = F)
 
-  temp <- left_join(placeboB, placeboT, by = "bandwidth", suffix = c("_B", "_T")) %>%
-    mutate(a = main_B - main_T,
-                  b = maincons_prop - main_T)
-  diffprop <- temp$a
-  diffprop2 <- temp$b
-  bandwidth_selection <- temp %>%
-    select(-maincons_prop)  %>%
-    pivot_longer(cols = c(main_B,
-                          main_T,
-                          a,
-                          b),
+  bandwidth_selection <- cons_dit %>%
+    select(-main2d)  %>%
+    pivot_longer(cols = c(main,
+                          control,
+                          diff,
+                          diff2d),
                  names_to = "type",
-                 values_to = "diffprop")
+                 values_to = "diffprop") %>%
+    mutate(type = case_when(type == "main" ~ "Beijing",
+                            type == "control" ~ "Tianjin",
+                            type == "diff" ~ "a",
+                            type == "diff2d" ~ "b"))
+
+  diffprop <- cons_dit$diff
+  diffprop2 <- cons_dit$diff2d
 
   whichmax <- which.max(diffprop)
-  diffintransp <- diffprop[whichmax]
   mostinform <- bandwidth_seq[whichmax]
 
-  message(paste("Figure 10, d-d analysis: most informative d = ", mostinform,
-                " with diff-in-transport = ", diffintransp, sep = ""))
-
   whichmax2 <- which.max(diffprop2)
-  diffintransp2 <- diffprop2[whichmax2]
   mostinform2 <- bandwidth_seq[whichmax2]
-
-  message(paste("Figure 10, 2d-d analysis: most informative d = ", mostinform2,
-                " with diff-in-transport = ", diffintransp2, sep = ""))
 
   fig10_plot <- ggplot(data = bandwidth_selection %>%
                          filter(type != "b"), # control d-d or 2d-d

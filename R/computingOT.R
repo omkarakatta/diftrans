@@ -37,7 +37,6 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0){
 ### Compute Transport Cost ---------------------------
 
 #' @importFrom transport transport
-#' @export
 get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSRP){
   # given pre-data and post-data, compute optimal transport cost given bandwidth
   pre <- pre_df$count
@@ -102,7 +101,9 @@ get_results <- function(pre_main = NULL, post_main = NULL,
                         pre_control = NULL, post_control = NULL,
                         bandwidth_seq = seq(0, 40000, 1000),
                         estimator = ifelse(!is.null(pre_control) & !is.null(post_control), "dit", "tc"),
-                        conservative = F){
+                        conservative = F,
+                        quietly = F,
+                        suppress_progress_bar = F){
 
   # error checking
   if (is.null(pre_main) | is.null(post_main)){
@@ -115,19 +116,19 @@ get_results <- function(pre_main = NULL, post_main = NULL,
     }
     est_message <- "Computing Transport Costs..."
     est <- "tc"
-    message(est_message)
+    if (!suppress_progress_bar) message(est_message)
   } else if (estimator == "dit" | estimator == "differences-in-transports"){
     if (is.null(pre_control) | is.null(post_control)){
       message("`pre_control` and/or `post_control` is mising.")
     }
     est_message <- "Computing Differences-in-Transports Estimator..."
     est <- "dit"
-    message(est_message)
+    if (!suppress_progress_bar) message(est_message)
   } else {
     stop("Invalid estimator. Choose 'ba' or 'dit' or double check inputs.")
   }
 
-  if (conservative){
+  if (conservative & !quietly){
     message("Note: you are using `conservative = T`.")
   }
 
@@ -137,9 +138,9 @@ get_results <- function(pre_main = NULL, post_main = NULL,
   if (est == "dit") control_prop <- rep(NA_real_, length(bandwidth_seq))
 
   # computation
-  pb <- utils::txtProgressBar(min = 0, max = length(bandwidth_seq), initial = 0)
+  if (!suppress_progress_bar) pb <- utils::txtProgressBar(min = 0, max = length(bandwidth_seq), initial = 0)
   for (i in seq_along(bandwidth_seq)){
-    utils::setTxtProgressBar(pb, i)
+    if (!suppress_progress_bar) utils::setTxtProgressBar(pb, i)
 
     bandwidth <- bandwidth_seq[i]
     main_cost <- get_OTcost(pre_main, post_main, bandwidth = bandwidth)
@@ -151,7 +152,7 @@ get_results <- function(pre_main = NULL, post_main = NULL,
     if (est == "dit") control_prop[i] <- control_cost$prop_bribe
   }
 
-  cat("\n")
+  if (!suppress_progress_bar) cat("\n")
 
   # compile results
   if (est == "dit"){
@@ -168,7 +169,7 @@ get_results <- function(pre_main = NULL, post_main = NULL,
       whichmax <- which.max(diffprop2d)
       dit <- diffprop2d[whichmax]
       dstar <- bandwidth_seq[whichmax]
-      message(paste("The conservative diff-in-transports estimator is ", dit, " at d = ", dstar, sep = ""))
+      if (!quietly) message(paste("The conservative diff-in-transports estimator is ", dit, " at d = ", dstar, sep = ""))
     } else {
       out <- data.frame(bandwidth = bandwidth_seq,
                         main = main_prop,
@@ -177,7 +178,7 @@ get_results <- function(pre_main = NULL, post_main = NULL,
       whichmax <- which.max(diffprop)
       dit <- diffprop[whichmax]
       dstar <- bandwidth_seq[whichmax]
-      message(paste("The non-conservative diff-in-transports estimator is ", dit, " at d = ", dstar, sep = ""))
+      if (!quietly) message(paste("The non-conservative diff-in-transports estimator is ", dit, " at d = ", dstar, sep = ""))
     }
   }
 
@@ -185,7 +186,7 @@ get_results <- function(pre_main = NULL, post_main = NULL,
     out <- data.frame(bandwidth = bandwidth_seq,
                       main = main_prop)
     if (conservative) out <- cbind(out, maincons_prop)
-    message(paste("The transport cost for the specified bandwidths have been computed."))
+    if (!quietly) message(paste("The transport cost for the specified bandwidths have been computed."))
   }
 
   return(invisible(out))
