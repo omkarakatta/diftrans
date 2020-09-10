@@ -21,11 +21,32 @@ filter_date <- function(data, datevar, lowerdate, upperdate, format = "%Y-%m-%d"
 
 #' Prepare Data
 #'
+#' Retrieve the support, the probability mass function, and the distribution
+#' of a variable.
+#'
+#' The tibble \code{data} must have a variable of interest \code{var} and the number of
+#' occurrences of each value of \code{var} in some column \code{count}.
+#' Note that values of \code{var} can be repeated within the data set. To obtain
+#' the unique values in \code{var}, use \code{prep = "support"}.
+#'
+#' Using \code{prep = "pmf"} can sum the values of \code{count} by the
+#' unique values of \code{var}. As a result, we obtain a table where each row contains
+#' a unique value of \code{var} and the *total* number of times that it appears in \code{data}.
+#'
+#' The optional argument \code{support} is a vector that specifies all the possible
+#' values of \code{var}. Using this with \code{prep = "pmf"} will give you table
+#' of counts for each value of \code{support}. Thus, the difference between using
+#' \code{prep = "pmf"} and using \code{prep = "pmf"} with \code{support} is that
+#' it is possible for the output of the latter to contain counts of 0.
+#'
+#' To go one step further, \code{prep = "dist"} takes repeats each value of the
+#' \code{support} according to the number of times it appears in \code{data}.
+#'
 #' @param data a tibble with counts (\code{count}) of the variable of interest (\code{var})
 #' @param prep specifies type of preparation: "support", "counts", "pmf", "dist"
-#' @param var variable of interest, default is \code{MSRP}
+#' @param var variable of interest; default is \code{MSRP} (see Daljord et al. (2020))
 #' @param support optionally define support of \code{var}
-#' @param count number of occurrences of \code{var}, default is \code{sales}
+#' @param count number of occurrences of \code{var}; default is \code{sales} (see Daljord et al. (2020))
 #' @param datevar variable of class "Date"
 #' @param lowerdate an inclusive lower bound on \code{datevar} given as a string; default is -Inf
 #' @param upperdate an exclusive upper bound on \code{datevar} given as a string; default is +Inf
@@ -36,10 +57,6 @@ filter_date <- function(data, datevar, lowerdate, upperdate, format = "%Y-%m-%d"
 #' \itemize{
 #'   \item If \code{prep == "support"}, then the output will be a vector of
 #'       unique values of \code{var} in ascending order
-#'   \item If \code{prep == "counts"}, then the output will be a tibble with two
-#'       columns: column 1 contains unique values of \code{var} and column 2 contains
-#'       the sum of \code{counts} in \code{data} corresponding to the the value of
-#'       \code{var}
 #'   \item If \code{prep == "pmf"}, then the output will be a tibble with two colums:
 #'       column 1 contains the values specified in \code{support} and column 2
 #'       contains the sum of \code{counts} in \code{data} corresponding to the value
@@ -55,7 +72,7 @@ filter_date <- function(data, datevar, lowerdate, upperdate, format = "%Y-%m-%d"
 #' support_Beijing
 #'
 #' # Aggregate total sales for each value of MSRP between 2010 and 2011 in Tianjin:
-#' count <- prep_data(Tianjin_cleaned, "counts", lowerdate = "2010-01-01", upperdate = "2011-01-01")
+#' count <- prep_data(Tianjin_cleaned, "pmf", lowerdate = "2010-01-01", upperdate = "2011-01-01")
 #' count
 #'
 #' # Obtain PMF of MSRP values between 2010 and 2011 in Tianjin:
@@ -90,14 +107,11 @@ prep_data <- function(data, prep,
                       datevar = ym,
                       lowerdate = as.Date(-Inf), upperdate = as.Date(Inf), format = "%Y-%m-%d"){
   # error checking
-  if (!prep %in% c("support", "pmf", "dist", "counts")){
-    stop("`prep` must be one of four values: 'support', 'pmf', 'dist', or 'counts'.")
+  if (!prep %in% c("support", "pmf", "dist")){
+    stop("`prep` must be one of three values: 'support', 'pmf', or 'dist'.")
   }
   if (prep == "support" & !is.null(support)){
     stop("`support` is already specified in function. Are you sure you want `prep = 'support'`?")
-  }
-  if (prep == "pmf" & is.null(support)){
-    message("Since `support` is not specified, `prep == 'pmf'` is equivalent to `prep == 'counts'`.")
   }
 
   # get support
@@ -129,7 +143,7 @@ prep_data <- function(data, prep,
   }
 
   # get counts
-  if (prep %in% c("counts", "pmf", "dist")){
+  if (prep %in% c("pmf", "dist")){
     datevar <- enquo(datevar)
     counts <- data %>%
       filter_date(datevar = !!datevar,
@@ -139,9 +153,6 @@ prep_data <- function(data, prep,
       dplyr::group_by(dplyr::across(c({{var}}))) %>%
       dplyr::summarise(count = sum({{count}})) %>%
       dplyr::filter(!is.na({{var}}))
-    if (prep == "counts"){
-      return(counts)
-    }
   }
 
   # get pmf

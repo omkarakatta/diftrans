@@ -21,11 +21,11 @@ prep_data(
 
 \item{prep}{specifies type of preparation: "support", "counts", "pmf", "dist"}
 
-\item{var}{variable of interest, default is \code{MSRP}}
+\item{var}{variable of interest; default is \code{MSRP} (see Daljord et al. (2020))}
 
 \item{support}{optionally define support of \code{var}}
 
-\item{count}{number of occurrences of \code{var}, default is \code{sales}}
+\item{count}{number of occurrences of \code{var}; default is \code{sales} (see Daljord et al. (2020))}
 
 \item{datevar}{variable of class "Date"}
 
@@ -41,10 +41,6 @@ depends on \code{prep}
 \itemize{
 \item If \code{prep == "support"}, then the output will be a vector of
 unique values of \code{var} in ascending order
-\item If \code{prep == "counts"}, then the output will be a tibble with two
-columns: column 1 contains unique values of \code{var} and column 2 contains
-the sum of \code{counts} in \code{data} corresponding to the the value of
-\code{var}
 \item If \code{prep == "pmf"}, then the output will be a tibble with two colums:
 column 1 contains the values specified in \code{support} and column 2
 contains the sum of \code{counts} in \code{data} corresponding to the value
@@ -54,15 +50,36 @@ are repetitions of the \code{var} according to \code{counts}.
 }
 }
 \description{
-Prepare Data
+Retrieve the support, the probability mass function, and the distribution
+of a variable.
+}
+\details{
+The tibble \code{data} must have a variable of interest \code{var} and the number of
+occurrences of each value of \code{var} in some column \code{count}.
+Note that values of \code{var} can be repeated within the data set. To obtain
+the unique values in \code{var}, use \code{prep = "support"}.
+
+Using \code{prep = "pmf"} can sum the values of \code{count} by the
+unique values of \code{var}. As a result, we obtain a table where each row contains
+a unique value of \code{var} and the \emph{total} number of times that it appears in \code{data}.
+
+The optional argument \code{support} is a vector that specifies all the possible
+values of \code{var}. Using this with \code{prep = "pmf"} will give you table
+of counts for each value of \code{support}. Thus, the difference between using
+\code{prep = "pmf"} and using \code{prep = "pmf"} with \code{support} is that
+it is possible for the output of the latter to contain counts of 0.
+
+To go one step further, \code{prep = "dist"} takes repeats each value of the
+\code{support} according to the number of times it appears in \code{data}.
 }
 \examples{
 # Obtain unique values of MSRP between 2010 and 2011 in Beijing and in Tianjin:
-support_Beijing <- prep_data(Beijing_cleaned, "support", lowerdate = "2010-01-01", upperdate = "2011-01-01")
+support_Beijing <- prep_data(Beijing_cleaned, "support",
+                             lowerdate = "2010-01-01", upperdate = "2011-01-01")
 support_Beijing
 
 # Aggregate total sales for each value of MSRP between 2010 and 2011 in Tianjin:
-count <- prep_data(Tianjin_cleaned, "counts", lowerdate = "2010-01-01", upperdate = "2011-01-01")
+count <- prep_data(Tianjin_cleaned, "pmf", lowerdate = "2010-01-01", upperdate = "2011-01-01")
 count
 
 # Obtain PMF of MSRP values between 2010 and 2011 in Tianjin:
@@ -73,7 +90,8 @@ all.equal(pmf, count)
 
 # Obtain PMF of MSRP values between 2010 and 2011 in Tianjin using full support:
 full_support <- prep_data(Tianjin_cleaned, "support")
-pmf2 <- prep_data(Tianjin_cleaned, "pmf", support = full_support, lowerdate = "2010-01-01", upperdate = "2011-01-01")
+pmf2 <- prep_data(Tianjin_cleaned, "pmf", support = full_support,
+                  lowerdate = "2010-01-01", upperdate = "2011-01-01")
 # Since support is different between \code{pmf2} and \code{count}, there will
 # be some values of MSRP whose \code{count} is 0.
 
