@@ -2,12 +2,13 @@
 ###
 ### Title: reproduce_results.R
 ###
-### Description: One-click R script to reproduce results
+### Description: R script to reproduce results of Daljord et al. (2020).
 ###
 ### Author: Omkar A. Katta
 ###
-### Notes: User can change information in preliminaries as needed to reproduce the
-###       analysis in Daljord et al. (2020).
+### Notes: User must change the information in the Preliminaries Section
+###       as needed. In particular, the `version` variable, the file paths,
+###       and the plotting parameters can be changed to fit the user's preferences.
 ###
 ###
 
