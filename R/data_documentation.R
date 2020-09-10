@@ -3,9 +3,9 @@
 #' A dataset containing the manufacturer's suggested retail price (MSRP) of car
 #' models and how many of these models were sold in Beijing between 2010 and 2015.
 #'
-#' @format A tibble with 217155 rows and 16 variables
+#' @format a tibble with 217155 rows and 16 variables
 #' \describe{
-#'   \item{id}{A number that uniquely identifies each Beijing car model by year}
+#'   \item{id}{a number that uniquely identifies each Beijing car model by year}
 #'   \item{year}{year, as an integer between 2010 and 2015}
 #'   \item{month}{month, as an integer between 1 and 12}
 #'   \item{ym}{A Date-class variable of the format yyyy-mm-01}
@@ -31,9 +31,9 @@
 #' A dataset containing the manufacturer's suggested retail price (MSRP) of car
 #' models and how many of these models were sold in Tianjin between 2010 and 2015.
 #'
-#' @format A tibble with 194468 rows and 16 variables
+#' @format a tibble with 194468 rows and 16 variables
 #' \describe{
-#'   \item{id}{A number that uniquely identifies each Tianjin car model by year}
+#'   \item{id}{a number that uniquely identifies each Tianjin car model by year}
 #'   \item{year}{year, as an integer between 2010 and 2015}
 #'   \item{month}{month, as an integer between 1 and 12}
 #'   \item{ym}{A Date-class variable of the format yyyy-mm-01}
@@ -59,9 +59,9 @@
 #' A dataset containing the manufacturer's suggested retail price (MSRP) of car
 #' models and how many of these models were sold in Shijiazhuang between 2010 and 2015.
 #'
-#' @format A tibble with 194468 rows and 16 variables
+#' @format a tibble with 194468 rows and 16 variables
 #' \describe{
-#'   \item{id}{A number that uniquely identifies each Shijiazhuang car model by year}
+#'   \item{id}{a number that uniquely identifies each Shijiazhuang car model by year}
 #'   \item{year}{year, as an integer between 2010 and 2015}
 #'   \item{month}{month, as an integer between 1 and 12}
 #'   \item{ym}{A Date-class variable of the format yyyy-mm-01}

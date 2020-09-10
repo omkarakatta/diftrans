@@ -5,9 +5,9 @@
 \alias{Tianjin_cleaned}
 \title{Tianjin car prices from 2010 to 2015}
 \format{
-A tibble with 194468 rows and 16 variables
+a tibble with 194468 rows and 16 variables
 \describe{
-\item{id}{A number that uniquely identifies each Tianjin car model by year}
+\item{id}{a number that uniquely identifies each Tianjin car model by year}
 \item{year}{year, as an integer between 2010 and 2015}
 \item{month}{month, as an integer between 1 and 12}
 \item{ym}{A Date-class variable of the format yyyy-mm-01}
