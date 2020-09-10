@@ -10,7 +10,7 @@ diftrans
 <!-- badges: end -->
 
 The goal of the `diftrans` package is to compute the
-differences-in-transports estimator introduced in Daljford, Pouliot, Hu,
+differences-in-transports estimator introduced in Daljord, Pouliot, Hu,
 and Xiao (2020). Currently, the package is in development.
 
 Installation
