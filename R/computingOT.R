@@ -185,7 +185,7 @@ get_results <- function(pre_main = NULL, post_main = NULL,
   if (est == "tc"){
     out <- data.frame(bandwidth = bandwidth_seq,
                       main = main_prop)
-    if (conservative) out <- cbind(out, maincons_prop)
+    if (conservative) out <- cbind(out, main2d = maincons_prop)
     if (!quietly) message(paste("The transport cost for the specified bandwidths have been computed."))
   }
 

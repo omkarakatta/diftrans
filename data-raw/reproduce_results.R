@@ -187,7 +187,7 @@ if (show_fig | show_fig1){
 ### Figure 2 ---------------------------
 fignum <- 2
 if (show_fig | show_fig2){
-  pre <- prep_data(Beijing, prep = "counts",
+  pre <- prep_data(Beijing, prep = "pmf",
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
   post <- Beijing %>% # find prices of new cars in 2011
     filter(ym < as.Date("2012-01-01")) %>%
@@ -581,7 +581,7 @@ if (show_fig | show_fig8){
     placeboT <- get_results(T2012_n2011, T2012_n2012, bandwidth = bandwidth_seq,
                             quietly = T)
 
-    placeboB_prop[i, ] <- placeboB$maincons_prop
+    placeboB_prop[i, ] <- placeboB$main2d
     placeboT_prop[i, ] <- placeboT$main
   }
 
@@ -664,7 +664,7 @@ if (show_fig | show_fig9){
                       bandwidth_seq = bandwidth_seq,
                       conservative = F,
                       quietly = T)
-  temp2 <- temp %>%
+  bandwidth_selection <- temp %>%
     pivot_longer(cols = c(main, control, diff),
                  names_to = "type",
                  values_to = "diffprop") %>%
@@ -672,16 +672,7 @@ if (show_fig | show_fig9){
                             type == "control" ~ "Tianjin",
                             type == "diff" ~ "a"))
 
-  bandwidth_selection <- left_join(placeboB, placeboT, by = "bandwidth", suffix = c("_B", "_T")) %>%
-    mutate(diffprop = main_B - main_T) %>%
-    select(-maincons_prop) %>%
-    pivot_longer(cols = c(main_B,
-                                 main_T,
-                                 diffprop),
-                        names_to = "type",
-                        values_to = "diffprop")
-
-  fig9_plot <- ggplot(data = temp2,
+  fig9_plot <- ggplot(data = bandwidth_selection,
                        aes(x = bandwidth)) +
     geom_line(aes(y = diffprop*100, color = type, linetype = type)) +
     bmp_plot(data = bandwidth_selection,
