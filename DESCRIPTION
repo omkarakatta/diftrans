@@ -9,7 +9,7 @@ Authors@R:
 Description: Given the probability mass functions of two distributions 
   (say, pre-treatment and post-treatment distributions), the diftrans package 
   computes the displacement between them using optimal transport theory. 
-  Introduced in Daljford, Hu, Pouliot, and Xiao (2020), the 
+  Introduced in Daljford, Pouliot, Hu, and Xiao (2020), the 
   differences-in-transports estimator compares two such displacements, e.g., 
   the displacement for the treated group and the displacement for some control
   group.

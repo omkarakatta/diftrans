@@ -2,7 +2,7 @@
 ###
 ### Title: reproduce_results.R
 ###
-### Description: R script to reproduce results of Daljord et al. (2020).
+### Description: R script to reproduce results of Daljord, Pouliot, Hu, and Xiao (2020).
 ###
 ### Author: Omkar A. Katta
 ###
