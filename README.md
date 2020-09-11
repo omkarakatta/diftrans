@@ -9,14 +9,46 @@ diftrans
 ![status](https://img.shields.io/badge/status-under%20construction-yellow)
 <!-- badges: end -->
 
-The goal of the `diftrans` package is to compute the
-differences-in-transports estimator introduced in Daljord, Pouliot, Hu,
-and Xiao (2020). Currently, the package is in development.
+Table of Contents
+-----------------
+
+-   [Introduction](#introduction)
+-   [Installation](#installation)
+-   [Example](#example)
+
+Introduction
+------------
+
+The `diftrans` package applies the novel methods described in Daljord,
+Pouliot, Hu, and Xiao (2020) to compute the transport costs between two
+univariate distributions and the differences-in-transports estimator.
+
+Appealing to optimal transport theory, the `diftrans` package builds off
+of the [`transport`
+package](https://cran.r-project.org/web/packages/transport/index.html)
+to compute the change between the distributions of a univariate variable
+of interest. Extending this application, the `diftrans` package allows
+users to compute the *before-and-after estimator* (Daljord et al.,
+2020), which controls for sampling uncertainty by trivializing small
+changes in the distributions. The `diftrans` package also computes the
+*differences-in-transports estimator*, which controls for unobservable
+reasons that the distributions may change by comparing the transport
+costs to those from another source of measurement.
+
+The two major functions in the `diftrans` package are:
+
+-   `get_results`, which returns all these computations, and
+-   `prep_data`, which prepares data to become inputs for `get_results`.
+
+More details about these functions can be found on their document files:
+
+    ?diftrans::get_results
+    ?diftrans::prep_data
 
 Installation
 ------------
 
-You can install the `diftrans` from
+Install the `diftrans` from
 [GitHub](https://github.com/omkarakatta/diftrans) with:
 
     # install.packages("devtools")
@@ -47,9 +79,7 @@ with two columns:
     each value in the support.
 
 To transform data to be in this form, consult the documentation for
-`prep_data`:
-
-    ?diftrans::prep_data
+`prep_data`.
 
 Suppose that the shift in the distribution is due to some treatment.
 Thus, we refer to the first and second distributions of `x` as the
@@ -97,8 +127,8 @@ that was given given to 1 in the pre-distribution is now given to 6.
 
 ### Compute Transport Cost
 
-In this trivial example, we should expect that the transport cost is
-100% because all the mass was transported due to the treatment.
+In this toy example, we should expect that the transport cost is 100%
+because all the mass was transported due to the treatment.
 
 We can compute the transport cost as follows:
 
@@ -117,7 +147,7 @@ We can compute the transport cost as follows:
     #>   bandwidth main
     #> 1         0    1
 
-The transport cost is 100% as expected. The `estimator` argument is
+**The transport cost is 100%** as expected. The `estimator` argument is
 specified to be `"tc"`, which stands for transport cost. (Since we only
 have two distributions, estimator will take on the value of `"tc"` by
 default.)
@@ -253,19 +283,22 @@ differences-in-differences estimator is that the
 differences-in-transports estimator is printed as a message. To save
 this result in `dit`, we use `save_dit = TRUE`.
 
-Thus, the differences-in-transports estimator is 61% at an optimal
-bandwidth of 2. Often times, the data will be a sample from a
-population, and sample variability is enough to cause differences
-between distributions. To account for this discrepancy, we can increase
-the bandwidth to ignore transfers of mass between nearby values of the
-support.
+Thus, **the differences-in-transports estimator is 61% at an optimal
+bandwidth of 2**.
+
+#### Sampling Variability
+
+Often times, the data will be a sample from a population, and sample
+variability is enough to cause differences between distributions. To
+account for this discrepancy, we can increase the bandwidth to ignore
+transfers of mass between nearby values of the support.
 
 While Daljord et al. (2020) offer a disciplined way to determine what
 the appropriate bandwidths are, for simplicity, we will suppose that
 there will not be any sampling variation with a bandwidth greater than
-3.
+1.
 
-    d_a <- 3
+    d_a <- 1
 
     dit <- get_results(pre_main = pre_treated, post_main = post_treated,
                        pre_control = pre_control, post_control = post_control,
@@ -277,38 +310,45 @@ there will not be any sampling variation with a bandwidth greater than
 
     #> ================================================================================
 
-    #> The non-conservative diff-in-transports estimator is 0.421052631578947 at d = 3
+    #> The non-conservative diff-in-transports estimator is 0.605263157894737 at d = 2
 
     dit$out
 
-    #>   bandwidth      main control      diff
-    #> 1         3 0.4210526       0 0.4210526
-    #> 2         4 0.2368421       0 0.2368421
-    #> 3         5 0.0000000       0 0.0000000
-    #> 4         6 0.0000000       0 0.0000000
-    #> 5         7 0.0000000       0 0.0000000
-    #> 6         8 0.0000000       0 0.0000000
-    #> 7         9 0.0000000       0 0.0000000
-    #> 8        10 0.0000000       0 0.0000000
+    #>    bandwidth      main   control      diff
+    #> 1          1 0.7631579 0.2368421 0.5263158
+    #> 2          2 0.6052632 0.0000000 0.6052632
+    #> 3          3 0.4210526 0.0000000 0.4210526
+    #> 4          4 0.2368421 0.0000000 0.2368421
+    #> 5          5 0.0000000 0.0000000 0.0000000
+    #> 6          6 0.0000000 0.0000000 0.0000000
+    #> 7          7 0.0000000 0.0000000 0.0000000
+    #> 8          8 0.0000000 0.0000000 0.0000000
+    #> 9          9 0.0000000 0.0000000 0.0000000
+    #> 10        10 0.0000000 0.0000000 0.0000000
 
     dit$dit
 
-    #> [1] 0.4210526
+    #> [1] 0.6052632
 
     dit$optimal_bandwidth
 
-    #> [1] 3
+    #> [1] 2
 
-Accounting for sampling variability, our differences-in-transports
-estimate is 42%. If we want to be more conservative, we can use
-`conservative = TRUE`, which essentially uses twice the bandwidth for
-computing the treated group’s transport costs relative to the bandwidth
-for computing the control group’s transport costs.
+Note that this restriction is not binding, so our result is unaffected.
+**Accounting for sampling variability, our differences-in-transports
+estimate is still 61%**.
+
+#### Conservative Differences-in-Transports
+
+If we want to be more conservative, we can use `conservative = TRUE`,
+which essentially uses twice the bandwidth for computing the treated
+group’s transport costs relative to the bandwidth for computing the
+control group’s transport costs.
 
     dit <- get_results(pre_main = pre_treated, post_main = post_treated,
                        pre_control = pre_control, post_control = post_control,
                        estimator = "dit", var = x,
-                       bandwidth_seq = seq(d_a, 10, 1), # smallest bandwidth will be 1
+                       bandwidth_seq = seq(d_a, 10, 1),
                        save_dit = TRUE,
                        conservative = TRUE)
 
@@ -318,30 +358,32 @@ for computing the control group’s transport costs.
 
     #> ================================================================================
 
-    #> The conservative diff-in-transports estimator is 0 at d = 3
+    #> The conservative diff-in-transports estimator is 0.368421052631579 at d = 1
 
     dit$out
 
-    #>   bandwidth      main main2d control      diff diff2d
-    #> 1         3 0.4210526      0       0 0.4210526      0
-    #> 2         4 0.2368421      0       0 0.2368421      0
-    #> 3         5 0.0000000      0       0 0.0000000      0
-    #> 4         6 0.0000000      0       0 0.0000000      0
-    #> 5         7 0.0000000      0       0 0.0000000      0
-    #> 6         8 0.0000000      0       0 0.0000000      0
-    #> 7         9 0.0000000      0       0 0.0000000      0
-    #> 8        10 0.0000000      0       0 0.0000000      0
+    #>    bandwidth      main    main2d   control      diff    diff2d
+    #> 1          1 0.7631579 0.6052632 0.2368421 0.5263158 0.3684211
+    #> 2          2 0.6052632 0.2368421 0.0000000 0.6052632 0.2368421
+    #> 3          3 0.4210526 0.0000000 0.0000000 0.4210526 0.0000000
+    #> 4          4 0.2368421 0.0000000 0.0000000 0.2368421 0.0000000
+    #> 5          5 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+    #> 6          6 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+    #> 7          7 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+    #> 8          8 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+    #> 9          9 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
+    #> 10        10 0.0000000 0.0000000 0.0000000 0.0000000 0.0000000
 
     dit$dit
 
-    #> [1] 0
+    #> [1] 0.3684211
 
     dit$optimal_bandwidth
 
-    #> [1] 3
+    #> [1] 1
 
-Finally, we have that the conservative differences-in-transports
-estimator is 0% at an optimal bandwidth of 3.
+Finally, we have that the **conservative differences-in-transports
+estimator is 37% at an optimal bandwidth of 1**.
 
 Note that `estimator = "dit"` is not necessary. Since we have two sets
 of pre- and post-distributions, `get_results` is smart enough to return
