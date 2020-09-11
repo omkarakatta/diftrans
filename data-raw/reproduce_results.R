@@ -724,12 +724,14 @@ if (show_fig | show_fig10){
 
   cons_dit <- get_results(pre_Bpmf, post_Bpmf, pre_Tpmf, post_Tpmf,
                           bandwidth_seq = bandwidth_seq,
-                          conservative = T)
+                          conservative = T,
+                          save_dit = T)
   dit <- get_results(pre_Bpmf, post_Bpmf, pre_Tpmf, post_Tpmf,
                      bandwidth_seq = bandwidth_seq,
-                     conservative = F)
+                     conservative = F,
+                     save_dit = T)
 
-  bandwidth_selection <- cons_dit %>%
+  bandwidth_selection <- cons_dit$out %>%
     select(-main2d)  %>%
     pivot_longer(cols = c(main,
                           control,
@@ -742,14 +744,9 @@ if (show_fig | show_fig10){
                             type == "diff" ~ "a",
                             type == "diff2d" ~ "b"))
 
-  diffprop <- cons_dit$diff
-  diffprop2 <- cons_dit$diff2d
 
-  whichmax <- which.max(diffprop)
-  mostinform <- bandwidth_seq[whichmax]
-
-  whichmax2 <- which.max(diffprop2)
-  mostinform2 <- bandwidth_seq[whichmax2]
+  mostinform <- dit$optimal_bandwidth
+  mostinform2 <- cons_dit$optimal_bandwidth
 
   fig10_plot <- ggplot(data = bandwidth_selection %>%
                          filter(type != "b"), # control d-d or 2d-d
