@@ -8,42 +8,12 @@ editor_options:
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
+  collapse = FALSE,
   comment = "#>",
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
 ```
-
-<style> 
-  /* https://stackoverflow.com/questions/31753897/2-column-section-in-r-markdown */
-  .col2 {
-    columns: 2 200px;         /* number of columns and width in pixels*/
-    -webkit-columns: 2 200px; /* chrome, safari */
-    -moz-columns: 2 200px;    /* firefox */
-  }
-  .col3 {
-    columns: 3 100px;
-    -webkit-columns: 3 100px;
-    -moz-columns: 3 100px;
-  }
-  .column-left{
-    float: left;
-    width: 30%;
-    text-align: left;
-  }
-  .column-right{
-    float: right;
-    width: 70%;
-    text-align: right;
-  }
-  /* https://gist.github.com/jennybc/e9e9aba6ba18c72cec26 */
-  .clearer {clear: both}
-  
-  .subhead{
-    text-align: left
-  }
-</style>
 
 # diftrans
 
@@ -91,12 +61,17 @@ library(dplyr)
 library(magrittr)
 library(ggplot2)
 library(knitr)
+library(kableExtra)
 devtools::load_all()
+
+mykable <- function(dt){
+  kable(dt,
+        align = 'c')
+}
 ```
 
-<div class="subhead"> <strong> Pre-Distribution for Treated Group </strong> </div>
+*Pre-Distribution for Treated Group*
 
-<div class="column-left">
 ```{r echo = F}
 set.seed(1)
 support_min <- 1
@@ -113,43 +88,20 @@ for (i in 1:shift){
   pre_treated[pre_treated$x == support_max-i+1, "count"] <- 0
 }
 
-kable(pre_treated)
+mykable(pre_treated)
 ```
-</div>
-<div class = "column-right">
-```{r echo = F}
-ggplot(pre_treated, aes(x = x, y = count)) +
-  geom_bar(stat = "identity") +
-  theme_bmp(sizefont = NULL,
-            axissizefont = NULL) +
-  scale_x_continuous(breaks = support,
-                     labels = support)
-```
-</div>
-<div class = "clearer"> </div>
 
-<div class="subhead"> <strong> Post-Distribution for Treated Group </strong> </div>
 
-<div class="column-left">
+*Post-Distribution for Treated Group*
+
 ```{r echo = F}
 post_treated <- data.frame(x = support,
                            count = lag(pre_treated$count, shift)) %>% 
   replace_na(list(count = 0))
 
-kable(post_treated)
+mykable(post_treated)
 ```
-</div>
-<div class = "column-right">
-```{r echo = F}
-ggplot(post_treated, aes(x = x, y = count)) +
-  geom_bar(stat = "identity") +
-  theme_bmp(sizefont = NULL,
-            axissizefont = NULL) +
-  scale_x_continuous(breaks = support,
-                     labels = support)
-```
-</div>
-<div class = "clearer"> </div>
+
 
 Observe that all the mass from the pre-distribution was shifted by `r shift` units
 of the support to form the post-distribution. That is, the treatment resulted in all
@@ -217,43 +169,18 @@ as that of our treated group. Then, let our post-distribution for our control gr
 be a `r control_shift`-unit shift of our pre-distribution. We therefore have the 
 following tibbles that represent our control group distributions:
 
-<div class="subhead"> <strong> Pre-Distribution for Control Group </strong> </div>
+*Pre-Distribution for Control Group*
 
-<div class="column-left">
-```{r echo = F}
-kable(pre_control)
-```
-</div>
-<div class="column-right">
-```{r echo = F}
-ggplot(pre_control, aes(x = x, y = count)) +
-  geom_bar(stat = "identity") +
-  theme_bmp(sizefont = NULL,
-            axissizefont = NULL) +
-  scale_x_continuous(breaks = support,
-                     labels = support)
-```
-</div>
-<div class = "clearer"> </div>
 
-<div class="subhead"> <strong> Post-Distribution for Control Group </strong> </div>
+```{r echo = F}
+mykable(pre_control)
+```
 
-<div class="column-left">
+*Post-Distribution for Control Group*
+
 ```{r echo = F}
-kable(post_control)
+mykable(post_control)
 ```
-</div>
-<div class="column-right">
-```{r echo = F}
-ggplot(post_control, aes(x = x, y = count)) +
-  geom_bar(stat = "identity") +
-  theme_bmp(sizefont = NULL,
-            axissizefont = NULL) +
-  scale_x_continuous(breaks = support,
-                     labels = support)
-```
-</div>
-<div class = "clearer"> </div>
 
 ### Compute Differences-in-Transports Estimator <sup id="a1">[1](#f1)</sup>
 

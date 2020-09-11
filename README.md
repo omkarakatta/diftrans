@@ -1,34 +1,5 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-<style> 
-  /* https://stackoverflow.com/questions/31753897/2-column-section-in-r-markdown */
-  .col2 {
-    columns: 2 200px;         /* number of columns and width in pixels*/
-    -webkit-columns: 2 200px; /* chrome, safari */
-    -moz-columns: 2 200px;    /* firefox */
-  }
-  .col3 {
-    columns: 3 100px;
-    -webkit-columns: 3 100px;
-    -moz-columns: 3 100px;
-  }
-  .column-left{
-    float: left;
-    width: 30%;
-    text-align: left;
-  }
-  .column-right{
-    float: right;
-    width: 70%;
-    text-align: right;
-  }
-  /* https://gist.github.com/jennybc/e9e9aba6ba18c72cec26 */
-  .clearer {clear: both}
-  
-  .subhead{
-    text-align: left
-  }
-</style>
 
 diftrans
 ========
@@ -80,71 +51,199 @@ Below are the tibbles for the pre- and post-distributions as well as the
 corresponding plots. Both tibbles contain the full support of our
 variable of interest, that is, their `support` column is the same.
 
-<div class="subhead">
+*Pre-Distribution for Treated Group*
 
-<strong> Pre-Distribution for Treated Group </strong>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">
+x
+</th>
+<th style="text-align:center;">
+count
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+4
+</td>
+<td style="text-align:center;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+6
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+7
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+8
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+9
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+10
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+</tbody>
+</table>
 
-</div>
+*Post-Distribution for Treated Group*
 
-<div class="column-left">
-
-|   x | count |
-|----:|------:|
-|   1 |     9 |
-|   2 |     7 |
-|   3 |     7 |
-|   4 |     6 |
-|   5 |     9 |
-|   6 |     0 |
-|   7 |     0 |
-|   8 |     0 |
-|   9 |     0 |
-|  10 |     0 |
-
-</div>
-
-<div class="column-right">
-
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
-
-</div>
-
-<div class="clearer">
-
-</div>
-
-<div class="subhead">
-
-<strong> Post-Distribution for Treated Group </strong>
-
-</div>
-
-<div class="column-left">
-
-|   x | count |
-|----:|------:|
-|   1 |     0 |
-|   2 |     0 |
-|   3 |     0 |
-|   4 |     0 |
-|   5 |     0 |
-|   6 |     9 |
-|   7 |     7 |
-|   8 |     7 |
-|   9 |     6 |
-|  10 |     9 |
-
-</div>
-
-<div class="column-right">
-
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
-
-</div>
-
-<div class="clearer">
-
-</div>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">
+x
+</th>
+<th style="text-align:center;">
+count
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+4
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+6
+</td>
+<td style="text-align:center;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+7
+</td>
+<td style="text-align:center;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+8
+</td>
+<td style="text-align:center;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+9
+</td>
+<td style="text-align:center;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+10
+</td>
+<td style="text-align:center;">
+9
+</td>
+</tr>
+</tbody>
+</table>
 
 Observe that all the mass from the pre-distribution was shifted by 5
 units of the support to form the post-distribution. That is, the
@@ -161,11 +260,15 @@ We can compute the transport cost as follows:
     tc <- get_results(pre_main = pre_treated, post_main = post_treated,
                       estimator = "tc", var = x,
                       bandwidth = 0)
+
     #> Computing Transport Costs...
+
     #> ================================================================================
+
     #> The transport cost for the specified bandwidths have been computed.
 
     tc
+
     #>   bandwidth main
     #> 1         0    1
 
@@ -182,11 +285,15 @@ to 10:
     tc <- get_results(pre_main = pre_treated, post_main = post_treated,
                       estimator = "tc", var = x,
                       bandwidth = seq(0, 10))
+
     #> Computing Transport Costs...
+
     #> ================================================================================
+
     #> The transport cost for the specified bandwidths have been computed.
 
     tc
+
     #>    bandwidth      main
     #> 1          0 1.0000000
     #> 2          1 0.7631579
@@ -223,71 +330,199 @@ our post-distribution for our control group be a 2-unit shift of our
 pre-distribution. We therefore have the following tibbles that represent
 our control group distributions:
 
-<div class="subhead">
+*Pre-Distribution for Control Group*
 
-<strong> Pre-Distribution for Control Group </strong>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">
+x
+</th>
+<th style="text-align:center;">
+count
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+4
+</td>
+<td style="text-align:center;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+6
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+7
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+8
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+9
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+10
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+</tbody>
+</table>
 
-</div>
+*Post-Distribution for Control Group*
 
-<div class="column-left">
-
-|   x | count |
-|----:|------:|
-|   1 |     9 |
-|   2 |     7 |
-|   3 |     7 |
-|   4 |     6 |
-|   5 |     9 |
-|   6 |     0 |
-|   7 |     0 |
-|   8 |     0 |
-|   9 |     0 |
-|  10 |     0 |
-
-</div>
-
-<div class="column-right">
-
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
-
-</div>
-
-<div class="clearer">
-
-</div>
-
-<div class="subhead">
-
-<strong> Post-Distribution for Control Group </strong>
-
-</div>
-
-<div class="column-left">
-
-|   x | count |
-|----:|------:|
-|   1 |     0 |
-|   2 |     0 |
-|   3 |     9 |
-|   4 |     7 |
-|   5 |     7 |
-|   6 |     6 |
-|   7 |     9 |
-|   8 |     0 |
-|   9 |     0 |
-|  10 |     0 |
-
-</div>
-
-<div class="column-right">
-
-<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
-
-</div>
-
-<div class="clearer">
-
-</div>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">
+x
+</th>
+<th style="text-align:center;">
+count
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+1
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+4
+</td>
+<td style="text-align:center;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+5
+</td>
+<td style="text-align:center;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+6
+</td>
+<td style="text-align:center;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+7
+</td>
+<td style="text-align:center;">
+9
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+8
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+9
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+10
+</td>
+<td style="text-align:center;">
+0
+</td>
+</tr>
+</tbody>
+</table>
 
 ### Compute Differences-in-Transports Estimator <sup id="a1">[1](#f1)</sup>
 
@@ -302,10 +537,15 @@ control group.
                        estimator = "dit", var = x,
                        bandwidth_seq = seq(0, 10, 1),
                        save_dit = TRUE)
+
     #> Computing Differences-in-Transports Estimator...
+
     #> ================================================================================
+
     #> The non-conservative diff-in-transports estimator is 0.605263157894737 at d = 2
+
     dit$out
+
     #>    bandwidth      main   control      diff
     #> 1          0 1.0000000 0.4736842 0.5263158
     #> 2          1 0.7631579 0.2368421 0.5263158
@@ -318,9 +558,13 @@ control group.
     #> 9          8 0.0000000 0.0000000 0.0000000
     #> 10         9 0.0000000 0.0000000 0.0000000
     #> 11        10 0.0000000 0.0000000 0.0000000
+
     dit$dit
+
     #> [1] 0.6052632
+
     dit$optimal_bandwidth
+
     #> [1] 2
 
 Another difference between computing the transport cost and the
@@ -347,10 +591,15 @@ there will not be any sampling variation with a bandwidth greater than
                        estimator = "dit", var = x,
                        bandwidth_seq = seq(d_a, 10, 1), # smallest bandwidth will be d_a
                        save_dit = TRUE)
+
     #> Computing Differences-in-Transports Estimator...
+
     #> ================================================================================
+
     #> The non-conservative diff-in-transports estimator is 0.421052631578947 at d = 3
+
     dit$out
+
     #>   bandwidth      main control      diff
     #> 1         3 0.4210526       0 0.4210526
     #> 2         4 0.2368421       0 0.2368421
@@ -360,9 +609,13 @@ there will not be any sampling variation with a bandwidth greater than
     #> 6         8 0.0000000       0 0.0000000
     #> 7         9 0.0000000       0 0.0000000
     #> 8        10 0.0000000       0 0.0000000
+
     dit$dit
+
     #> [1] 0.4210526
+
     dit$optimal_bandwidth
+
     #> [1] 3
 
 Accounting for sampling variability, our differences-in-transports
@@ -377,11 +630,17 @@ for computing the control group’s transport costs.
                        bandwidth_seq = seq(d_a, 10, 1), # smallest bandwidth will be 1
                        save_dit = TRUE,
                        conservative = TRUE)
+
     #> Computing Differences-in-Transports Estimator...
+
     #> Note: you are using `conservative = T`.
+
     #> ================================================================================
+
     #> The conservative diff-in-transports estimator is 0 at d = 3
+
     dit$out
+
     #>   bandwidth      main main2d control      diff diff2d
     #> 1         3 0.4210526      0       0 0.4210526      0
     #> 2         4 0.2368421      0       0 0.2368421      0
@@ -391,9 +650,13 @@ for computing the control group’s transport costs.
     #> 6         8 0.0000000      0       0 0.0000000      0
     #> 7         9 0.0000000      0       0 0.0000000      0
     #> 8        10 0.0000000      0       0 0.0000000      0
+
     dit$dit
+
     #> [1] 0
+
     dit$optimal_bandwidth
+
     #> [1] 3
 
 Finally, we have that the conservative differences-in-transports
