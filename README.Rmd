@@ -7,6 +7,7 @@ editor_options:
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
+library(knitr)
 knitr::opts_chunk$set(
   collapse = FALSE,
   comment = "#>",
@@ -40,11 +41,36 @@ The workhorse function in the `diftrans` package is `get_results`, which serves 
 
 ### Setup
 
+```{r echo = F, message = F, warning = F}
+library(dplyr)
+library(magrittr)
+devtools::load_all()
+
+mykable <- function(dt){
+  kable(dt,
+        align = 'c')
+}
+```
+
+```{r eval = F}
+library(dplyr)
+library(magrittr)
+library(diftrans)
+```
+
+
 We begin by computing the transport cost between two distributions of some 
 variable `x`. These distributions should be represented as tibbles with two columns:
 
 * column 1 contains the full support of the distribution and 
 * column 2 (labeled "count") contains the mass/counts associated with each value in the support.
+
+To transform data to be in this form, consult the documentation for `prep_data`:
+
+```{r eval = F}
+?diftrans::prep_data
+```
+
 
 Suppose that the shift in the distribution is due to some treatment. 
 Thus, we refer to the first and second distributions of `x` as the 
@@ -54,21 +80,6 @@ Below are the tibbles for the pre- and post-distributions as well as the
 corresponding plots. 
 Both tibbles contain the full support of our variable of interest, that is, their
 `support` column is the same. 
-
-
-```{r echo = F, message = F, warning = F}
-library(dplyr)
-library(magrittr)
-library(ggplot2)
-library(knitr)
-library(kableExtra)
-devtools::load_all()
-
-mykable <- function(dt){
-  kable(dt,
-        align = 'c')
-}
-```
 
 *Pre-Distribution for Treated Group*
 

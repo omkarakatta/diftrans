@@ -34,6 +34,10 @@ serves two purposes:
 
 ### Setup
 
+    library(dplyr)
+    library(magrittr)
+    library(diftrans)
+
 We begin by computing the transport cost between two distributions of
 some variable `x`. These distributions should be represented as tibbles
 with two columns:
@@ -41,6 +45,11 @@ with two columns:
 -   column 1 contains the full support of the distribution and
 -   column 2 (labeled “count”) contains the mass/counts associated with
     each value in the support.
+
+To transform data to be in this form, consult the documentation for
+`prep_data`:
+
+    ?diftrans::prep_data
 
 Suppose that the shift in the distribution is due to some treatment.
 Thus, we refer to the first and second distributions of `x` as the
@@ -53,197 +62,33 @@ variable of interest, that is, their `support` column is the same.
 
 *Pre-Distribution for Treated Group*
 
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">
-x
-</th>
-<th style="text-align:center;">
-count
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">
-1
-</td>
-<td style="text-align:center;">
-9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-2
-</td>
-<td style="text-align:center;">
-7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-3
-</td>
-<td style="text-align:center;">
-7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-4
-</td>
-<td style="text-align:center;">
-6
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-5
-</td>
-<td style="text-align:center;">
-9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-6
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-7
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-8
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-9
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-10
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-</tbody>
-</table>
+|  x  | count |
+|:---:|:-----:|
+|  1  |   9   |
+|  2  |   7   |
+|  3  |   7   |
+|  4  |   6   |
+|  5  |   9   |
+|  6  |   0   |
+|  7  |   0   |
+|  8  |   0   |
+|  9  |   0   |
+| 10  |   0   |
 
 *Post-Distribution for Treated Group*
 
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">
-x
-</th>
-<th style="text-align:center;">
-count
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">
-1
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-2
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-3
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-4
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-5
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-6
-</td>
-<td style="text-align:center;">
-9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-7
-</td>
-<td style="text-align:center;">
-7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-8
-</td>
-<td style="text-align:center;">
-7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-9
-</td>
-<td style="text-align:center;">
-6
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-10
-</td>
-<td style="text-align:center;">
-9
-</td>
-</tr>
-</tbody>
-</table>
+|  x  | count |
+|:---:|:-----:|
+|  1  |   0   |
+|  2  |   0   |
+|  3  |   0   |
+|  4  |   0   |
+|  5  |   0   |
+|  6  |   9   |
+|  7  |   7   |
+|  8  |   7   |
+|  9  |   6   |
+| 10  |   9   |
 
 Observe that all the mass from the pre-distribution was shifted by 5
 units of the support to form the post-distribution. That is, the
@@ -332,197 +177,33 @@ our control group distributions:
 
 *Pre-Distribution for Control Group*
 
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">
-x
-</th>
-<th style="text-align:center;">
-count
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">
-1
-</td>
-<td style="text-align:center;">
-9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-2
-</td>
-<td style="text-align:center;">
-7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-3
-</td>
-<td style="text-align:center;">
-7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-4
-</td>
-<td style="text-align:center;">
-6
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-5
-</td>
-<td style="text-align:center;">
-9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-6
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-7
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-8
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-9
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-10
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-</tbody>
-</table>
+|  x  | count |
+|:---:|:-----:|
+|  1  |   9   |
+|  2  |   7   |
+|  3  |   7   |
+|  4  |   6   |
+|  5  |   9   |
+|  6  |   0   |
+|  7  |   0   |
+|  8  |   0   |
+|  9  |   0   |
+| 10  |   0   |
 
 *Post-Distribution for Control Group*
 
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">
-x
-</th>
-<th style="text-align:center;">
-count
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">
-1
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-2
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-3
-</td>
-<td style="text-align:center;">
-9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-4
-</td>
-<td style="text-align:center;">
-7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-5
-</td>
-<td style="text-align:center;">
-7
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-6
-</td>
-<td style="text-align:center;">
-6
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-7
-</td>
-<td style="text-align:center;">
-9
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-8
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-9
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-10
-</td>
-<td style="text-align:center;">
-0
-</td>
-</tr>
-</tbody>
-</table>
+|  x  | count |
+|:---:|:-----:|
+|  1  |   0   |
+|  2  |   0   |
+|  3  |   9   |
+|  4  |   7   |
+|  5  |   7   |
+|  6  |   6   |
+|  7  |   9   |
+|  8  |   0   |
+|  9  |   0   |
+| 10  |   0   |
 
 ### Compute Differences-in-Transports Estimator <sup id="a1">[1](#f1)</sup>
 
