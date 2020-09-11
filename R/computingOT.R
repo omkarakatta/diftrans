@@ -184,7 +184,7 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 #'                           lowerdate = "2011-01-01", upperdate = "2012-01-01")
 #' dit <- get_results(pre_Beijing, post_Beijing, pre_Tianjin, post_Tianjin,
 #'                    conservative = TRUE, bandwidth = seq(0, 40000, 1000),
-#'                    save_dit = T)
+#'                    save_dit = TRUE)
 #' dit$optimal_bandwidth
 #' dit$dit
 #' # Note: the message that is printed contains the differences-in-transports

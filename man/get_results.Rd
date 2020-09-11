@@ -14,7 +14,8 @@ get_results(
   estimator = ifelse(!is.null(pre_control) & !is.null(post_control), "dit", "tc"),
   conservative = F,
   quietly = F,
-  suppress_progress_bar = F
+  suppress_progress_bar = F,
+  save_dit = F
 )
 }
 \arguments{
@@ -50,6 +51,9 @@ difference-in-transports estimator; default is \code{FALSE}}
 \item{quietly}{if \code{TRUE}, some results and will be suppressed from printing; default is \code{FALSE}}
 
 \item{suppress_progress_bar}{if \code{TRUE}, the progress bar will be suppressed; default is \code{FALSE}}
+
+\item{save_dit}{if \code{TRUE}, the differences-in-transports estimator as
+well as the associated bandwidth will be returned}
 }
 \value{
 a data.frame with the transport costs associated with each value of \code{bandwidth_seq}.
@@ -59,10 +63,17 @@ a data.frame with the transport costs associated with each value of \code{bandwi
 \item \code{main2d}: transport costs associated with main distributions using twice the bandwidth;
 appears only if \code{conservative = TRUE}
 \item \code{control}: transport costs associated with the control distributions;
-appears only if \code{pre_control} and \code{post_control} are specified
+appears only if \code{pre_control} and \code{post_control}
+are specified
 \item \code{diff}: \code{main - control}
 \item \code{diff2d}: \code{main2d - control}
 }
+
+If \code{save_dit = TRUE}, then a list is returned, with the first element
+(labeled \code{out}) being the data.frame described above.
+The second element (labeled \code{dit}) is the differences-in-transports
+estimator, and the third and final element (labeled \code{optimal_bandwidth})
+is the bandwidth associated with the estimator.
 }
 \description{
 Given the pre and post probability mass functions as well as a vector of
@@ -104,9 +115,12 @@ pre_Tianjin <- prep_data(Tianjin_cleaned, "pmf", support = support_Tianjin,
 post_Tianjin <- prep_data(Tianjin_cleaned, "pmf", support = support_Tianjin,
                           lowerdate = "2011-01-01", upperdate = "2012-01-01")
 dit <- get_results(pre_Beijing, post_Beijing, pre_Tianjin, post_Tianjin,
-                   conservative = TRUE, bandwidth = seq(0, 40000, 1000))
-# Note: the message that is printed contains the differences-in-tranports estimator
-# that is in Daljord et al. (2020).
+                   conservative = TRUE, bandwidth = seq(0, 40000, 1000),
+                   save_dit = TRUE)
+dit$optimal_bandwidth
+dit$dit
+# Note: the message that is printed contains the differences-in-transports
+# estimator that is in Daljord et al. (2020).
 
 
 }
