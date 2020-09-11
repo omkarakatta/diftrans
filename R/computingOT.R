@@ -107,10 +107,12 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 #' \code{post_control} variables are all probability mass functions.
 #' That is, they are a tibble with two columns:
 #' \itemize{
-#'   \item column 1 contains the support of \code{var}, and
-#'   \item column 2, which should be titled "counts", contains the corresponding
+#'   \item column 1 contains the full support of \code{var}, and
+#'   \item column 2, which should be titled "count", contains the corresponding
 #'   mass of each value in the support.
 #' }
+#' Since column 1 contains the full support of \code{var} and all these distributions
+#' are of \code{var}, column 1 must be the same for all distributions
 #'
 #' @param pre_main probability mass function (see "Details") for \code{var} of the
 #'     treated group before treatment occurs
