@@ -25,8 +25,8 @@
   /* https://gist.github.com/jennybc/e9e9aba6ba18c72cec26 */
   .clearer {clear: both}
   
-  .center{
-    text-align: center
+  .subhead{
+    text-align: left
   }
 </style>
 
@@ -45,7 +45,8 @@ and Xiao (2020). Currently, the package is in development.
 Installation
 ------------
 
-You can install the `diftrans` from [GitHub](https://github.com/) with:
+You can install the `diftrans` from
+[GitHub](https://github.com/omkarakatta/diftrans) with:
 
     # install.packages("devtools")
     devtools::install_github("omkarakatta/diftrans")
@@ -60,40 +61,45 @@ serves two purposes:
 -   compute the differences-in-transports estimator (see Daljord et
     al. (2020)).
 
-We begin by computing the transport cost between two distributions,
-which we shall call the pre-distribution and post-distribution. They
-should be represented as tibbles with two columns:
+### Setup
+
+We begin by computing the transport cost between two distributions of
+some variable `x`. These distributions should be represented as tibbles
+with two columns:
 
 -   column 1 contains the full support of the distribution and
 -   column 2 (labeled “count”) contains the mass/counts associated with
     each value in the support.
 
-### Setup
+Suppose that the shift in the distribution is due to some treatment.
+Thus, we refer to the first and second distributions of `x` as the
+pre-distribution and post-distribution for the treated group,
+respectively.
 
-Below are the tibbles for the pre- and post-distributions as a well as
-corresponding plot. Both tibbles contain the full support of our
+Below are the tibbles for the pre- and post-distributions as well as the
+corresponding plots. Both tibbles contain the full support of our
 variable of interest, that is, their `support` column is the same.
 
-<div class="center">
+<div class="subhead">
 
-<strong> Pre-Distribution </strong>
+<strong> Pre-Distribution for Treated Group </strong>
 
 </div>
 
 <div class="column-left">
 
-| support | count |
-|--------:|------:|
-|       1 |     9 |
-|       2 |     7 |
-|       3 |     7 |
-|       4 |     6 |
-|       5 |     9 |
-|       6 |     0 |
-|       7 |     0 |
-|       8 |     0 |
-|       9 |     0 |
-|      10 |     0 |
+|   x | count |
+|----:|------:|
+|   1 |     9 |
+|   2 |     7 |
+|   3 |     7 |
+|   4 |     6 |
+|   5 |     9 |
+|   6 |     0 |
+|   7 |     0 |
+|   8 |     0 |
+|   9 |     0 |
+|  10 |     0 |
 
 </div>
 
@@ -107,26 +113,26 @@ variable of interest, that is, their `support` column is the same.
 
 </div>
 
-<div class="center">
+<div class="subhead">
 
-<strong> Post-Distribution </strong>
+<strong> Post-Distribution for Treated Group </strong>
 
 </div>
 
 <div class="column-left">
 
-| support | count |
-|--------:|------:|
-|       1 |     0 |
-|       2 |     0 |
-|       3 |     0 |
-|       4 |     0 |
-|       5 |     0 |
-|       6 |     9 |
-|       7 |     7 |
-|       8 |     7 |
-|       9 |     6 |
-|      10 |     9 |
+|   x | count |
+|----:|------:|
+|   1 |     0 |
+|   2 |     0 |
+|   3 |     0 |
+|   4 |     0 |
+|   5 |     0 |
+|   6 |     9 |
+|   7 |     7 |
+|   8 |     7 |
+|   9 |     6 |
+|  10 |     9 |
 
 </div>
 
@@ -140,16 +146,20 @@ variable of interest, that is, their `support` column is the same.
 
 </div>
 
-Observe that the post-distribution is simply the result of shifting the
-mass in the pre-distribution by 5 units. For instance, all the mass that
-was given given to 1 in the pre-distribution is now given to 6.
+Observe that all the mass from the pre-distribution was shifted by 5
+units of the support to form the post-distribution. That is, the
+treatment resulted in all the mass to change. For instance, the mass
+that was given given to 1 in the pre-distribution is now given to 6.
 
 ### Compute Transport Cost
 
+In this trivial example, we should expect that the transport cost is
+100% because all the mass was transported due to the treatment.
+
 We can compute the transport cost as follows:
 
-    tc <- get_results(pre_main = pre_distribution, post_main = post_distribution,
-                      estimator = "tc", var = support,
+    tc <- get_results(pre_main = pre_treated, post_main = post_treated,
+                      estimator = "tc", var = x,
                       bandwidth = 0)
     #> Computing Transport Costs...
     #> ================================================================================
@@ -159,20 +169,18 @@ We can compute the transport cost as follows:
     #>   bandwidth main
     #> 1         0    1
 
-The transport cost is 100%, which makes sense since all the mass in the
-pre-distribution moves to values of the support that did not have any
-mass in the post-distribution, i.e. each unit of mass was transported.
-The `estimator` argument is specified to be `"tc"`, which stands for
-transport cost. (Since we only have two distributions, estimator will
-take on the value of `"tc"` by default.)
+The transport cost is 100% as expected. The `estimator` argument is
+specified to be `"tc"`, which stands for transport cost. (Since we only
+have two distributions, estimator will take on the value of `"tc"` by
+default.)
 
 Since the post-distribution is a 5-unit shift in the pre-distribution,
 any bandwidth at least 5 must result in a transport cost of 0. We verify
-this by computing the transport cost for a sequence of bandwiths from 0
+this by computing the transport cost for a sequence of bandwidths from 0
 to 10:
 
-    tc <- get_results(pre_main = pre_distribution, post_main = post_distribution,
-                      estimator = "tc", var = support,
+    tc <- get_results(pre_main = pre_treated, post_main = post_treated,
+                      estimator = "tc", var = x,
                       bandwidth = seq(0, 10))
     #> Computing Transport Costs...
     #> ================================================================================
@@ -194,15 +202,14 @@ to 10:
 
 ### Setup for Difference-in-Transports
 
-To provide a bit more context to our synthetic example, suppose that the
-shift in the post-distribution of our variable of interest is considered
-to be the result of some treatment. Perhaps there are unobserved trends
-in our variable that might also explain this shift. To elicit how much
-of this shift is due to the treatment and how much of this shift is due
-to unobserved trends, we can compare our distributions above with
-distributions of the same variable measured in some control group that
-did not receive the treatment but was also subjected to the same
-unobserved trends.
+Above, we assumed that the treatment is sole reason why any shifts
+between the pre- and post-distributions of `x` might occur. Now suppose
+there are unobserved trends in our variable that might also explain this
+shift. To elicit how much of this shift is due to the treatment and how
+much of this shift is due to unobserved trends, we can compare our
+distributions above with distributions of the same variable measured in
+some control group that did not receive the treatment but was also
+subjected to the same unobserved trends.
 
 The novel differences-in-transports estimator described in Daljord et
 al. (2020) quantifies the change in distribution due to some treatment
@@ -216,26 +223,26 @@ our post-distribution for our control group be a 2-unit shift of our
 pre-distribution. We therefore have the following tibbles that represent
 our control group distributions:
 
-<div class="center">
+<div class="subhead">
 
-<strong> Pre-Distribution </strong>
+<strong> Pre-Distribution for Control Group </strong>
 
 </div>
 
 <div class="column-left">
 
-| support | count |
-|--------:|------:|
-|       1 |     9 |
-|       2 |     7 |
-|       3 |     7 |
-|       4 |     6 |
-|       5 |     9 |
-|       6 |     0 |
-|       7 |     0 |
-|       8 |     0 |
-|       9 |     0 |
-|      10 |     0 |
+|   x | count |
+|----:|------:|
+|   1 |     9 |
+|   2 |     7 |
+|   3 |     7 |
+|   4 |     6 |
+|   5 |     9 |
+|   6 |     0 |
+|   7 |     0 |
+|   8 |     0 |
+|   9 |     0 |
+|  10 |     0 |
 
 </div>
 
@@ -249,26 +256,26 @@ our control group distributions:
 
 </div>
 
-<div class="center">
+<div class="subhead">
 
-<strong> Post-Distribution </strong>
+<strong> Post-Distribution for Control Group </strong>
 
 </div>
 
 <div class="column-left">
 
-| support | count |
-|--------:|------:|
-|       1 |     0 |
-|       2 |     0 |
-|       3 |     9 |
-|       4 |     7 |
-|       5 |     7 |
-|       6 |     6 |
-|       7 |     9 |
-|       8 |     0 |
-|       9 |     0 |
-|      10 |     0 |
+|   x | count |
+|----:|------:|
+|   1 |     0 |
+|   2 |     0 |
+|   3 |     9 |
+|   4 |     7 |
+|   5 |     7 |
+|   6 |     6 |
+|   7 |     9 |
+|   8 |     0 |
+|   9 |     0 |
+|  10 |     0 |
 
 </div>
 
@@ -282,12 +289,7 @@ our control group distributions:
 
 </div>
 
-### Compute Differences-in-Transports Estimator
-
-There is more nuance to computing the differences-in-transports
-estimator than is presented in this expository document. See Daljord et
-al. (2020) for a more complete treatment on how to compute the
-differences-in-transports estimator.
+### Compute Differences-in-Transports Estimator <sup id="a1">[1](#f1)</sup>
 
 Above, we used `estimator = "tc"` and specified our pre- and
 post-distributions for our treated group. Now, we use
@@ -295,9 +297,9 @@ post-distributions for our treated group. Now, we use
 estimator) while also specifying our pre- and post-distributions for our
 control group.
 
-    dit <- get_results(pre_main = pre_distribution, post_main = post_distribution,
+    dit <- get_results(pre_main = pre_treated, post_main = post_treated,
                        pre_control = pre_control, post_control = post_control,
-                       estimator = "dit", var = support,
+                       estimator = "dit", var = x,
                        bandwidth_seq = seq(0, 10, 1),
                        save_dit = TRUE)
     #> Computing Differences-in-Transports Estimator...
@@ -324,25 +326,26 @@ control group.
 Another difference between computing the transport cost and the
 differences-in-differences estimator is that the
 differences-in-transports estimator is printed as a message. To save
-this result, we use `save_dit = TRUE`.
+this result in `dit`, we use `save_dit = TRUE`.
 
-Thus, the differences-in-transports estimator at an optimal bandwidth of
-2 is 61%. Often times, the data will be a sample from a population, and
-sample variability is enough to cause differences between distributions.
-To account for this discrepancy, we can increase the bandwidth to ignore
-transfers of mass between nearby values of the support.
-
-    d_a <- 3
+Thus, the differences-in-transports estimator is 61% at an optimal
+bandwidth of 2. Often times, the data will be a sample from a
+population, and sample variability is enough to cause differences
+between distributions. To account for this discrepancy, we can increase
+the bandwidth to ignore transfers of mass between nearby values of the
+support.
 
 While Daljord et al. (2020) offer a disciplined way to determine what
 the appropriate bandwidths are, for simplicity, we will suppose that
 there will not be any sampling variation with a bandwidth greater than
 3.
 
-    dit <- get_results(pre_main = pre_distribution, post_main = post_distribution,
+    d_a <- 3
+
+    dit <- get_results(pre_main = pre_treated, post_main = post_treated,
                        pre_control = pre_control, post_control = post_control,
-                       estimator = "dit", var = support,
-                       bandwidth_seq = seq(d_a, 10, 1), # smallest bandwidth will be 1
+                       estimator = "dit", var = x,
+                       bandwidth_seq = seq(d_a, 10, 1), # smallest bandwidth will be d_a
                        save_dit = TRUE)
     #> Computing Differences-in-Transports Estimator...
     #> ================================================================================
@@ -368,9 +371,9 @@ estimate is 42%. If we want to be more conservative, we can use
 computing the treated group’s transport costs relative to the bandwidth
 for computing the control group’s transport costs.
 
-    dit <- get_results(pre_main = pre_distribution, post_main = post_distribution,
+    dit <- get_results(pre_main = pre_treated, post_main = post_treated,
                        pre_control = pre_control, post_control = post_control,
-                       estimator = "dit", var = support,
+                       estimator = "dit", var = x,
                        bandwidth_seq = seq(d_a, 10, 1), # smallest bandwidth will be 1
                        save_dit = TRUE,
                        conservative = TRUE)
@@ -399,3 +402,12 @@ estimator is 0% at an optimal bandwidth of 3.
 Note that `estimator = "dit"` is not necessary. Since we have two sets
 of pre- and post-distributions, `get_results` is smart enough to return
 the differences-in-transports estimator by default.
+
+------------------------------------------------------------------------
+
+<b id="f1">1</b> There is more nuance to computing the
+differences-in-transports estimator than is presented in this expository
+document. See Daljord et al. (2020) for a more complete treatment on how
+to compute the differences-in-transports estimator. [↩](#a1)
+
+<!-- https://stackoverflow.com/a/32119820 -->
