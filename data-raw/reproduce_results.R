@@ -314,7 +314,7 @@ if (show_fig | show_fig4){
              ggtitle = "Post-Lottery",
              sizefont = (fontsize - 8),
              axissizefont = (fontsizeaxis - 5))
-  fig4_plot_show <- grid.arrange(fig4a_OK, fig4b_OK, ncol = 2)
+  # fig4_plot_show <- grid.arrange(fig4a_OK, fig4b_OK, ncol = 2)
   fig4_plot <- arrangeGrob(fig4a_OK, fig4b_OK, ncol = 2)
   if (save_fig | save_fig4){
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), fig4_plot, path = img_path,
@@ -419,9 +419,9 @@ if (show_fig | show_fig5){
              sizefont = (fontsize - 8),
              axissizefont = (fontsizeaxis - 5))
   # fig5d_OK
-  fig5_plot_show <- grid.arrange(fig5a_OK, fig5b_OK,
-                                 fig5c_OK, fig5d_OK,
-                                 nrow = 2)
+  # fig5_plot_show <- grid.arrange(fig5a_OK, fig5b_OK,
+  #                                fig5c_OK, fig5d_OK,
+  #                                nrow = 2)
   fig5_plot <- arrangeGrob(fig5a_OK, fig5b_OK,
                            fig5c_OK, fig5d_OK,
                            nrow = 2)
