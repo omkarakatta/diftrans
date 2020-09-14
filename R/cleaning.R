@@ -67,29 +67,29 @@ filter_date <- function(data, datevar, lowerdate, upperdate, format = "%Y-%m-%d"
 #'
 #' @examples
 #' # Obtain unique values of MSRP between 2010 and 2011 in Beijing and in Tianjin:
-#' support_Beijing <- prep_data(Beijing_cleaned, "support",
+#' support_Beijing <- prep_data(Beijing_sample, "support",
 #'                              lowerdate = "2010-01-01", upperdate = "2011-01-01")
 #' support_Beijing
 #'
 #' # Aggregate total sales for each value of MSRP between 2010 and 2011 in Tianjin:
-#' count <- prep_data(Tianjin_cleaned, "pmf", lowerdate = "2010-01-01", upperdate = "2011-01-01")
+#' count <- prep_data(Tianjin_sample, "pmf", lowerdate = "2010-01-01", upperdate = "2011-01-01")
 #' count
 #'
 #' # Obtain PMF of MSRP values between 2010 and 2011 in Tianjin:
-#' pmf <- prep_data(Tianjin_cleaned, "pmf", lowerdate = "2010-01-01", upperdate = "2011-01-01")
+#' pmf <- prep_data(Tianjin_sample, "pmf", lowerdate = "2010-01-01", upperdate = "2011-01-01")
 #' pmf
 #' # Note: \code{pmf} should be same as \code{count} because support is the same.
 #' all.equal(pmf, count)
 #'
 #' # Obtain PMF of MSRP values between 2010 and 2011 in Tianjin using full support:
-#' full_support <- prep_data(Tianjin_cleaned, "support")
-#' pmf2 <- prep_data(Tianjin_cleaned, "pmf", support = full_support,
+#' full_support <- prep_data(Tianjin_sample, "support")
+#' pmf2 <- prep_data(Tianjin_sample, "pmf", support = full_support,
 #'                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
 #' # Since support is different between \code{pmf2} and \code{count}, there will
 #' # be some values of MSRP whose \code{count} is 0.
 #'
 #' # Obtain the distribution of MSRP values between 2010 and 2011 in Tianjin:
-#' dist <- prep_data(Tianjin_cleaned, "dist", lowerdate = "2010-01-01", upperdate = "2011-01-01")
+#' dist <- prep_data(Tianjin_sample, "dist", lowerdate = "2010-01-01", upperdate = "2011-01-01")
 #' dist
 #' # Compare \code{dist} with \code{count}
 #'

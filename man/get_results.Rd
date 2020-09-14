@@ -95,11 +95,11 @@ are of \code{var}, column 1 must be the same for all distributions
 }
 \examples{
 # Find conservative transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 0
-support_Beijing <- prep_data(Beijing_cleaned, "support",
+support_Beijing <- prep_data(Beijing_sample, "support",
                      lowerdate = "2010-01-01", upperdate = "2012-01-01")
-pre_Beijing <- prep_data(Beijing_cleaned, "pmf", support = support_Beijing,
+pre_Beijing <- prep_data(Beijing_sample, "pmf", support = support_Beijing,
                          lowerdate = "2010-01-01", upperdate = "2011-01-01")
-post_Beijing <- prep_data(Beijing_cleaned, "pmf", support = support_Beijing,
+post_Beijing <- prep_data(Beijing_sample, "pmf", support = support_Beijing,
                           lowerdate = "2011-01-01", upperdate = "2012-01-01")
 tc <- get_results(pre_Beijing, post_Beijing, conservative = TRUE, bandwidth = 0)
 tc$main2d
@@ -110,11 +110,11 @@ tc_10000$main
 # Note: this result is the same as the before-and-after estimator in Daljord et al. (2020)
 
 # Find conservative differences-in-transport estimator using Tianjin as a control
-support_Tianjin <- prep_data(Tianjin_cleaned, "support",
+support_Tianjin <- prep_data(Tianjin_sample, "support",
                      lowerdate = "2010-01-01", upperdate = "2012-01-01")
-pre_Tianjin <- prep_data(Tianjin_cleaned, "pmf", support = support_Tianjin,
+pre_Tianjin <- prep_data(Tianjin_sample, "pmf", support = support_Tianjin,
                          lowerdate = "2010-01-01", upperdate = "2011-01-01")
-post_Tianjin <- prep_data(Tianjin_cleaned, "pmf", support = support_Tianjin,
+post_Tianjin <- prep_data(Tianjin_sample, "pmf", support = support_Tianjin,
                           lowerdate = "2011-01-01", upperdate = "2012-01-01")
 dit <- get_results(pre_Beijing, post_Beijing, pre_Tianjin, post_Tianjin,
                    conservative = TRUE, bandwidth = seq(0, 40000, 1000),
