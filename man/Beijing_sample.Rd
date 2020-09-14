@@ -32,7 +32,8 @@ Beijing_sample
 }
 \description{
 A dataset containing the manufacturer's suggested retail price (MSRP) of car
-models and how many of these models were sold in Beijing between 2010 and 2015.
+models and how many of these models were sold in Beijing between 2010 and 2015
+as well as other information.
 }
 \details{
 Due to privacy restrictions, we cannot distribute the original data sets.

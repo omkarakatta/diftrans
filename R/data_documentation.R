@@ -1,7 +1,8 @@
 #' Beijing car prices from 2010 to 2015
 #'
 #' A dataset containing the manufacturer's suggested retail price (MSRP) of car
-#' models and how many of these models were sold in Beijing between 2010 and 2015.
+#' models and how many of these models were sold in Beijing between 2010 and 2015
+#' as well as other information.
 #'
 #' Due to privacy restrictions, we cannot distribute the original data sets.
 #' This data set is an anonymized version of the original.
@@ -32,7 +33,8 @@
 #' Tianjin car prices from 2010 to 2015
 #'
 #' A dataset containing the manufacturer's suggested retail price (MSRP) of car
-#' models and how many of these models were sold in Tianjin between 2010 and 2015.
+#' models and how many of these models were sold in Tianjin between 2010 and 2015
+#' as well as other information.
 #'
 #' Due to privacy restrictions, we cannot distribute the original data sets.
 #' This data set is an anonymized version of the original.
@@ -63,7 +65,8 @@
 #' Shijiazhuang car prices from 2010 to 2015
 #'
 #' A dataset containing the manufacturer's suggested retail price (MSRP) of car
-#' models and how many of these models were sold in Shijiazhuang between 2010 and 2015.
+#' models and how many of these models were sold in Shijiazhuang between 2010 and 2015
+#' as well as other information.
 #'
 #' Due to privacy restrictions, we cannot distribute the original data sets.
 #' This data set is an anonymized version of the original.
