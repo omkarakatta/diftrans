@@ -86,10 +86,12 @@ The \code{pre_main}, \code{post_main}, \code{pre_control}, and
 \code{post_control} variables are all probability mass functions.
 That is, they are a tibble with two columns:
 \itemize{
-\item column 1 contains the support of \code{var}, and
-\item column 2, which should be titled "counts", contains the corresponding
+\item column 1 contains the full support of \code{var}, and
+\item column 2, which should be titled "count", contains the corresponding
 mass of each value in the support.
 }
+Since column 1 contains the full support of \code{var} and all these distributions
+are of \code{var}, column 1 must be the same for all distributions
 }
 \examples{
 # Find conservative transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 0
