@@ -20,7 +20,7 @@ post_treated <- data.frame(x = support,
                            count = lag(pre_treated$count, shift)) %>%
   tidyr::replace_na(list(count = 0))
 
-tc <- get_results(pre_main = pre_treated, post_main = post_treated,
+tc <- diftrans(pre_main = pre_treated, post_main = post_treated,
                   estimator = "tc", var = x,
                   bandwidth = 0)
 

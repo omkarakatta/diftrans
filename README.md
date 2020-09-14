@@ -35,13 +35,13 @@ changes in the distributions. The `diftrans` package also computes the
 reasons that the distributions may change by comparing the transport
 costs to those from another source of measurement.
 
-The only function in the `diftrans` package is `get_results`, which is
+The only function in the `diftrans` package is `diftrans`, which is
 explained below by way of a toy example.
 
-More details about `diftrans::get_results` can be found on their
-document files:
+More details about `diftrans::diftrans` can be found on their document
+files:
 
-    ?diftrans::get_results
+    ?diftrans::diftrans
 
 Installation
 ------------
@@ -55,8 +55,8 @@ Install the `diftrans` from
 Example
 -------
 
-The workhorse function in the `diftrans` package is `get_results`, which
-serves two purposes:
+The workhorse function in the `diftrans` package is also called
+`diftrans`, which serves two purposes:
 
 -   compute transport cost between two univariate distributions, and
 -   compute the differences-in-transports estimator (see Daljord et
@@ -127,7 +127,7 @@ because all the mass was transported due to the treatment.
 
 We can compute the transport cost as follows:
 
-    tc <- get_results(pre_main = pre_treated, post_main = post_treated,
+    tc <- diftrans(pre_main = pre_treated, post_main = post_treated,
                       estimator = "tc", var = x,
                       bandwidth = 0)
 
@@ -152,7 +152,7 @@ any bandwidth at least 5 must result in a transport cost of 0. We verify
 this by computing the transport cost for a sequence of bandwidths from 0
 to 10:
 
-    tc <- get_results(pre_main = pre_treated, post_main = post_treated,
+    tc <- diftrans(pre_main = pre_treated, post_main = post_treated,
                       estimator = "tc", var = x,
                       bandwidth = seq(0, 10))
 
@@ -238,7 +238,7 @@ post-distributions for our treated group. Now, we use
 estimator) while also specifying our pre- and post-distributions for our
 control group.
 
-    dit <- get_results(pre_main = pre_treated, post_main = post_treated,
+    dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                        pre_control = pre_control, post_control = post_control,
                        estimator = "dit", var = x,
                        bandwidth_seq = seq(0, 10, 1),
@@ -295,7 +295,7 @@ there will not be any sampling variation with a bandwidth greater than
 
     d_a <- 1
 
-    dit <- get_results(pre_main = pre_treated, post_main = post_treated,
+    dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                        pre_control = pre_control, post_control = post_control,
                        estimator = "dit", var = x,
                        bandwidth_seq = seq(d_a, 10, 1), # smallest bandwidth will be d_a
@@ -340,7 +340,7 @@ which essentially uses twice the bandwidth for computing the treated
 group’s transport costs relative to the bandwidth for computing the
 control group’s transport costs.
 
-    dit <- get_results(pre_main = pre_treated, post_main = post_treated,
+    dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                        pre_control = pre_control, post_control = post_control,
                        estimator = "dit", var = x,
                        bandwidth_seq = seq(d_a, 10, 1),
@@ -381,8 +381,8 @@ Finally, we have that the **conservative differences-in-transports
 estimator is 37% at an optimal bandwidth of 1**.
 
 Note that `estimator = "dit"` is not necessary. Since we have two sets
-of pre- and post-distributions, `get_results` is smart enough to return
-the differences-in-transports estimator by default.
+of pre- and post-distributions, `diftrans` is smart enough to return the
+differences-in-transports estimator by default.
 
 ------------------------------------------------------------------------
 

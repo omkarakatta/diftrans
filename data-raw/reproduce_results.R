@@ -462,8 +462,8 @@ if (show_fig | show_fig6){
 
   bandwidth_seq = seq(0, 100000, 1000)
 
-  real <- get_results(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
-  placebo <- get_results(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
+  real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
+  placebo <- diftrans(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
 
   bandwidth_selection <- left_join(real, placebo, by = "bandwidth", suffix = c("_real", "_placebo")) %>%
     mutate(ratio = main_real / main_placebo) %>%
@@ -585,10 +585,10 @@ if (show_fig | show_fig8){
     cat("\n")
     print(paste("Simulation Number ", i, " out of ", numsim, sep = ""))
 
-    placeboB <- get_results(B2012_n2011, B2012_n2012, bandwidth = bandwidth_seq,
+    placeboB <- diftrans(B2012_n2011, B2012_n2012, bandwidth = bandwidth_seq,
                             conservative = T,
                             quietly = T)
-    placeboT <- get_results(T2012_n2011, T2012_n2012, bandwidth = bandwidth_seq,
+    placeboT <- diftrans(T2012_n2011, T2012_n2012, bandwidth = bandwidth_seq,
                             quietly = T)
 
     placeboB_prop[i, ] <- placeboB$main2d
@@ -670,7 +670,7 @@ if (show_fig | show_fig9){
 
   bandwidth_seq = seq(0, 40000, 1000)
 
-  temp <- get_results(pre_Bpmf, post_Bpmf, pre_Tpmf, post_Tpmf,
+  temp <- diftrans(pre_Bpmf, post_Bpmf, pre_Tpmf, post_Tpmf,
                       bandwidth_seq = bandwidth_seq,
                       conservative = F,
                       quietly = T)
@@ -732,11 +732,11 @@ if (show_fig | show_fig10){
 
   bandwidth_seq = seq(0, 40000, 1000)
 
-  cons_dit <- get_results(pre_Bpmf, post_Bpmf, pre_Tpmf, post_Tpmf,
+  cons_dit <- diftrans(pre_Bpmf, post_Bpmf, pre_Tpmf, post_Tpmf,
                           bandwidth_seq = bandwidth_seq,
                           conservative = T,
                           save_dit = T)
-  dit <- get_results(pre_Bpmf, post_Bpmf, pre_Tpmf, post_Tpmf,
+  dit <- diftrans(pre_Bpmf, post_Bpmf, pre_Tpmf, post_Tpmf,
                      bandwidth_seq = bandwidth_seq,
                      conservative = F,
                      save_dit = T)

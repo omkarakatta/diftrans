@@ -193,11 +193,11 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 #'   tidyr::replace_na(list(count = 0)) %>%
 #'   tibble::as_tibble()
 #' # # step 3: compute results
-#' tc <- get_results(pre_Beijing, post_Beijing, conservative = TRUE, bandwidth = 0)
+#' tc <- diftrans(pre_Beijing, post_Beijing, conservative = TRUE, bandwidth = 0)
 #' tc$main2d
 #'
 #' # Find transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 10000
-#' # tc_10000 <- get_results(pre_Beijing, post_Beijing, bandwidth = 10000)# tc_10000$main
+#' # tc_10000 <- diftrans(pre_Beijing, post_Beijing, bandwidth = 10000)# tc_10000$main
 #' # Find conservative differences-in-transport estimator using Tianjin as a control
 #' # # step 1: find support
 #' support_Tianjin <- Tianjin_sample %>%
@@ -228,20 +228,20 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 #'   tidyr::replace_na(list(count = 0)) %>%
 #'   tibble::as_tibble()
 #' # # step 3: compute results
-#' dit <- get_results(pre_Beijing, post_Beijing, pre_Tianjin, post_Tianjin,
+#' dit <- diftrans(pre_Beijing, post_Beijing, pre_Tianjin, post_Tianjin,
 #'                    conservative = TRUE, bandwidth = seq(0, 40000, 1000),
 #'                    save_dit = TRUE)
 #' dit$optimal_bandwidth
 #' dit$dit
-get_results <- function(pre_main = NULL, post_main = NULL,
-                        pre_control = NULL, post_control = NULL,
-                        var = MSRP,
-                        bandwidth_seq = seq(0, 40000, 1000),
-                        estimator = ifelse(!is.null(pre_control) & !is.null(post_control), "dit", "tc"),
-                        conservative = F,
-                        quietly = F,
-                        suppress_progress_bar = F,
-                        save_dit = F){
+diftrans <- function(pre_main = NULL, post_main = NULL,
+                     pre_control = NULL, post_control = NULL,
+                     var = MSRP,
+                     bandwidth_seq = seq(0, 40000, 1000),
+                     estimator = ifelse(!is.null(pre_control) & !is.null(post_control), "dit", "tc"),
+                     conservative = F,
+                     quietly = F,
+                     suppress_progress_bar = F,
+                     save_dit = F){
   var <- rlang::enquo(var)
   # error checking
   if (is.null(pre_main) | is.null(post_main)){

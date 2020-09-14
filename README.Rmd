@@ -38,12 +38,12 @@ to compute the change between the distributions of a univariate variable of inte
 Extending this application, the `diftrans` package allows users to compute the *before-and-after estimator* (Daljord et al., 2020), which controls for sampling uncertainty by trivializing small changes in the distributions. 
 The `diftrans` package also computes the *differences-in-transports estimator*, which controls for unobservable reasons that the distributions may change by comparing the transport costs to those from another source of measurement.
 
-The only function in the `diftrans` package is `get_results`, which is explained below by way of a toy example.
+The only function in the `diftrans` package is `diftrans`, which is explained below by way of a toy example.
 
-More details about `diftrans::get_results` can be found on their document files:
+More details about `diftrans::diftrans` can be found on their document files:
 
 ```{r eval = F}
-?diftrans::get_results
+?diftrans::diftrans
 ```
 
 
@@ -57,7 +57,7 @@ devtools::install_github("omkarakatta/diftrans")
 ```
 ## Example
 
-The workhorse function in the `diftrans` package is `get_results`, which serves two purposes:
+The workhorse function in the `diftrans` package is also called `diftrans`, which serves two purposes:
 
 * compute transport cost between two univariate distributions, and
 * compute the differences-in-transports estimator (see Daljord et al. (2020)).
@@ -144,7 +144,7 @@ all the mass was transported due to the treatment.
 We can compute the transport cost as follows:
 
 ```{r echo = T}
-tc <- get_results(pre_main = pre_treated, post_main = post_treated,
+tc <- diftrans(pre_main = pre_treated, post_main = post_treated,
                   estimator = "tc", var = x,
                   bandwidth = 0)
 
@@ -159,7 +159,7 @@ Since the post-distribution is a `r shift`-unit shift in the pre-distribution, a
 at least `r shift` must result in a transport cost of 0. We verify this by computing
 the transport cost for a sequence of bandwidths from 0 to 10:
 ```{r}
-tc <- get_results(pre_main = pre_treated, post_main = post_treated,
+tc <- diftrans(pre_main = pre_treated, post_main = post_treated,
                   estimator = "tc", var = x,
                   bandwidth = seq(0, 10))
 
@@ -217,7 +217,7 @@ Now, we use `estimator = "dit"` (which stands for differences-in-treatments esti
 while also specifying our pre- and post-distributions for our control group.
 
 ```{r echo = T}
-dit <- get_results(pre_main = pre_treated, post_main = post_treated,
+dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                    pre_control = pre_control, post_control = post_control,
                    estimator = "dit", var = x,
                    bandwidth_seq = seq(0, 10, 1),
@@ -253,7 +253,7 @@ d_a <- 1
 ```
 
 ```{r echo = T}
-dit <- get_results(pre_main = pre_treated, post_main = post_treated,
+dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                    pre_control = pre_control, post_control = post_control,
                    estimator = "dit", var = x,
                    bandwidth_seq = seq(d_a, 10, 1), # smallest bandwidth will be d_a
@@ -274,7 +274,7 @@ treated group's transport costs relative to the bandwidth for computing the cont
 group's transport costs.
 
 ```{r}
-dit <- get_results(pre_main = pre_treated, post_main = post_treated,
+dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                    pre_control = pre_control, post_control = post_control,
                    estimator = "dit", var = x,
                    bandwidth_seq = seq(d_a, 10, 1),
@@ -288,7 +288,7 @@ dit$optimal_bandwidth
 Finally, we have that the **conservative differences-in-transports estimator is `r scales::percent(dit$dit)` at an optimal bandwidth of `r dit$optimal_bandwidth`**.
 
 Note that `estimator = "dit"` is not necessary. Since we have two sets of pre- and
-post-distributions, `get_results` is smart enough to return the differences-in-transports 
+post-distributions, `diftrans` is smart enough to return the differences-in-transports 
 estimator by default. 
 
 ------
