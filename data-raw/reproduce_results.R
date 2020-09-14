@@ -10,6 +10,9 @@
 ###       as needed. In particular, the `version` variable, the file paths,
 ###       and the plotting parameters can be changed to fit the user's preferences.
 ###
+###       User needs to change file paths to source functions used to prepare and
+###       plot the data.
+###
 ###       Due to privacy restrictions, the original data set cannot be distributed.
 ###       Hence, an anonymized version of the data set will be provided.
 ###       The results of this script will therefore differ slightly from the paper's results.
@@ -51,12 +54,16 @@ library(dplyr)
 library(tidyr)
 library(stargazer)
 
+# source functions: CHANGE FILE PATH
+source(here::here("data-raw", "prepare_data.R"))
+source(here::here("data-raw", "plotting_functions.R"))
+
+
 # What data do you want to use?
 # Option 1: "original" i.e. use entire data set
 # Option 2: "v1" i.e. exclude December 2010
 # Option 3: "v2" i.e. exclude December 2010, January 2011, and February 2012
-
-version <- "original" # options are: "original" "v1" "v2". See comments above.
+version <- "original"
 
 # Do you want to see figures?
 show_fig <- TRUE

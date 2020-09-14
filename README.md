@@ -35,15 +35,13 @@ changes in the distributions. The `diftrans` package also computes the
 reasons that the distributions may change by comparing the transport
 costs to those from another source of measurement.
 
-The two major functions in the `diftrans` package are:
+The only function in the `diftrans` package is `get_results`, which is
+explained below by way of a toy example.
 
--   `get_results`, which returns all these computations, and
--   `prep_data`, which prepares data to become inputs for `get_results`.
-
-More details about these functions can be found on their document files:
+More details about `diftrans::get_results` can be found on their
+document files:
 
     ?diftrans::get_results
-    ?diftrans::prep_data
 
 Installation
 ------------
@@ -77,9 +75,6 @@ with two columns:
 -   column 1 contains the full support of the distribution and
 -   column 2 (labeled “count”) contains the mass/counts associated with
     each value in the support.
-
-To transform data to be in this form, consult the documentation for
-`prep_data`.
 
 Suppose that the shift in the distribution is due to some treatment.
 Thus, we refer to the first and second distributions of `x` as the

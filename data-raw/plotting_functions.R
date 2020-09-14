@@ -14,7 +14,7 @@
 
 ### Color Palette ---------------------------
 
-#' @export
+
 get_color_palette <- function(number, grayscale = grayscale){
   # colors: http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/
   orange <- "#E69F00"
@@ -74,7 +74,7 @@ get_color_palette <- function(number, grayscale = grayscale){
 
 ### Theme  ---------------------------
 
-#' @export
+
 theme_bmp <- function(legend.direction = "vertical",
                       legend.position = c(0.8, 0.8),
                       legend.title = ggplot2::element_blank(),
@@ -102,7 +102,7 @@ theme_bmp <- function(legend.direction = "vertical",
 
 ### Plotting  ---------------------------
 
-#' @export
+
 bmp_plot <- function(data,
                      color = NULL, colorgray = grayscale,
                      fill = NULL,
@@ -127,15 +127,15 @@ bmp_plot <- function(data,
     theme_bmp(...),
     # if (!is.null(quo(color))){
     ggplot2::scale_color_manual(values = get_color_palette(data %>% dplyr::select({{color}}) %>% dplyr::distinct() %>% nrow,
-                                                  grayscale = colorgray),
-                       labels = legendlabels,
-                       name = ""),
+                                                           grayscale = colorgray),
+                                labels = legendlabels,
+                                name = ""),
     # },
     # if (!is.null(quo(fill))){
     ggplot2::scale_fill_manual(values = get_color_palette(data %>% dplyr::select({{fill}}) %>% dplyr::distinct() %>% nrow,
-                                                 grayscale = colorgray),
-                      labels = legendlabels,
-                      name = ""),
+                                                          grayscale = colorgray),
+                               labels = legendlabels,
+                               name = ""),
     # },
     ggplot2::xlab(xlab),
     ggplot2::ylab(ylab),
@@ -143,29 +143,29 @@ bmp_plot <- function(data,
     ggplot2::coord_cartesian(xlim = xlims, ylim = ylims),
     if (xtype == "date") {
       ggplot2::scale_x_date(breaks = xbreaks,
-                   date_labels = xlabels,
-                   minor_breaks = xminor)
+                            date_labels = xlabels,
+                            minor_breaks = xminor)
     },
     if (xtype == "ym"){
       ggplot2::scale_x_date(breaks = seq(min(data$ym), max(data$ym), by = "1 year"),
-                   date_labels = "%Y",
-                   minor_breaks = data$ym)
+                            date_labels = "%Y",
+                            minor_breaks = data$ym)
     },
     if (xtype == "continuous"){
       ggplot2::scale_x_continuous(breaks = xbreaks,
-                         labels = xlabels,
-                         minor_breaks = xminor)
+                                  labels = xlabels,
+                                  minor_breaks = xminor)
     },
     if (ytype == "continuous"){
       ggplot2::scale_y_continuous(breaks = ybreaks,
-                         labels = ylabels,
-                         minor_breaks = yminor)
+                                  labels = ylabels,
+                                  minor_breaks = yminor)
     }
 
   )
 }
 
-#' @export
+
 bmp_point <- function(x, y, data,
                       color = NULL,
                       size = 1,
@@ -173,44 +173,44 @@ bmp_point <- function(x, y, data,
                       ...){
   list(
     ggplot2::geom_point(data = data,
-               mapping = ggplot2::aes(x = {{x}},
-                             y = {{y}},
-                             color = {{color}}),
-               alpha = alpha,
-               size = size,
-               ...)
+                        mapping = ggplot2::aes(x = {{x}},
+                                               y = {{y}},
+                                               color = {{color}}),
+                        alpha = alpha,
+                        size = size,
+                        ...)
   )
 }
 
-#' @export
+
 bmp_twohist <- function(data1, data2,
                         x, scale,
                         binwidth = NULL,
                         alpha = ifelse(grayscale, 0.8, 0.35)){
   list(
     ggplot2::geom_histogram(data = data1,
-                   mapping = ggplot2::aes(x = {{x}} / scale,
-                                 y = ..density..,
-                                 fill = "1",
-                                 color = "1"),
-                   alpha = alpha,
-                   binwidth = binwidth),
+                            mapping = ggplot2::aes(x = {{x}} / scale,
+                                                   y = ..density..,
+                                                   fill = "1",
+                                                   color = "1"),
+                            alpha = alpha,
+                            binwidth = binwidth),
     ggplot2::geom_histogram(data = data2,
-                   mapping = ggplot2::aes(x = {{x}} / scale,
-                                 y = ..density..,
-                                 fill = "2",
-                                 color = "2"),
-                   alpha = alpha,
-                   binwidth = binwidth),
+                            mapping = ggplot2::aes(x = {{x}} / scale,
+                                                   y = ..density..,
+                                                   fill = "2",
+                                                   color = "2"),
+                            alpha = alpha,
+                            binwidth = binwidth),
     ggplot2::guides(color = F)
   )
 }
 
-#' @export
+
 bmp_vline <- function(xint, color = "#bcbcbc", linetype = 5){
   list(
     ggplot2::geom_vline(xintercept = xint,
-               color = color,
-               linetype = linetype)
+                        color = color,
+                        linetype = linetype)
   )
 }

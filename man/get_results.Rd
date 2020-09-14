@@ -95,34 +95,73 @@ are of \code{var}, column 1 must be the same for all distributions
 }
 \examples{
 # Find conservative transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 0
-support_Beijing <- prep_data(Beijing_sample, "support",
-                     lowerdate = "2010-01-01", upperdate = "2012-01-01")
-pre_Beijing <- prep_data(Beijing_sample, "pmf", support = support_Beijing,
-                         lowerdate = "2010-01-01", upperdate = "2011-01-01")
-post_Beijing <- prep_data(Beijing_sample, "pmf", support = support_Beijing,
-                          lowerdate = "2011-01-01", upperdate = "2012-01-01")
+# # step 1: find support
+support_Beijing <- Beijing_sample \%>\%
+  dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2012-01-01") \%>\%
+  dplyr::select(MSRP) \%>\%
+  dplyr::distinct() \%>\%
+  dplyr::arrange(MSRP) \%>\%
+  dplyr::filter(!is.na(MSRP)) \%>\%
+  unlist()
+temp <- data.frame(MSRP = support_Beijing)
+# # step 2: prepare probability mass functions
+pre_Beijing <- Beijing_sample \%>\%
+  dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2011-01-01") \%>\%
+  dplyr::group_by(dplyr::across(c(MSRP))) \%>\%
+  dplyr::summarise(count = sum(sales)) \%>\%
+  dplyr::filter(!is.na(MSRP)) \%>\%
+  dplyr::left_join(temp, .) \%>\%
+  dplyr::select(MSRP, count) \%>\%
+  tidyr::replace_na(list(count = 0)) \%>\%
+  tibble::as_tibble()
+post_Beijing <- Beijing_sample \%>\%
+  dplyr::filter(ym >= as.Date("2011-01-01") & ym < "2012-01-01") \%>\%
+  dplyr::group_by(dplyr::across(c(MSRP))) \%>\%
+  dplyr::summarise(count = sum(sales)) \%>\%
+  dplyr::filter(!is.na(MSRP)) \%>\%
+  dplyr::left_join(temp, .) \%>\%
+  dplyr::select(MSRP, count) \%>\%
+  tidyr::replace_na(list(count = 0)) \%>\%
+  tibble::as_tibble()
+# # step 3: compute results
 tc <- get_results(pre_Beijing, post_Beijing, conservative = TRUE, bandwidth = 0)
 tc$main2d
 
 # Find transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 10000
-tc_10000 <- get_results(pre_Beijing, post_Beijing, bandwidth = 10000)
-tc_10000$main
-# Note: this result is the same as the before-and-after estimator in Daljord et al. (2020)
-
+# tc_10000 <- get_results(pre_Beijing, post_Beijing, bandwidth = 10000)# tc_10000$main
 # Find conservative differences-in-transport estimator using Tianjin as a control
-support_Tianjin <- prep_data(Tianjin_sample, "support",
-                     lowerdate = "2010-01-01", upperdate = "2012-01-01")
-pre_Tianjin <- prep_data(Tianjin_sample, "pmf", support = support_Tianjin,
-                         lowerdate = "2010-01-01", upperdate = "2011-01-01")
-post_Tianjin <- prep_data(Tianjin_sample, "pmf", support = support_Tianjin,
-                          lowerdate = "2011-01-01", upperdate = "2012-01-01")
+# # step 1: find support
+support_Tianjin <- Tianjin_sample \%>\%
+  dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2012-01-01") \%>\%
+  dplyr::select(MSRP) \%>\%
+  dplyr::distinct() \%>\%
+  dplyr::arrange(MSRP) \%>\%
+  dplyr::filter(!is.na(MSRP)) \%>\%
+  unlist()
+temp <- data.frame(MSRP = support_Tianjin)
+# # step 2: prepare probability mass functions
+pre_Tianjin <- Tianjin_sample \%>\%
+  dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2011-01-01") \%>\%
+  dplyr::group_by(dplyr::across(c(MSRP))) \%>\%
+  dplyr::summarise(count = sum(sales)) \%>\%
+  dplyr::filter(!is.na(MSRP)) \%>\%
+  dplyr::left_join(temp, .) \%>\%
+  dplyr::select(MSRP, count) \%>\%
+  tidyr::replace_na(list(count = 0)) \%>\%
+  tibble::as_tibble()
+post_Tianjin <- Tianjin_sample \%>\%
+  dplyr::filter(ym >= as.Date("2011-01-01") & ym < "2012-01-01") \%>\%
+  dplyr::group_by(dplyr::across(c(MSRP))) \%>\%
+  dplyr::summarise(count = sum(sales)) \%>\%
+  dplyr::filter(!is.na(MSRP)) \%>\%
+  dplyr::left_join(temp, .) \%>\%
+  dplyr::select(MSRP, count) \%>\%
+  tidyr::replace_na(list(count = 0)) \%>\%
+  tibble::as_tibble()
+# # step 3: compute results
 dit <- get_results(pre_Beijing, post_Beijing, pre_Tianjin, post_Tianjin,
                    conservative = TRUE, bandwidth = seq(0, 40000, 1000),
                    save_dit = TRUE)
 dit$optimal_bandwidth
 dit$dit
-# Note: the message that is printed contains the differences-in-transports
-# estimator that is in Daljord et al. (2020).
-
-
 }

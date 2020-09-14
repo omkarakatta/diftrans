@@ -1,8 +1,8 @@
 ### Header ---------------------------
 ###
-### Title: cleaning.R
+### Title: prepare_data.R
 ###
-### Description: Functions for cleaning data
+### Description: Functions for preparing data
 ###
 ### Author: Omkar A. Katta
 ###
@@ -99,7 +99,6 @@ filter_date <- function(data, datevar, lowerdate, upperdate, format = "%Y-%m-%d"
 #' @importFrom rlang enquo
 #' @importFrom rlang enexpr
 #' @importFrom stats complete.cases
-#' @export
 prep_data <- function(data, prep,
                       var = MSRP,
                       support = NULL,
@@ -117,7 +116,7 @@ prep_data <- function(data, prep,
   # get support
   if (prep %in% c("support", "pmf", "dist")){
     if ((all(is.na(support)))){ # if there is no support provided
-      datevar = enquo(datevar)
+      datevar = rlang::enquo(datevar)
       support <- data %>%
         filter_date(datevar = !!datevar,
                     lowerdate = lowerdate,
@@ -144,7 +143,7 @@ prep_data <- function(data, prep,
 
   # get counts
   if (prep %in% c("pmf", "dist")){
-    datevar <- enquo(datevar)
+    datevar <- rlang::enquo(datevar)
     counts <- data %>%
       filter_date(datevar = !!datevar,
                   lowerdate = lowerdate,
@@ -161,8 +160,8 @@ prep_data <- function(data, prep,
       dplyr::rename("{{var}}" := temp)
     pmf <- dplyr::left_join(support, counts) %>%
       dplyr::select({{var}}, count) %>%
-      replace_na(list(count = 0)) %>%
-      as_tibble()
+      tidyr::replace_na(list(count = 0)) %>%
+      tibble::as_tibble()
     if (prep == "pmf"){
       return(pmf)
     }
@@ -170,7 +169,7 @@ prep_data <- function(data, prep,
 
   if (prep %in% c("dist")){
     pmf %>%
-      uncount(count)
+      tidyr::uncount(count)
   }
 
 }
