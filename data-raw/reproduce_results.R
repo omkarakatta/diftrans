@@ -10,6 +10,9 @@
 ###       as needed. In particular, the `version` variable, the file paths,
 ###       and the plotting parameters can be changed to fit the user's preferences.
 ###
+###       Due to privacy restrictions, the original data set cannot be distributed.
+###       Hence, an anonymized version of the data set will be provided.
+###       The results of this script will therefore differ slightly from the paper's results.
 ###
 
 ### Preliminaries ---------------------------
@@ -106,30 +109,30 @@ linetype2 <- "dotted" # tertiary line type
 ### Prepare Data ---------------------------
 
 if (version == "original"){
-  Beijing <- Beijing_cleaned
-  Tianjin <- Tianjin_cleaned
-  Shijiazhuang <- Shijiazhuang_cleaned
+  Beijing <- Beijing_sample
+  Tianjin <- Tianjin_sample
+  Shijiazhuang <- Shijiazhuang_sample
   seedplus <- 0 # i.e. do not modify seed
   message(paste("Version: ", version, sep = ""))
 } else if (version == "v1"){
   # filter out Dec 2010
-  Beijing <- Beijing_cleaned %>%
+  Beijing <- Beijing_sample %>%
     filter(!(year == 2010 & month == 12))
-  Tianjin <- Tianjin_cleaned %>%
+  Tianjin <- Tianjin_sample %>%
     filter(!(year == 2010 & month == 12))
-  Shijiazhuang <- Shijiazhuang_cleaned %>%
+  Shijiazhuang <- Shijiazhuang_sample %>%
     filter(!(year == 2010 & month == 12))
   seedplus <- 1
   message(paste("Version: ", version, sep = ""))
 } else if (version == "v2"){
   # filter out Dec 2010, Jan 2011, and Feb 2011
-  Beijing <- Beijing_cleaned %>%
+  Beijing <- Beijing_sample %>%
     filter(!(year == 2010 & month == 12)) %>%
     filter(!(year == 2011 & month %in% c(1, 2)))
-  Tianjin <- Tianjin_cleaned %>%
+  Tianjin <- Tianjin_sample %>%
     filter(!(year == 2010 & month == 12)) %>%
     filter(!(year == 2011 & month %in% c(1, 2)))
-  Shijiazhuang <- Shijiazhuang_cleaned %>%
+  Shijiazhuang <- Shijiazhuang_sample %>%
     filter(!(year == 2010 & month == 12)) %>%
     filter(!(year == 2011 & month %in% c(1, 2)))
   seedplus <- 2
