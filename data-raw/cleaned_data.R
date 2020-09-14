@@ -19,7 +19,6 @@
 
 library(magrittr)
 
-# NEED TO CHANGE
 rawdata_path <- "/Users/omkar_katta/BFI/3_BMP_GP/data-raw/GuisChineseCities (1).csv"
 
 version <- "original"
