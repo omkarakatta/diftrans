@@ -6,18 +6,9 @@
 ###
 ### Author: Omkar A. Katta
 ###
-### Notes: The raw data set is too large to provide in this package.
-###   Instead, the cleaned data sets are provided as well as the default workspaces.
-###   If there is access to the raw data set, change the `rawdata_path` to where
-###   the raw data set is stored in order to run this script.
-###
-###   Options for `version` are:
-###     - `"original"`, i.e., use the entire data set
-###     - `"v1"`, i.e., exclude December 2010
-###     - `"v2"`, i.e., exclude December 2010, January 2011, and February 2011
-###
-###   To save data, note that the name of the object should correspond to the version.
-###   This must be user-specified.
+### Notes: The original data set cannot be shared, so this document is mainly
+###   for observation purposes. This script documents the procedure used to clean
+###   the original data sets.
 ###
 ###   Note that the defaults were not saved to the package because they only
 ###   clutter the workspace.
@@ -65,9 +56,9 @@ Beijing_cleaned <- Beijing
 Tianjin_cleaned <- Tianjin
 Shijiazhuang_cleaned <- Shijiazhuang
 
-save(Beijing_cleaned, file = here::here("data", "Beijing_cleaned.RData"), compress = "xz")
-save(Tianjin_cleaned, file = here::here("data", "Tianjin_cleaned.RData"), compress = "xz")
-save(Shijiazhuang_cleaned, file = here::here("data", "Shijiazhuang_cleaned.RData"), compress = "xz")
+save(Beijing_cleaned, file = here::here(".hidden", "Beijing_cleaned.RData"), compress = "xz")
+save(Tianjin_cleaned, file = here::here(".hidden", "Tianjin_cleaned.RData"), compress = "xz")
+save(Shijiazhuang_cleaned, file = here::here(".hidden", "Shijiazhuang_cleaned.RData"), compress = "xz")
 
 ### Save Defaults ---------------------------
 
