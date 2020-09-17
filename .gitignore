@@ -3,3 +3,4 @@ scrapnotes/
 .Rhistory
 .DS_Store
 .hidden/
+inst/doc

@@ -29,4 +29,7 @@ Imports:
     tibble,
     tidyr
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
