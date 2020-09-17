@@ -30,16 +30,18 @@ to compute the change between the distributions of a univariate variable
 of interest. Extending this application, the `diftrans` package allows
 users to compute the *before-and-after estimator* (Daljord et al.,
 2020), which controls for sampling uncertainty by trivializing small
-changes in the distributions. The `diftrans` package also computes the
-*differences-in-transports estimator*, which controls for unobservable
-reasons that the distributions may change by comparing the transport
-costs to those from another source of measurement.
+changes in the distributions.
+
+The `diftrans` package also computes the *differences-in-transports
+estimator*, which controls for unobservable reasons that the
+distributions may change by comparing the transport costs to those from
+another source of measurement.
 
 The only function in the `diftrans` package is `diftrans`, which is
 explained below by way of a toy example.
 
-More details about `diftrans::diftrans` can be found on their document
-files:
+The documentation file for `diftrans::diftrans` can be found by running
+the following in an R console:
 
     ?diftrans::diftrans
 
@@ -58,7 +60,7 @@ Example
 The workhorse function in the `diftrans` package is also called
 `diftrans`, which serves two purposes:
 
--   compute transport cost between two univariate distributions, and
+-   compute the transport cost between two univariate distributions, and
 -   compute the differences-in-transports estimator (see Daljord et
     al. (2020)).
 
@@ -72,18 +74,18 @@ We begin by computing the transport cost between two distributions of
 some variable `x`. These distributions should be represented as tibbles
 with two columns:
 
--   column 1 contains the full support of the distribution and
+-   column 1 contains the full support of the distribution, and
 -   column 2 (labeled “count”) contains the mass/counts associated with
     each value in the support.
 
-Suppose that the shift in the distribution is due to some treatment.
-Thus, we refer to the first and second distributions of `x` as the
-pre-distribution and post-distribution for the treated group,
+Suppose that the shift in the distribution is due to some treatment. We
+refer to the first and second distributions of some random variable `x`
+as the pre-distribution and post-distribution for the treated group,
 respectively.
 
 Below are the tibbles for the pre- and post-distributions as well as the
 corresponding plots. Both tibbles contain the full support of our
-variable of interest, that is, their `support` column is the same.
+variable of interest, i.e., their `support` column is the same.
 
 *Pre-Distribution for Treated Group*
 
@@ -120,10 +122,10 @@ units of the support to form the post-distribution. That is, the
 treatment resulted in all the mass to change. For instance, the mass
 that was given given to 1 in the pre-distribution is now given to 6.
 
-### Compute Transport Cost
-
 In this toy example, we should expect that the transport cost is 100%
 because all the mass was transported due to the treatment.
+
+### Compute Transport Cost
 
 We can compute the transport cost as follows:
 
