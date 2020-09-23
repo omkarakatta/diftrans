@@ -54,8 +54,9 @@ Install the `diftrans` from
     # install.packages("devtools")
     devtools::install_github("omkarakatta/diftrans")
 
-To install the package with the vignette installed, run the following
-instead:
+To install the package with the vignette installed, set the
+`build_vignettes` argument to `TRUE`. Note that the installation will
+take more time this way.
 
     # install.packages("devtools")
     devtools::install_github("omkarakatta/diftrans", build_vignettes = TRUE)

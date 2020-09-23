@@ -57,11 +57,14 @@ Install the `diftrans` from [GitHub](https://github.com/omkarakatta/diftrans) wi
 devtools::install_github("omkarakatta/diftrans")
 ```
 
-To install the package with the vignette installed, run the following instead:
+To install the package with the vignette installed, set the `build_vignettes` 
+argument to `TRUE`.
+Note that the installation will take more time this way.
 ```r
 # install.packages("devtools")
 devtools::install_github("omkarakatta/diftrans", build_vignettes = TRUE)
 ```
+
 ## Example
 
 The workhorse function in the `diftrans` package is also called `diftrans`, which serves two purposes:
