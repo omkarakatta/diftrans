@@ -61,6 +61,13 @@ take more time this way.
     # install.packages("devtools")
     devtools::install_github("omkarakatta/diftrans", build_vignettes = TRUE)
 
+Attribution
+-----------
+
+To cite the `diftrans` package, use the BibTeX entry provided by:
+
+    citation("diftrans")
+
 Example
 -------
 

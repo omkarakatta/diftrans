@@ -65,6 +65,14 @@ Note that the installation will take more time this way.
 devtools::install_github("omkarakatta/diftrans", build_vignettes = TRUE)
 ```
 
+## Attribution
+
+To cite the `diftrans` package, use the BibTeX entry provided by:
+
+``` r
+citation("diftrans")
+```
+
 ## Example
 
 The workhorse function in the `diftrans` package is also called `diftrans`, which serves two purposes:
