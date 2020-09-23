@@ -1,6 +1,7 @@
 Package: diftrans
 Title: Compute the Differences-in-Transports Estimator
 Version: 0.0.0.9000
+Date: 2020-09-23
 Authors@R: c(
     person(given = "Guillaume",
            family = "Pouliot",
@@ -8,11 +9,12 @@ Authors@R: c(
     person(given = "Oystein",
            family = "Daljord",
            role = c("aut")),
-    person(given = "Omkar",
+    person(given = "Omkar A.",
            family = "Katta",
            role = c("aut", "cre"),
            email = "omkarakatta@gmail.com")
     )
+URL: https://github.com/omkarakatta/diftrans
 Description: Given the probability mass functions of two distributions 
   (say, pre-treatment and post-treatment distributions), the diftrans package 
   computes the displacement between them using optimal transport theory. 
