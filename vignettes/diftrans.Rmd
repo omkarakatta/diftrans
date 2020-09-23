@@ -72,7 +72,7 @@ The workhorse function in the `diftrans` package is also called `diftrans`, whic
 library(dplyr)
 library(magrittr)
 library(knitr)
-devtools::load_all()
+library(diftrans)
 
 mykable <- function(dt){
   kable(dt,
