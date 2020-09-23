@@ -550,22 +550,22 @@ if (show_fig | show_fig8){
   year_count <- BTS %>%
     group_by(city, year) %>%
     count()
-  n_2012_Beijing <- year_count[year_count$city == "Beijing" & year_count$year == 2012, "n"] %>% as.numeric
   n_2011_Beijing <- year_count[year_count$city == "Beijing" & year_count$year == 2011, "n"] %>% as.numeric
-  n_2012_Tianjin <- year_count[year_count$city == "Tianjin" & year_count$year == 2012, "n"] %>% as.numeric
+  n_2010_Beijing <- year_count[year_count$city == "Beijing" & year_count$year == 2010, "n"] %>% as.numeric
   n_2011_Tianjin <- year_count[year_count$city == "Tianjin" & year_count$year == 2011, "n"] %>% as.numeric
+  n_2010_Tianjin <- year_count[year_count$city == "Tianjin" & year_count$year == 2010, "n"] %>% as.numeric
 
   supportB <- prep_data(BTS %>% filter(city == "Beijing"),
                         prep = "support")
   supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
                         prep = "support")
 
-  B2012 <- prep_data(Beijing, prep = "pmf",
+  B2011 <- prep_data(Beijing, prep = "pmf",
                      support = supportB,
-                     lowerdate = "2012-01-01", upperdate = "2013-01-01")
-  T2012 <- prep_data(Tianjin, prep = "pmf",
+                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  T2011 <- prep_data(Tianjin, prep = "pmf",
                      support = supportT,
-                     lowerdate = "2012-01-01", upperdate = "2013-01-01")
+                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
 
 
   bandwidth_seq = seq(0, 15000, 500)
@@ -574,21 +574,21 @@ if (show_fig | show_fig8){
   placeboT_prop <- matrix(NA_real_, numsim, length(bandwidth_seq))
 
   for (i in seq_len(numsim)){
-    B2012_n2012 <- data.frame(MSRP = B2012$MSRP,
-                              count = rmultinom(1, n_2012_Beijing, B2012$count))
-    B2012_n2011 <- data.frame(MSRP = B2012$MSRP,
-                              count = rmultinom(1, n_2011_Beijing, B2012$count))
-    T2012_n2012 <- data.frame(MSRP = T2012$MSRP,
-                              count = rmultinom(1, n_2012_Tianjin, T2012$count))
-    T2012_n2011 <- data.frame(MSRP = T2012$MSRP,
-                              count = rmultinom(1, n_2011_Tianjin, T2012$count))
+    B2011_n2011 <- data.frame(MSRP = B2011$MSRP,
+                              count = rmultinom(1, n_2011_Beijing, B2011$count))
+    B2011_n2010 <- data.frame(MSRP = B2011$MSRP,
+                              count = rmultinom(1, n_2010_Beijing, B2011$count))
+    T2011_n2011 <- data.frame(MSRP = T2011$MSRP,
+                              count = rmultinom(1, n_2011_Tianjin, T2011$count))
+    T2011_n2010 <- data.frame(MSRP = T2011$MSRP,
+                              count = rmultinom(1, n_2010_Tianjin, T2011$count))
     cat("\n")
     print(paste("Simulation Number ", i, " out of ", numsim, sep = ""))
 
-    placeboB <- diftrans(B2012_n2011, B2012_n2012, bandwidth = bandwidth_seq,
+    placeboB <- diftrans(B2011_n2010, B2011_n2011, bandwidth = bandwidth_seq,
                             conservative = T,
                             quietly = T)
-    placeboT <- diftrans(T2012_n2011, T2012_n2012, bandwidth = bandwidth_seq,
+    placeboT <- diftrans(T2011_n2010, T2011_n2011, bandwidth = bandwidth_seq,
                             quietly = T)
 
     placeboB_prop[i, ] <- placeboB$main2d
