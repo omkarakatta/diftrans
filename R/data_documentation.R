@@ -26,7 +26,7 @@
 #'   \item{policy_dummy}{1 if cars were sold after lottery in 2011, same as postBeijing}
 #' }
 #'
-#' @source Daljord et al. (2020), The Black Market for Beijing License Plates
+#' @source This data set mimics the properties of the data set used in Daljord et al. (2020).
 #'
 "Beijing_sample"
 
@@ -58,7 +58,7 @@
 #'   \item{policy_dummy}{1 if cars were sold after lottery/auction in 2014, same as postTianjin}
 #' }
 #'
-#' @source Daljord et al. (2020), The Black Market for Tianjin License Plates
+#' @source This data set mimics the properties of the data set used in Daljord et al. (2020).
 #'
 "Tianjin_sample"
 
@@ -90,7 +90,7 @@
 #'   \item{policy_dummy}{0 because there is no policy enacted in Shijiazhuang between 2010 and 2015}
 #' }
 #'
-#' @source Daljord et al. (2020), The Black Market for Tianjin License Plates
+#' @source This data set mimics the properties of the data set used in Daljord et al. (2020).
 #'
 "Shijiazhuang_sample"
 

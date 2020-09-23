@@ -25,7 +25,7 @@ a tibble with 217155 rows and 16 variables
 }
 }
 \source{
-Daljord et al. (2020), The Black Market for Beijing License Plates
+This data set mimics the properties of the data set used in Daljord et al. (2020).
 }
 \usage{
 Beijing_sample
