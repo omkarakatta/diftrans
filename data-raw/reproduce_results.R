@@ -685,6 +685,7 @@ if (show_fig | show_fig9){
   fig9_plot <- ggplot(data = bandwidth_selection,
                        aes(x = bandwidth)) +
     geom_line(aes(y = diffprop*100, color = type, linetype = type)) +
+    bmp_vline(xint = 2000) +
     bmp_plot(data = bandwidth_selection,
              color = type,
              legendlabels = c("Difference", "Beijing placebo", "Tianjin placebo"),
