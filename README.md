@@ -14,6 +14,7 @@ Table of Contents
 
 -   [Introduction](#introduction)
 -   [Installation](#installation)
+-   [Attribution](#attribution)
 -   [Example](#example)
 
 Introduction
