@@ -725,7 +725,7 @@ if (show_fig | show_fig8){
     mutate(valid = closetozero*closetozero_lag1*closetozero_lag2)
 
 
-  # d_a = first time that the difference in the mean cost at a particular bandwidth and the previous bandwidth is less than 1e-3 three times for consecutive bandwidth choices
+  # d_a = first time that the difference in the mean cost at a particular bandwidth and the two previous bandwidths is less than 1e-2
   d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
                              "bandwidth"]
   meancost_d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
@@ -843,7 +843,7 @@ if (show_fig | show_fig8){
     mutate(valid = closetozero*closetozero_lag1*closetozero_lag2)
 
 
-  # d_a = first time that the difference in the mean cost at a particular bandwidth and the previous bandwidth is less than 1e-3 three times for consecutive bandwidth choices
+  # d_a = first time that the difference in the mean cost at a particular bandwidth and the two previous bandwidths is less than 1e-2
   d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
                              "bandwidth"]
   meancost_d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
@@ -961,7 +961,7 @@ if (show_fig | show_fig8){
     mutate(valid = closetozero*closetozero_lag1*closetozero_lag2)
 
 
-  # d_a = first time that the difference in the mean cost at a particular bandwidth and the previous bandwidth is less than 1e-3 three times for consecutive bandwidth choices
+  # d_a = first time that the difference in the mean cost at a particular bandwidth and the two previous bandwidths is less than 1e-2
   d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
                              "bandwidth"]
   meancost_d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
@@ -1075,7 +1075,7 @@ if (show_fig | show_fig8){
     mutate(valid = closetozero*closetozero_lag1*closetozero_lag2)
 
 
-  # d_a = first time that the difference in the mean cost at a particular bandwidth and the previous bandwidth is less than 1e-3 three times for consecutive bandwidth choices
+  # d_a = first time that the difference in the mean cost at a particular bandwidth and the two previous bandwidths is less than 1e-2
   d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
                              "bandwidth"]
   meancost_d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
