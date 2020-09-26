@@ -630,14 +630,14 @@ if (show_fig | show_fig8){
     # bmp_vline(xint = d_a / 2) +
     # bmp_vline(xint = d_a) +
     geom_smooth(data = bandwidth_selection,
-                mapping = aes(x = bandwidth, y = diffprop),
+                mapping = aes(x = bandwidth, y = diffprop*100),
                 method = loess,
                 se = F,
                 color = "black",
                 size = 0.5) +
     bmp_plot(data = bandwidth_selection,
              xlab = "d",
-             ylab = "Mean Cost",
+             ylab = "Transport Cost (%)",
              xtype = "continuous",
              xbreaks = seq(0, 15000, 1000),
              sizefont = (fontsize - 8),
