@@ -765,7 +765,7 @@ if (show_fig | show_fig8){
     #           linetype = linetype1)
 
     if (save_fig | save_fig8){
-      ggsave(paste("fig", fignum, suffix, suffix, "OK.jpg", sep = ""), path = img_path,
+      ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
              width = default_width+2, height = default_height, units = "in")
       message(paste("fig", fignum, suffix, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
     }
