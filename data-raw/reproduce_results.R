@@ -656,6 +656,125 @@ if (show_fig | show_fig8){
   message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
 
+### Figure 8 Exploration ---------------------------
+fignum <- "8exp"
+if (show_fig | show_fig8){
+  set.seed(16 + seedplus)
+  BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
+  year_count <- BTS %>%
+    group_by(city, year) %>%
+    count()
+  n_2011_Beijing <- year_count[year_count$city == "Beijing" & year_count$year == 2011, "n"] %>% as.numeric
+  n_2010_Beijing <- year_count[year_count$city == "Beijing" & year_count$year == 2010, "n"] %>% as.numeric
+  n_2011_Tianjin <- year_count[year_count$city == "Tianjin" & year_count$year == 2011, "n"] %>% as.numeric
+  n_2010_Tianjin <- year_count[year_count$city == "Tianjin" & year_count$year == 2010, "n"] %>% as.numeric
+
+  supportB <- prep_data(BTS %>% filter(city == "Beijing"),
+                        prep = "support")
+  supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
+                        prep = "support")
+
+  B2010 <- prep_data(Beijing, prep = "pmf",
+                     support = supportB,
+                     lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  T2010 <- prep_data(Tianjin, prep = "pmf",
+                     support = supportT,
+                     lowerdate = "2010-01-01", upperdate = "2011-01-01")
+
+  B2011 <- prep_data(Beijing, prep = "pmf",
+                     support = supportB,
+                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  T2011 <- prep_data(Tianjin, prep = "pmf",
+                     support = supportT,
+                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
+
+
+  bandwidth_seq = seq(0, 15000, 500)
+  numsim <- 100
+  placeboB_prop <- matrix(NA_real_, numsim, length(bandwidth_seq))
+  placeboT_prop <- matrix(NA_real_, numsim, length(bandwidth_seq))
+
+  # lambda_seq = c(1, 0.75, 0.5, 0.25, 0)
+
+  # for (lambda in lambda_seq){
+    for (i in seq_len(numsim)){
+      B2011_n2011 <- data.frame(MSRP = B2011$MSRP,
+                                count = rmultinom(1, n_2011_Beijing, B2011$count))
+      B2010_n2010 <- data.frame(MSRP = B2011$MSRP,
+                                count = rmultinom(1, n_2010_Beijing, B2010$count))
+      T2011_n2011 <- data.frame(MSRP = T2011$MSRP,
+                                count = rmultinom(1, n_2011_Tianjin, T2011$count))
+      T2010_n2010 <- data.frame(MSRP = T2011$MSRP,
+                                count = rmultinom(1, n_2010_Tianjin, T2010$count))
+      cat("\n")
+      print(paste("Simulation Number ", i, " out of ", numsim, sep = ""))
+
+      placeboB <- diftrans(B2010_n2010, B2011_n2011, bandwidth = bandwidth_seq,
+                           # conservative = T,
+                           quietly = T)
+      placeboT <- diftrans(T2010_n2010, T2011_n2011, bandwidth = bandwidth_seq,
+                           quietly = T)
+
+      placeboB_prop[i, ] <- placeboB$main
+      placeboT_prop[i, ] <- placeboT$main
+    }
+
+    diffprop <- placeboB_prop - placeboT_prop
+
+    meandiff <- matrix(rep(apply(diffprop, 2, mean), numsim), nrow = numsim, byrow = T) # TRY THIS
+
+    diffprop <- abs(diffprop - meandiff)
+
+    bandwidth_selection <- data.frame(bandwidth = bandwidth_seq,
+                                      diffprop = apply(diffprop, 2, mean)) %>%
+      mutate(diffprop_lag = lag(diffprop, 1)) %>%
+      mutate(diffprop_diff = abs(diffprop - diffprop_lag)) %>%
+      mutate(closetozero = diffprop_diff < 1e-3) %>%
+      mutate(closetozero_lag1 = lag(closetozero)) %>%
+      mutate(closetozero_lag2 = lag(closetozero, 2)) %>%
+      mutate(valid = closetozero*closetozero_lag1*closetozero_lag2)
+
+
+    # d_a = first time that the difference in the mean cost at a particular bandwidth and the two previous bandwidths is less than 1e-2
+    d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
+                               "bandwidth"]
+    meancost_d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
+                                        "diffprop"]
+
+    message(paste("Figure 8 analysis: d_a = ", d_a, " with cost = ", meancost_d_a, sep = ""))
+
+    fig8exp_plot <- ggplot() +
+      # bmp_vline(xint = d_a / 2) +
+      # bmp_vline(xint = d_a) +
+      geom_smooth(data = bandwidth_selection,
+                  mapping = aes(x = bandwidth, y = diffprop*100),
+                  method = loess,
+                  se = F,
+                  color = "black",
+                  size = 0.5) +
+      bmp_plot(data = bandwidth_selection,
+               xlab = "d",
+               ylab = "Transport Cost (%)",
+               xtype = "continuous",
+               xbreaks = seq(0, 15000, 1000),
+               sizefont = (fontsize - 8),
+               axissizefont = (fontsizeaxis - 5)) # +
+    # geom_line(data = bandwidth_selection,
+    #           mapping = aes(x = bandwidth, y = diffprop),
+    #           color = get_color_palette(2, grayscale)[[2]],
+    #           linetype = linetype1)
+
+    if (save_fig | save_fig8){
+      ggsave(paste("fig", fignum, suffix, suffix, "OK.jpg", sep = ""), path = img_path,
+             width = default_width+2, height = default_height, units = "in")
+      message(paste("fig", fignum, suffix, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+    }
+  # }
+
+  message(paste("Figure ", fignum, " is complete.", sep = ""))
+}
+
+
 ### Figure 9 ---------------------------
 fignum <- 9
 if (show_fig | show_fig9){
