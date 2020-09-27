@@ -784,27 +784,27 @@ if (show_fig | show_fig8){
     count()
   n_2011_Beijing <- year_count[year_count$city == "Beijing" & year_count$year == 2011, "n"] %>% as.numeric
   n_2010_Beijing <- year_count[year_count$city == "Beijing" & year_count$year == 2010, "n"] %>% as.numeric
-  # n_2011_Tianjin <- year_count[year_count$city == "Tianjin" & year_count$year == 2011, "n"] %>% as.numeric
-  # n_2010_Tianjin <- year_count[year_count$city == "Tianjin" & year_count$year == 2010, "n"] %>% as.numeric
+  n_2011_Tianjin <- year_count[year_count$city == "Tianjin" & year_count$year == 2011, "n"] %>% as.numeric
+  n_2010_Tianjin <- year_count[year_count$city == "Tianjin" & year_count$year == 2010, "n"] %>% as.numeric
 
   supportB <- prep_data(BTS %>% filter(city == "Beijing"),
                         prep = "support")
-  # supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
-  #                       prep = "support")
+  supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
+                        prep = "support")
 
   B2010 <- prep_data(Beijing, prep = "pmf",
                      support = supportB,
                      lowerdate = "2010-01-01", upperdate = "2011-01-01")
-  # T2010 <- prep_data(Tianjin, prep = "pmf",
-  #                    support = supportT,
-  #                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  T2010 <- prep_data(Tianjin, prep = "pmf",
+                     support = supportT,
+                     lowerdate = "2010-01-01", upperdate = "2011-01-01")
 
   B2011 <- prep_data(Beijing, prep = "pmf",
                      support = supportB,
                      lowerdate = "2011-01-01", upperdate = "2012-01-01")
-  # T2011 <- prep_data(Tianjin, prep = "pmf",
-  #                    support = supportT,
-  #                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  T2011 <- prep_data(Tianjin, prep = "pmf",
+                     support = supportT,
+                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
 
 
   bandwidth_seq = seq(0, 15000, 500)
@@ -813,6 +813,8 @@ if (show_fig | show_fig8){
   placeboT_prop <- matrix(NA_real_, numsim, length(bandwidth_seq))
 
   lambda_seq = c(1, 0.75, 0.5, 0.25, 0)
+  lambda_data_final <- data.frame(bandwidth = bandwidth_seq)
+  lambda_data_final2 <- data.frame(bandwidth = bandwidth_seq)
 
   for (lambda in lambda_seq){
     print(lambda)
@@ -821,28 +823,31 @@ if (show_fig | show_fig8){
                                 count = rmultinom(1, n_2011_Beijing, lambda*B2010$count+(1-lambda)*B2011$count))
       B2010_n2010 <- data.frame(MSRP = B2011$MSRP,
                                 count = rmultinom(1, n_2010_Beijing, B2010$count))
-      # T2011_n2011 <- data.frame(MSRP = T2011$MSRP,
-      #                           count = rmultinom(1, n_2011_Tianjin, T2011$count))
-      # T2010_n2010 <- data.frame(MSRP = T2011$MSRP,
-      #                           count = rmultinom(1, n_2010_Tianjin, T2010$count))
+      T2011_n2011 <- data.frame(MSRP = T2011$MSRP,
+                                count = rmultinom(1, n_2011_Tianjin, T2011$count))
+      T2010_n2010 <- data.frame(MSRP = T2011$MSRP,
+                                count = rmultinom(1, n_2010_Tianjin, T2010$count))
       cat("\n")
       print(paste("Simulation Number ", i, " out of ", numsim, sep = ""))
 
       placeboB <- diftrans(B2010_n2010, B2011_n2011, bandwidth = bandwidth_seq,
                            # conservative = T,
                            quietly = T)
-      # placeboT <- diftrans(T2010_n2010, T2011_n2011, bandwidth = bandwidth_seq,
-      #                      quietly = T)
+      placeboT <- diftrans(T2010_n2010, T2011_n2011, bandwidth = bandwidth_seq,
+                           quietly = T)
 
       placeboB_prop[i, ] <- placeboB$main
-      # placeboT_prop[i, ] <- placeboT$main
+      placeboT_prop[i, ] <- placeboT$main
     }
 
-    diffprop <- placeboB_prop # - placeboT_prop
+    diffprop <- placeboB_prop
+    diffprop2 <- placeboT_prop
 
     meandiff <- matrix(rep(apply(diffprop, 2, mean), numsim), nrow = numsim, byrow = T) # TRY THIS
+    meandiff2 <- matrix(rep(apply(diffprop2, 2, mean), numsim), nrow = numsim, byrow = T)
 
     diffprop <- abs(diffprop - meandiff)
+    diffprop2 <- abs(diffprop2 - meandiff2)
 
     bandwidth_selection <- data.frame(bandwidth = bandwidth_seq,
                                       diffprop = apply(diffprop, 2, mean)) %>%
@@ -853,6 +858,32 @@ if (show_fig | show_fig8){
       mutate(closetozero_lag2 = lag(closetozero, 2)) %>%
       mutate(valid = closetozero*closetozero_lag1*closetozero_lag2)
 
+    name <- paste("bandwidth_selection", lambda, sep = "_")
+    assign(name, bandwidth_selection, envir = .GlobalEnv)
+
+    lambda_data <- bandwidth_selection %>%
+      select(bandwidth, diffprop)
+    names(lambda_data) <- c("bandwidth", paste("diffprop", lambda, sep = "_"))
+
+    lambda_data_final <- left_join(lambda_data, lambda_data_final, by = "bandwidth")
+
+    bandwidth_selection2 <- data.frame(bandwidth = bandwidth_seq,
+                                      diffprop = apply(diffprop2, 2, mean)) %>%
+      mutate(diffprop_lag = lag(diffprop, 1)) %>%
+      mutate(diffprop_diff = abs(diffprop - diffprop_lag)) %>%
+      mutate(closetozero = diffprop_diff < 1e-3) %>%
+      mutate(closetozero_lag1 = lag(closetozero)) %>%
+      mutate(closetozero_lag2 = lag(closetozero, 2)) %>%
+      mutate(valid = closetozero*closetozero_lag1*closetozero_lag2)
+
+    name <- paste("bandwidth_selection2", lambda, sep = "_")
+    assign(name, bandwidth_selection2, envir = .GlobalEnv)
+
+    lambda_data2 <- bandwidth_selection2 %>%
+      select(bandwidth, diffprop)
+    names(lambda_data2) <- c("bandwidth", paste("diffprop", lambda, sep = "_"))
+
+    lambda_data_final2 <- left_join(lambda_data2, lambda_data_final2, by = "bandwidth")
 
     # d_a = first time that the difference in the mean cost at a particular bandwidth and the two previous bandwidths is less than 1e-2
     d_a <- bandwidth_selection[match(1, bandwidth_selection$valid),
@@ -862,33 +893,90 @@ if (show_fig | show_fig8){
 
     message(paste("Figure 8 analysis: d_a = ", d_a, " with cost = ", meancost_d_a, sep = ""))
 
-    fig8exp_plot <- ggplot() +
-      # bmp_vline(xint = d_a / 2) +
-      # bmp_vline(xint = d_a) +
-      geom_smooth(data = bandwidth_selection,
-                  mapping = aes(x = bandwidth, y = diffprop*100),
-                  method = loess,
-                  se = F,
-                  color = "black",
-                  size = 0.5) +
-      bmp_plot(data = bandwidth_selection,
-               xlab = "d",
-               ylab = "Transport Cost (%)",
-               xtype = "continuous",
-               xbreaks = seq(0, 15000, 1000),
-               sizefont = (fontsize - 8),
-               axissizefont = (fontsizeaxis - 5)) # +
-    # geom_line(data = bandwidth_selection,
-    #           mapping = aes(x = bandwidth, y = diffprop),
-    #           color = get_color_palette(2, grayscale)[[2]],
-    #           linetype = linetype1)
+  }
 
-    if (save_fig | save_fig8){
-      ggsave(paste("fig", fignum, suffix, lambda, suffix, "OK.jpg", sep = ""), path = img_path,
-             width = default_width+2, height = default_height, units = "in")
-      message(paste("fig", fignum, suffix, lambda, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-    }
-    print("lambda is over.")
+  plot_data <- lambda_data_final %>%
+    pivot_longer(cols = contains("diffprop"), names_to = "lambda", values_to = "diffprop") %>%
+    mutate(lambda = stringr::str_extract(lambda, "\\-*\\d+\\.*\\d*"))
+
+  fig8lambda_plot <- ggplot() +
+    # bmp_vline(xint = d_a / 2) +
+    # bmp_vline(xint = d_a) +
+    geom_smooth(data = plot_data,
+                mapping = aes(x = bandwidth, y = diffprop*100, color = lambda),
+                method = loess,
+                se = F,
+                # color = "black",
+                size = 0.5) +
+    # theme_bmp() +
+    # xlab("d") +
+    # ylab("Transport Cost (%)") +
+    # scale_x_continuous(breaks = seq(0, 15000, 1000))
+    bmp_plot(data = plot_data,
+             color = lambda,
+             ggtitle = "Beijing",
+             xlab = "d",
+             ylab = "Transport Cost (%)",
+             xtype = "continuous",
+             xbreaks = seq(0, 15000, 1000),
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5),
+             legend.direction = "horizontal",
+             legend.position = c(0.8, 0.93)) # +
+  # geom_line(data = bandwidth_selection,
+  #           mapping = aes(x = bandwidth, y = diffprop),
+  #           color = get_color_palette(2, grayscale)[[2]],
+  #           linetype = linetype1)
+
+
+
+  if (save_fig | save_fig8){
+    ggsave(paste("fig", fignum, suffix, "Beijing", suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width+2, height = default_height, units = "in")
+    message(paste("fig", fignum, suffix, "Beijing", suffix, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+    # print("lambda is over.")
+  }
+
+  plot_data2 <- lambda_data_final2 %>%
+    pivot_longer(cols = contains("diffprop"), names_to = "lambda", values_to = "diffprop") %>%
+    mutate(lambda = stringr::str_extract(lambda, "\\-*\\d+\\.*\\d*"))
+
+  fig8lambda_plot2 <- ggplot() +
+    # bmp_vline(xint = d_a / 2) +
+    # bmp_vline(xint = d_a) +
+    geom_smooth(data = plot_data2,
+                mapping = aes(x = bandwidth, y = diffprop*100, color = lambda),
+                method = loess,
+                se = F,
+                # color = "black",
+                size = 0.5) +
+    # theme_bmp() +
+    # xlab("d") +
+    # ylab("Transport Cost (%)") +
+    # scale_x_continuous(breaks = seq(0, 15000, 1000))
+    bmp_plot(data = plot_data2,
+             color = lambda,
+             ggtitle = "Tianjin",
+             xlab = "d",
+             ylab = "Transport Cost (%)",
+             xtype = "continuous",
+             xbreaks = seq(0, 15000, 1000),
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5),
+             legend.direction = "vertical",
+             legend.position = c(0.7, 0.7)) # +
+  # geom_line(data = bandwidth_selection,
+  #           mapping = aes(x = bandwidth, y = diffprop),
+  #           color = get_color_palette(2, grayscale)[[2]],
+  #           linetype = linetype1)
+
+
+
+  if (save_fig | save_fig8){
+    ggsave(paste("fig", fignum, suffix, "Tianjin", suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width+2, height = default_height, units = "in")
+    message(paste("fig", fignum, suffix, "Tianjin", suffix, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+    # print("lambda is over.")
   }
 
   message(paste("Figure ", fignum, "_lambda is complete.", sep = ""))
