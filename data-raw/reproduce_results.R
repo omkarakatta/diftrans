@@ -919,9 +919,9 @@ if (show_fig | show_fig8){
              axissizefont = (fontsizeaxis - 5),
              legend.direction = "horizontal",
              legend.position = c(0.8, 0.93)) # +
-  # geom_line(data = bandwidth_selection,
-  #           mapping = aes(x = bandwidth, y = diffprop),
-  #           color = get_color_palette(2, grayscale)[[2]],
+  # geom_line(data = plot_data,
+  #           mapping = aes(x = bandwidth, y = diffprop*100, color = lambda),
+  #           # color = get_color_palette(2, grayscale)[[2]],
   #           linetype = linetype1)
 
 
