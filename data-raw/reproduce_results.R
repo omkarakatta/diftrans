@@ -820,7 +820,7 @@ if (show_fig | show_fig8){
       B2014_n2014 <- data.frame(MSRP = B2015$MSRP,
                                 count = rmultinom(1, n_2014_Beijing, B2014$count))
       T2015_n2015 <- data.frame(MSRP = T2015$MSRP,
-                                count = rmultinom(1, n_2015_Tianjin, T2015$count))
+                                count = rmultinom(1, n_2015_Tianjin, lambda*T2014$count+(1-lambda)*T2015$count))
       T2014_n2014 <- data.frame(MSRP = T2015$MSRP,
                                 count = rmultinom(1, n_2014_Tianjin, T2014$count))
       cat("\n")
@@ -1031,7 +1031,7 @@ if (show_fig | show_fig8){
       B2010_n2010 <- data.frame(MSRP = B2011$MSRP,
                                 count = rmultinom(1, n_2010_Beijing, B2010$count))
       T2011_n2011 <- data.frame(MSRP = T2011$MSRP,
-                                count = rmultinom(1, n_2011_Tianjin, T2011$count))
+                                count = rmultinom(1, n_2011_Tianjin, lambda*T2010$count+(1-lambda)*T2011$count))
       T2010_n2010 <- data.frame(MSRP = T2011$MSRP,
                                 count = rmultinom(1, n_2010_Tianjin, T2010$count))
       cat("\n")
