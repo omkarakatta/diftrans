@@ -1191,7 +1191,7 @@ if (show_fig | show_fig8){
 
 
 ### Figure 8 lambda - 10 and 11 diff samplesizes (wip) ---------------------------
-fignum <- "8lambda1011_samplesizes"
+fignum <- "8lambda1011_samplesizes0.7"
 if (show_fig | show_fig8){
   set.seed(16 + seedplus)
   BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
@@ -1236,17 +1236,17 @@ if (show_fig | show_fig8){
     print(lambda)
     for (i in seq_len(numsim)){
       B2011_n2011 <- data.frame(MSRP = B2011$MSRP,
-                                count = rmultinom(1, n_2011_Beijing, lambda*B2010$count+(1-lambda)*B2011$count))
+                                count = rmultinom(1, 0.7*n_2011_Beijing, lambda*B2010$count+(1-lambda)*B2011$count))
       B2010_n2010 <- data.frame(MSRP = B2011$MSRP,
-                                count = rmultinom(1, n_2010_Beijing, B2010$count))
+                                count = rmultinom(1, 0.7*n_2010_Beijing, B2010$count))
       # T2011_n2011 <- data.frame(MSRP = T2011$MSRP,
       #                           count = rmultinom(1, n_2011_Tianjin, T2011$count))
       # T2010_n2010 <- data.frame(MSRP = T2011$MSRP,
       #                           count = rmultinom(1, n_2010_Tianjin, T2010$count))
       T2011_n2011 <- data.frame(MSRP = T2011$MSRP,
-                                count = rmultinom(1, n_2011_Beijing, T2011$count)) # use Beijing sample sizes
+                                count = rmultinom(1, 0.7*n_2011_Beijing, T2011$count)) # use Beijing sample sizes
       T2010_n2010 <- data.frame(MSRP = T2011$MSRP,
-                                count = rmultinom(1, n_2010_Beijing, T2010$count)) # use Beijing sample sizes
+                                count = rmultinom(1, 0.7*n_2010_Beijing, T2010$count)) # use Beijing sample sizes
       cat("\n")
       print(paste("Simulation Number ", i, " out of ", numsim, sep = ""))
 
