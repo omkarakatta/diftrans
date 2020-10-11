@@ -870,8 +870,8 @@ if (show_fig | show_fig6){
 
 ### FIG 6 VARIANT
 
-### Figure 6 - B1011 VARIANT1 (Oct 5) ---------------------------
-fignum <- "6_B1011"
+### Figure 6 - B1011 VARIANT1 - Reproduce Table 4 (Oct 5) ---------------------------
+fignum <- "6_B1011_TABLE_4"
 if (show_fig | show_fig6){
   set.seed(11 + seedplus)
   support <- prep_data(data = Beijing, prep = "support")
@@ -883,62 +883,83 @@ if (show_fig | show_fig6){
                     support = support,
                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
 
-  synth_pre1 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-  synth_pre2 <- data.frame(MSRP = post$MSRP,
-                           count = rmultinom(1, sum(post$count), post$count))
 
-  bandwidth_seq = seq(0, 100000, 1000)
+  bandwidth_seq = c(8000, 9000, 10000, 20000, 30000, 50000, 70000, 90000)
+  numsims <- 200
+  results <- matrix(NA_real_, nrow = numsims, ncol = length(bandwidth_seq))
+  colnames(results) <- bandwidth_seq
 
   real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
-  placebo <- diftrans(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
 
-  bandwidth_selection <- left_join(real, placebo, by = "bandwidth", suffix = c("_real", "_placebo")) %>%
-    mutate(ratio = main_real / main_placebo) %>%
-    mutate(order2 = ratio > 100)
+  for (i in seq_len(numsims)) {
+    synth_pre1 <- data.frame(MSRP = pre$MSRP,
+                            count = rmultinom(1, sum(pre$count), pre$count))
+    synth_pre2 <- data.frame(MSRP = post$MSRP,
+                            count = rmultinom(1, sum(post$count), post$count))
+    placebo <- diftrans(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
+    results[i, ] <- placebo$main
+  }
+  
+  real_estimate <- real$main
+  names(real_estimate) <- real$bandwidth
+  mean_placebo <- apply(results, 2, mean)
+  sd_placebo <- apply(results, 2, sd)
+  placebo_centered <- sweep(results, 2, mean_placebo)
+  placebo_real_centered <- sweep(results, 2, real_estimate)
+  sd_placebo_centered <- apply(placebo_centered, 2, sd)
+  sd_placebo_real_centered <- apply(placebo_real_centered, 2, sd)
+  quantile_placebo <- apply(results, 2, quantile, probs = c(0.01, 0.05, 0.1, 0.9, 0.95, 0.99))
 
-  d1000 <- bandwidth_selection %>%
-    filter(bandwidth == 10000) %>%
-    .$main_real
 
-  message(paste("Figure 6 analysis: the tranport cost at d = 10000 is ", d1000, sep = ""))
+  # bandwidth_selection <- left_join(real, placebo, by = "bandwidth", suffix = c("_real", "_placebo")) %>%
+  #   mutate(ratio = main_real / main_placebo) %>%
+  #   mutate(order2 = ratio > 100)
 
-  d_table <- bandwidth_selection %>%
-    filter(bandwidth %in% c(8000, 9000, 10000, 20000, 30000, 50000, 70000, 90000)) %>%
-    mutate(s_hat = round(main_real * 100, 3),
-           s_hat_placebo = round(main_placebo * 100, 3)) %>%
-    select(bandwidth, s_hat, s_hat_placebo) %>%
-    pivot_longer(cols = c(s_hat, s_hat_placebo), names_to = "type", values_to = "cost") %>%
-    pivot_wider(names_from = bandwidth, values_from = cost)
+  # d1000 <- bandwidth_selection %>%
+  #   filter(bandwidth == 10000) %>%
+  #   .$main_real
+
+  # message(paste("Figure 6 analysis: the tranport cost at d = 10000 is ", d1000, sep = ""))
+
+  # d_table <- bandwidth_selection %>%
+  #   filter(bandwidth %in% bandwidth_seq) %>%
+  #   mutate(s_hat = round(main_real * 100, 3),
+  #          s_hat_placebo = round(main_placebo * 100, 3)) %>%
+  #   select(bandwidth, s_hat, s_hat_placebo) %>%
+  #   pivot_longer(cols = c(s_hat, s_hat_placebo), names_to = "type", values_to = "cost") %>%
+  #   pivot_wider(names_from = bandwidth, values_from = cost)
+
+  d_table <- rbind(real_estimate, mean_placebo, sd_placebo, quantile_placebo) 
+
   knitr::kable(d_table, format = "latex", booktabs = T)
 
-  fig6_plot <- ggplot(data = bandwidth_selection, aes(x = bandwidth)) +
-    geom_smooth(aes(y = 100*main_real, color = "0", linetype = "0"),
-                method = loess,
-                se = F,
-                size = 0.5) +
-    geom_line(aes(y = 100*main_real, color = "1", linetype = "1")) +
-    geom_line(aes(y = 100*main_placebo, color = "2", linetype = "2")) +
-    scale_color_manual(values = get_color_palette(3, grayscale),
-                       labels = c("smoothed", "real", "placebo"),
-                       name = "") +
-    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                          labels = c("smoothed", "real", "placebo"),
-                          name = "") +
-    xlab("d") +
-    ylab("Transport Cost (%)") +
-    theme_bmp(sizefont = (fontsize - 8),
-              axissizefont = (fontsizeaxis - 5)) +
-    scale_y_continuous(breaks = seq(0, 100, 10)) +
-    scale_x_continuous(breaks = seq(0, 100000, 10000))
+  # fig6_plot <- ggplot(data = bandwidth_selection, aes(x = bandwidth)) +
+  #   geom_smooth(aes(y = 100*main_real, color = "0", linetype = "0"),
+  #               method = loess,
+  #               se = F,
+  #               size = 0.5) +
+  #   geom_line(aes(y = 100*main_real, color = "1", linetype = "1")) +
+  #   geom_line(aes(y = 100*main_placebo, color = "2", linetype = "2")) +
+  #   scale_color_manual(values = get_color_palette(3, grayscale),
+  #                      labels = c("smoothed", "real", "placebo"),
+  #                      name = "") +
+  #   scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
+  #                         labels = c("smoothed", "real", "placebo"),
+  #                         name = "") +
+  #   xlab("d") +
+  #   ylab("Transport Cost (%)") +
+  #   theme_bmp(sizefont = (fontsize - 8),
+  #             axissizefont = (fontsizeaxis - 5)) +
+  #   scale_y_continuous(breaks = seq(0, 100, 10)) +
+  #   scale_x_continuous(breaks = seq(0, 100000, 10000))
 
-  if (save_fig | save_fig6){
-    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
-           width = default_width, height = default_height, units = "in")
-    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-  }
+  # if (save_fig | save_fig6){
+  #   ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
+  #          width = default_width, height = default_height, units = "in")
+  #   message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  # }
 
-  message(paste("Figure ", fignum, " is complete.", sep = ""))
+  message(paste("Revised Table ", fignum, " is complete.", sep = ""))
 }
 
 
