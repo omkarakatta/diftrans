@@ -907,8 +907,8 @@ if (show_fig | show_fig6){
   real_estimate <- real$main*100
   names(real_estimate) <- real$bandwidth
   mean_placebo <- apply(results, 2, mean)
-  sd_placebo_centered <- sapply(seq_along(bandwidth_seq), function(x) sum((results[,x] - mean(results[,x]))^2) / (numsims))
-  sd_placebo_real_centered <- sapply(seq_along(bandwidth_seq), function(x) sum((results[,x] - real_estimate[x])^2) / (numsims))
+  sd_placebo_centered <- sapply(seq_along(bandwidth_seq), function(x) sqrt(sum((results[,x] - mean(results[,x]))^2) / (numsims)))
+  sd_placebo_real_centered <- sapply(seq_along(bandwidth_seq), function(x) sqrt(sum((results[,x] - real_estimate[x])^2) / (numsims)))
   # sd_placebo <- apply(results, 2, sd)
   # placebo_centered <- sweep(results, 2, mean_placebo)
   # placebo_real_centered <- sweep(results, 2, real_estimate)
@@ -935,8 +935,13 @@ if (show_fig | show_fig6){
   #   pivot_longer(cols = c(s_hat, s_hat_placebo), names_to = "type", values_to = "cost") %>%
   #   pivot_wider(names_from = bandwidth, values_from = cost)
   
+  real_estimate_round <- round(real_estimate, 3)
+  mean_placebo_round <- round(mean_placebo, 3)
+  sd_placebo_centered_round <- round(sd_placebo_centered, 5)
+  sd_placebo_real_centered_round <- round(sd_placebo_real_centered, 5)
+  quantile_placebo_round <- round(quantile_placebo, 3)
 
-  d_table <- round(rbind(real_estimate, mean_placebo, sd_placebo_centered, sd_placebo_real_centered, quantile_placebo), 3)
+  d_table <- rbind(real_estimate_round, mean_placebo_round, sd_placebo_centered_round, sd_placebo_real_centered_round, quantile_placebo_round)
 
   knitr::kable(d_table, format = "latex", booktabs = T)
 
