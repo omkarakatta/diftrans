@@ -890,8 +890,10 @@ if (show_fig | show_fig6){
   colnames(results) <- bandwidth_seq
 
   real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
-
+  
+  
   for (i in seq_len(numsims)) {
+    print(paste("Simulation Number ", i, " out of ", numsims, sep = ""))
     synth_pre1 <- data.frame(MSRP = pre$MSRP,
                             count = rmultinom(1, sum(pre$count), pre$count))
     synth_pre2 <- data.frame(MSRP = post$MSRP,
@@ -899,15 +901,19 @@ if (show_fig | show_fig6){
     placebo <- diftrans(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
     results[i, ] <- placebo$main
   }
+
+  results <- results*100
   
-  real_estimate <- real$main
+  real_estimate <- real$main*100
   names(real_estimate) <- real$bandwidth
   mean_placebo <- apply(results, 2, mean)
-  sd_placebo <- apply(results, 2, sd)
-  placebo_centered <- sweep(results, 2, mean_placebo)
-  placebo_real_centered <- sweep(results, 2, real_estimate)
-  sd_placebo_centered <- apply(placebo_centered, 2, sd)
-  sd_placebo_real_centered <- apply(placebo_real_centered, 2, sd)
+  sd_placebo_centered <- sapply(seq_along(bandwidth_seq), function(x) sum((results[,x] - mean(results[,x]))^2) / (numsims))
+  sd_placebo_real_centered <- sapply(seq_along(bandwidth_seq), function(x) sum((results[,x] - real_estimate[x])^2) / (numsims))
+  # sd_placebo <- apply(results, 2, sd)
+  # placebo_centered <- sweep(results, 2, mean_placebo)
+  # placebo_real_centered <- sweep(results, 2, real_estimate)
+  # sd_placebo_centered <- apply(placebo_centered, 2, function(x) 1/length(x) * sum(x^2))
+  # sd_placebo_real_centered <- apply(placebo_real_centered, 2, function(x) 1/length(x) * sum(x^2))
   quantile_placebo <- apply(results, 2, quantile, probs = c(0.01, 0.05, 0.1, 0.9, 0.95, 0.99))
 
 
@@ -928,8 +934,9 @@ if (show_fig | show_fig6){
   #   select(bandwidth, s_hat, s_hat_placebo) %>%
   #   pivot_longer(cols = c(s_hat, s_hat_placebo), names_to = "type", values_to = "cost") %>%
   #   pivot_wider(names_from = bandwidth, values_from = cost)
+  
 
-  d_table <- rbind(real_estimate, mean_placebo, sd_placebo, quantile_placebo) 
+  d_table <- round(rbind(real_estimate, mean_placebo, sd_placebo_centered, sd_placebo_real_centered, quantile_placebo), 3)
 
   knitr::kable(d_table, format = "latex", booktabs = T)
 
