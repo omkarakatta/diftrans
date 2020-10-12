@@ -914,7 +914,7 @@ if (show_fig | show_fig6){
   # placebo_real_centered <- sweep(results, 2, real_estimate)
   # sd_placebo_centered <- apply(placebo_centered, 2, function(x) 1/length(x) * sum(x^2))
   # sd_placebo_real_centered <- apply(placebo_real_centered, 2, function(x) 1/length(x) * sum(x^2))
-  quantile_placebo <- apply(results, 2, quantile, probs = c(0.01, 0.05, 0.1, 0.9, 0.95, 0.99))
+  quantile_placebo <- apply(results, 2, quantile, probs = c(0.01, 0.99, 0.05, 0.95, 0.1, 0.9))
 
 
   # bandwidth_selection <- left_join(real, placebo, by = "bandwidth", suffix = c("_real", "_placebo")) %>%
@@ -941,9 +941,14 @@ if (show_fig | show_fig6){
   sd_placebo_real_centered_round <- round(sd_placebo_real_centered, 5)
   quantile_placebo_round <- round(quantile_placebo, 3)
 
-  d_table <- rbind(real_estimate_round, mean_placebo_round, sd_placebo_centered_round, sd_placebo_real_centered_round, quantile_placebo_round)
+  d_table <- t(rbind(real_estimate_round, mean_placebo_round, sd_placebo_centered_round, sd_placebo_real_centered_round, quantile_placebo_round))
 
   knitr::kable(d_table, format = "latex", booktabs = T)
+
+  q1 <- quantile_placebo["99%",] - quantile_placebo["1%",]
+  q2 <- quantile_placebo["95%",] - quantile_placebo["5%",]
+  q3 <- quantile_placebo["90%",] - quantile_placebo["10%",]
+  q <- t(rbind(q1, q2, q3))
 
   # fig6_plot <- ggplot(data = bandwidth_selection, aes(x = bandwidth)) +
   #   geom_smooth(aes(y = 100*main_real, color = "0", linetype = "0"),
