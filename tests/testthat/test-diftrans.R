@@ -1,3 +1,5 @@
+context("Diftrans Example")
+
 library(dplyr)
 library(magrittr)
 
