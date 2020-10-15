@@ -15,7 +15,9 @@ diftrans(
   conservative = F,
   quietly = F,
   suppress_progress_bar = F,
-  save_dit = F
+  save_dit = F,
+  costm_main = NULL,
+  costm_control = NULL
 )
 }
 \arguments{
@@ -54,6 +56,12 @@ difference-in-transports estimator; default is \code{FALSE}}
 
 \item{save_dit}{if \code{TRUE}, the differences-in-transports estimator as
 well as the associated bandwidth will be returned}
+
+\item{costm_main}{if \code{NULL}, the cost matrix will be such that if the transport
+distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.}
+
+\item{costm_control}{if \code{NULL}, the cost matrix will be such that if the transport
+distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.}
 }
 \value{
 a data.frame with the transport costs associated with each value of \code{bandwidth_seq}.
@@ -91,7 +99,9 @@ That is, they are a tibble with two columns:
 mass of each value in the support.
 }
 Since column 1 contains the full support of \code{var} and all these distributions
-are of \code{var}, column 1 must be the same for all distributions
+are of \code{var}, column 1 must be the same for all distributions.
+
+The cost matrices specified by \code{costm} should use the minimal support of the distributions.
 }
 \examples{
 # Find conservative transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 0
