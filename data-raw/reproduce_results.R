@@ -1401,6 +1401,136 @@ if (show_fig | show_fig6) {
 }
 
 
+### \hat{P}_{B,2011} vs \tilde{P}_{B,2011} (Oct 16) ----------------
+fignum <- "B11"
+if (show_fig | show_fig6) {
+  set.seed(19 + seedplus)
+  support <- prep_data(data = Beijing, prep = "support")
+
+  pre <- prep_data(Beijing, prep = "pmf",
+                   support = support,
+                   lowerdate = "2011-01-01", upperdate = "2012-01-01")
+
+  bandwidth_seq = seq(0, 100000, 1000)
+  bandwidth_table = c(8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 70000, 90000)
+  numsims <- 200
+  results <- matrix(NA_real_, nrow = numsims, ncol = length(bandwidth_seq))
+  colnames(results) <- bandwidth_seq
+
+  # real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
+  
+  for (i in seq_len(numsims)) {
+    print(paste("Simulation Number ", i, " out of ", numsims, sep = ""))
+    synth <- data.frame(MSRP = pre$MSRP, 
+                        count = rmultinom(1, sum(pre$count), pre$count))
+    placebo <- diftrans(pre, synth, bandwidth_seq = bandwidth_seq, conservative = F)
+    results[i, ] <- placebo$main
+  }
+
+  results <- results*100
+  # real_estimate <- real$main*100
+  names(real_estimate) <- real$bandwidth
+
+  mean_placebo <- apply(results, 2, mean)
+  sd_placebo_centered <- sapply(seq_along(bandwidth_seq), function(x) sqrt(sum((results[,x] - mean(results[,x]))^2) / (numsims)))
+  # sd_placebo_real_centered <- sapply(seq_along(bandwidth_seq), function(x) sqrt(sum((results[,x] - real_estimate[x])^2) / (numsims)))
+  # quantile_placebo <- apply(results, 2, quantile, probs = c(0.01, 0.99, 0.05, 0.95, 0.1, 0.9))
+  quantile_placebo <- apply(results, 2, quantile, probs = c(0.99, 0.95, 0.9))
+
+  # real_estimate_round <- round(real_estimate, 3)
+  mean_placebo_round <- round(mean_placebo, 5)
+  sd_placebo_centered_round <- round(sd_placebo_centered, 5)
+  # sd_placebo_real_centered_round <- round(sd_placebo_real_centered, 5)
+  quantile_placebo_round <- round(quantile_placebo, 5)
+
+  plot_table <- data.frame(t(rbind(mean_placebo, sd_placebo_centered, quantile_placebo)))
+
+  d_table <- plot_table[as.character(bandwidth_table), ]
+  knitr::kable(d_table, format = "latex", booktabs = T, linesep = "")
+
+  # q1 <- quantile_placebo["99%",] - quantile_placebo["1%",]
+  # q2 <- quantile_placebo["95%",] - quantile_placebo["5%",]
+  # q3 <- quantile_placebo["90%",] - quantile_placebo["10%",]
+  # q <- t(rbind(q1, q2, q3))[as.character(bandwidth_table), ]
+
+
+  fig_B11_1 <- ggplot(data = plot_table, aes(x = as.numeric(rownames(plot_table)))) +
+    geom_line(aes(y = X99., color = "0", linetype = "0")) + 
+    geom_line(aes(y = X95., color = "1", linetype = "1")) + 
+    geom_line(aes(y = X90., color = "2", linetype = "2")) + 
+    geom_line(aes(y = mean_placebo_round, color = "3", linetype = "3")) +
+    geom_line(aes(y = sd_placebo_centered_round, color = "4", linetype = "4")) + 
+    xlab("d") +
+    ylab("Transport Cost (%)") +
+    theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
+              legend.position = c(0.8, 0.7)) +
+    # ylim(0, 0.15) +
+    scale_y_continuous(breaks = seq(0, 1, .10)) +
+    scale_color_manual(values = get_color_palette(5, grayscale),
+                       labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
+                       name = "") +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2, linetype3, linetype4),
+                          labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
+                          name = "") +
+    scale_x_continuous(breaks = seq(0, 100000, 10000), labels = seq(0, 100000, 10000))
+
+  fig_B11_2 <- ggplot(data = plot_table, aes(x = as.numeric(rownames(plot_table)))) +
+    geom_line(aes(y = X99., color = "0", linetype = "0")) + 
+    geom_line(aes(y = X95., color = "1", linetype = "1")) + 
+    geom_line(aes(y = X90., color = "2", linetype = "2")) + 
+    geom_line(aes(y = mean_placebo_round, color = "3", linetype = "3")) +
+    geom_line(aes(y = sd_placebo_centered_round, color = "4", linetype = "4")) + 
+    xlab("d") +
+    ylab("Transport Cost (%)") +
+    theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
+              legend.position = c(0.8, 0.7)) +
+    ylim(0, 0.15) +
+#     scale_y_continuous(breaks = seq(0, 0.2, .05)) +
+    scale_color_manual(values = get_color_palette(5, grayscale),
+                       labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
+                       name = "") +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2, linetype3, linetype4),
+                          labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
+                          name = "") +
+    scale_x_continuous(breaks = seq(0, 100000, 10000)) +
+    ggtitle("OT(P_hat_Beijing_2011, P_tilde_Beijing_2011) - zoomed in")
+
+  fig_B11_3 <- ggplot(data = plot_table, aes(x = as.numeric(rownames(plot_table)))) +
+    geom_smooth(aes(y = X99., color = "0", linetype = "0"), method = loess, se = F, size = 0.5) + 
+    geom_smooth(aes(y = X95., color = "1", linetype = "1"), method = loess, se = F, size = 0.5) + 
+    geom_smooth(aes(y = X90., color = "2", linetype = "2"), method = loess, se = F, size = 0.5) + 
+    geom_smooth(aes(y = mean_placebo_round, color = "3", linetype = "3"), method = loess, se = F, size = 0.5) +
+    geom_smooth(aes(y = sd_placebo_centered_round, color = "4", linetype = "4"), method = loess, se = F, size = 0.5) + 
+    xlab("d") +
+    ylab("Transport Cost (%)") +
+    theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
+              legend.position = c(0.8, 0.7)) +
+    ylim(0, 0.15) +
+#     scale_y_continuous(breaks = seq(0, 0.2, .05)) +
+    scale_color_manual(values = get_color_palette(5, grayscale),
+                       labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
+                       name = "") +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2, linetype3, linetype4),
+                          labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
+                          name = "") +
+    scale_x_continuous(breaks = seq(0, 100000, 10000)) +
+    ggtitle("OT(P_hat_Beijing_2011, P_tilde_Beijing_2011) - zoomed in with loess filter")
+
+  if (save_fig | save_fig6) {
+    ggsave(paste("fig", fignum, suffix, "1", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B11_1, path = img_path,
+           width = default_width, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+    ggsave(paste("fig", fignum, suffix, "2", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B11_2, path = img_path,
+           width = default_width, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+    ggsave(paste("fig", fignum, suffix, "3", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B11_3, path = img_path,
+           width = default_width, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+
+}
+
+
 ### Figure 7 ---------------------------
 fignum <- 7
 if (show_fig | show_fig7){
