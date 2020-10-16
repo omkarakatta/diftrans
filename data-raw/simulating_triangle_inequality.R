@@ -72,9 +72,9 @@ pb <- txtProgressBar(min = 0, max = length(bandwidth_seq), initial = 0)
 for (i in seq_along(bandwidth_seq)) {
   setTxtProgressBar(pb, i)
   bw <- bandwidth_seq[i]
-  lhs[i] <- get_OTcost(pre, post, bandwidth = bw, costmat = common_cost, costmat_ref = pre_post)$prop_bribe
-  rhs[i] <- get_OTcost(pre, middle, bandwidth = bw, costmat = common_cost, costmat_ref = pre_middle)$prop_bribe + 
-    get_OTcost(middle, post, bandwidth = bw, costmat = common_cost, costmat_ref = middle_post)$prop_bribe
+  lhs[i] <- (get_OTcost(pre, post, bandwidth = bw, costmat = common_cost, costmat_ref = pre_post)$prop_bribe)^(1/2)
+  rhs[i] <- (get_OTcost(pre, middle, bandwidth = bw, costmat = common_cost, costmat_ref = pre_middle)$prop_bribe)^(1/2) + 
+    (get_OTcost(middle, post, bandwidth = bw, costmat = common_cost, costmat_ref = middle_post)$prop_bribe)^(1/2)
 }
 
 sum(lhs <= rhs) / length(bandwidth_seq) # = 1
