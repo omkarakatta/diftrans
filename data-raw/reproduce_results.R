@@ -510,7 +510,7 @@ if (show_fig | show_fig6){
 }
 
 ### Figure 6 - B1011 ---------------------------
-fignum <- "6_B1011"
+fignum <- "6_B1011" # this is what we want :)
 if (show_fig | show_fig6){
   set.seed(11 + seedplus)
   support <- prep_data(data = Beijing, prep = "support")
@@ -543,39 +543,13 @@ if (show_fig | show_fig6){
   message(paste("Figure 6 analysis: the tranport cost at d = 10000 is ", d1000, sep = ""))
 
   d_table <- bandwidth_selection %>%
-    filter(bandwidth %in% c(8000, 9000, 10000, 20000, 30000, 50000, 70000, 90000)) %>%
+    filter(bandwidth %in% c(8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 70000, 90000)) %>%
     mutate(s_hat = round(main_real * 100, 1),
-           s_hat_placebo = main_placebo * 100) %>%
-    select(bandwidth, s_hat, s_hat_placebo) %>%
-    pivot_longer(cols = c(s_hat, s_hat_placebo), names_to = "type", values_to = "cost") %>%
-    pivot_wider(names_from = bandwidth, values_from = cost)
-  knitr::kable(d_table, format = "latex", booktabs = T)
-
-  fig6_plot <- ggplot(data = bandwidth_selection, aes(x = bandwidth)) +
-    geom_smooth(aes(y = 100*main_real, color = "0", linetype = "0"),
-                method = loess,
-                se = F,
-                size = 0.5) +
-    geom_line(aes(y = 100*main_real, color = "1", linetype = "1")) +
-    geom_line(aes(y = 100*main_placebo, color = "2", linetype = "2")) +
-    scale_color_manual(values = get_color_palette(3, grayscale),
-                       labels = c("smoothed", "real", "placebo"),
-                       name = "") +
-    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                          labels = c("smoothed", "real", "placebo"),
-                          name = "") +
-    xlab("d") +
-    ylab("Transport Cost (%)") +
-    theme_bmp(sizefont = (fontsize - 8),
-              axissizefont = (fontsizeaxis - 5)) +
-    scale_y_continuous(breaks = seq(0, 100, 10)) +
-    scale_x_continuous(breaks = seq(0, 100000, 10000))
-
-  if (save_fig | save_fig6){
-    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
-           width = default_width, height = default_height, units = "in")
-    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-  }
+           s_hat_placebo = round(main_placebo * 100, 4)) %>%
+    select(bandwidth, s_hat, s_hat_placebo) # %>%
+    # pivot_longer(cols = c(s_hat, s_hat_placebo), names_to = "type", values_to = "cost") %>%
+    # pivot_wider(names_from = bandwidth, values_from = cost)
+  knitr::kable(d_table, format = "latex", booktabs = T, linesep = "")
 
   message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
