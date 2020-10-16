@@ -50,10 +50,11 @@ sum(lhs <= rhs) / length(bandwidth_seq) # = 1
 
 ### L-p Wasserstein (without d) with p = 2
 
-bandwidth_seq <- c(0)
+bw <- 0
+p_seq <- seq(1, 15)
 
-lhs <- rep(NA_real_, length(bandwidth_seq))
-rhs <- rep(NA_real_, length(bandwidth_seq))
+lhs <- rep(NA_real_, length(p_seq))
+rhs <- rep(NA_real_, length(p_seq))
 
 Lpcost <- function(min_pre_support, min_post_support, p) {
   costm <- matrix(NA_real_, nrow = length(min_pre_support), ncol = length(min_post_support))
@@ -63,18 +64,18 @@ Lpcost <- function(min_pre_support, min_post_support, p) {
   costm
 }
 
-common_cost <- Lpcost(common_support, common_support, p = 2)
-pre_post <- Lpcost(min_pre, min_post, p = 2)
-pre_middle <- Lpcost(min_pre, min_middle, p = 2)
-middle_post <- Lpcost(min_middle, min_post, p = 2)
 
-pb <- txtProgressBar(min = 0, max = length(bandwidth_seq), initial = 0)
-for (i in seq_along(bandwidth_seq)) {
+pb <- txtProgressBar(min = 0, max = length(p_seq), initial = 0)
+for (i in seq_along(p_seq)) {
+  p <- p_seq[i]
   setTxtProgressBar(pb, i)
-  bw <- bandwidth_seq[i]
-  lhs[i] <- (get_OTcost(pre, post, bandwidth = bw, costmat = common_cost, costmat_ref = pre_post)$prop_bribe)^(1/2)
-  rhs[i] <- (get_OTcost(pre, middle, bandwidth = bw, costmat = common_cost, costmat_ref = pre_middle)$prop_bribe)^(1/2) + 
-    (get_OTcost(middle, post, bandwidth = bw, costmat = common_cost, costmat_ref = middle_post)$prop_bribe)^(1/2)
+  common_cost <- Lpcost(common_support, common_support, p = p)
+  pre_post <- Lpcost(min_pre, min_post, p = p)
+  pre_middle <- Lpcost(min_pre, min_middle, p = p)
+  middle_post <- Lpcost(min_middle, min_post, p = p)
+  lhs[i] <- (get_OTcost(pre, post, bandwidth = bw, costmat = common_cost, costmat_ref = pre_post)$prop_bribe)^(1/p)
+  rhs[i] <- (get_OTcost(pre, middle, bandwidth = bw, costmat = common_cost, costmat_ref = pre_middle)$prop_bribe)^(1/p) + 
+    (get_OTcost(middle, post, bandwidth = bw, costmat = common_cost, costmat_ref = middle_post)$prop_bribe)^(1/p)
 }
 
-sum(lhs <= rhs) / length(bandwidth_seq) # = 1
+sum(lhs <= rhs) / length(p_seq) # = 1
