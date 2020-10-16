@@ -130,7 +130,7 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 #' are of \code{var}, column 1 must be the same for all distributions.
 #'
 #' The cost matrices specified by \code{costm} should use a common support of the respective distributions.
-#' However, \code{cosm_ref} matrices should use the minimal support of the respective pre and post distributions.
+#' However, \code{costm_ref} matrices should use the minimal support of the respective pre and post distributions.
 #'
 #' @param pre_main probability mass function (see "Details") for \code{var} of the
 #'     treated group before treatment occurs
@@ -159,11 +159,11 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 #'     well as the associated bandwidth will be returned
 #' @param costm_main if \code{NULL}, the cost matrix with common support will be such that if the transport 
 #'     distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.
-#' @param costm_main_ref if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be 
+#' @param costm_ref_main if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be 
 #'     using the minimal support of main distributions
 #' @param costm_control if \code{NULL}, the cost matrix with common support will be such that if the transport 
 #'     distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.
-#' @param costm_control_ref if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be 
+#' @param costm_ref_control if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be 
 #'     using the minimal support of control distributions
 #'
 #' @return a data.frame with the transport costs associated with each value of \code{bandwidth_seq}.
