@@ -1271,7 +1271,7 @@ if (show_fig | show_fig6){
   message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
 
-### \hat{P}_{B,2010} vs \tilde{P}_{B,2010} ----------------
+### \hat{P}_{B,2010} vs \tilde{P}_{B,2010} (Oct 16) ----------------
 fignum <- "B10"
 if (show_fig | show_fig6) {
   set.seed(19 + seedplus)
@@ -1282,7 +1282,7 @@ if (show_fig | show_fig6) {
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
 
   bandwidth_seq = seq(0, 100000, 1000)
-  bandwidth_table = c(8000, 9000, 10000, 20000, 30000, 50000, 70000, 90000)
+  bandwidth_table = c(8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 70000, 90000)
   numsims <- 200
   results <- matrix(NA_real_, nrow = numsims, ncol = length(bandwidth_seq))
   colnames(results) <- bandwidth_seq
@@ -1316,7 +1316,7 @@ if (show_fig | show_fig6) {
   plot_table <- data.frame(t(rbind(mean_placebo, sd_placebo_centered, quantile_placebo)))
 
   d_table <- plot_table[as.character(bandwidth_table), ]
-  knitr::kable(d_table, format = "latex", booktabs = T)
+  knitr::kable(d_table, format = "latex", booktabs = T, linesep = "")
 
   # q1 <- quantile_placebo["99%",] - quantile_placebo["1%",]
   # q2 <- quantile_placebo["95%",] - quantile_placebo["5%",]
@@ -1342,8 +1342,7 @@ if (show_fig | show_fig6) {
     scale_linetype_manual(values = c(linetype0, linetype1, linetype2, linetype3, linetype4),
                           labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
                           name = "") +
-    scale_x_continuous(breaks = seq(0, 100000, 10000)) +
-    ggtitle("OT(P_hat_Beijing_2010, P_tilde_Beijing_2010)")
+    scale_x_continuous(breaks = seq(0, 100000, 10000), labels = seq(0, 100000, 10000))
 
   fig_B10_2 <- ggplot(data = plot_table, aes(x = as.numeric(rownames(plot_table)))) +
     geom_line(aes(y = X99., color = "0", linetype = "0")) + 
@@ -1388,13 +1387,13 @@ if (show_fig | show_fig6) {
     ggtitle("OT(P_hat_Beijing_2010, P_tilde_Beijing_2010) - zoomed in with loess filter")
 
   if (save_fig | save_fig6) {
-    ggsave(paste("fig", fignum, suffix, "1", suffix, "OK.jpg", sep = ""), plot = fig_B10_1, path = img_path,
+    ggsave(paste("fig", fignum, suffix, "1", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B10_1, path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-    ggsave(paste("fig", fignum, suffix, "2", suffix, "OK.jpg", sep = ""), plot = fig_B10_2, path = img_path,
+    ggsave(paste("fig", fignum, suffix, "2", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B10_2, path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-    ggsave(paste("fig", fignum, suffix, "3", suffix, "OK.jpg", sep = ""), plot = fig_B10_3, path = img_path,
+    ggsave(paste("fig", fignum, suffix, "3", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B10_3, path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
