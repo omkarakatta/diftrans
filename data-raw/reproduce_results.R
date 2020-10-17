@@ -1273,7 +1273,7 @@ if (show_fig | show_fig6) {
 
   results <- results*100
   # real_estimate <- real$main*100
-  names(real_estimate) <- real$bandwidth
+  # names(real_estimate) <- real$bandwidth
 
   mean_placebo <- apply(results, 2, mean)
   sd_placebo_centered <- sapply(seq_along(bandwidth_seq), function(x) sqrt(sum((results[,x] - mean(results[,x]))^2) / (numsims)))
@@ -1361,13 +1361,13 @@ if (show_fig | show_fig6) {
     ggtitle("OT(P_hat_Beijing_2010, P_tilde_Beijing_2010) - zoomed in with loess filter")
 
   if (save_fig | save_fig6) {
-    ggsave(paste("fig", fignum, suffix, "1", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B10_1, path = img_path,
+    ggsave(paste("fig", fignum, suffix, "1", suffix, "OK.jpg", sep = ""), plot = fig_B10_1, path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-    ggsave(paste("fig", fignum, suffix, "2", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B10_2, path = img_path,
+    ggsave(paste("fig", fignum, suffix, "2", suffix, "OK.jpg", sep = ""), plot = fig_B10_2, path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-    ggsave(paste("fig", fignum, suffix, "3", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B10_3, path = img_path,
+    ggsave(paste("fig", fignum, suffix, "3", suffix, "OK.jpg", sep = ""), plot = fig_B10_3, path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
@@ -1491,13 +1491,13 @@ if (show_fig | show_fig6) {
     ggtitle("OT(P_hat_Beijing_2011, P_tilde_Beijing_2011) - zoomed in with loess filter")
 
   if (save_fig | save_fig6) {
-    ggsave(paste("fig", fignum, suffix, "1", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B11_1, path = img_path,
+    ggsave(paste("fig", fignum, suffix, "1", suffix, "OK.jpg", sep = ""), plot = fig_B11_1, path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-    ggsave(paste("fig", fignum, suffix, "2", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B11_2, path = img_path,
+    ggsave(paste("fig", fignum, suffix, "2", suffix, "OK.jpg", sep = ""), plot = fig_B11_2, path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-    ggsave(paste("fig", fignum, suffix, "3", suffix, version, suffix, "OK.jpg", sep = ""), plot = fig_B11_3, path = img_path,
+    ggsave(paste("fig", fignum, suffix, "3", suffix, "OK.jpg", sep = ""), plot = fig_B11_3, path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
