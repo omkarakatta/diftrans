@@ -542,8 +542,10 @@ if (show_fig | show_fig6){
 
   message(paste("Figure 6 analysis: the tranport cost at d = 10000 is ", d1000, sep = ""))
 
+  bandwidth_table = c(4000, 5000, 6000, 7000, 8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 70000, 90000)
+
   d_table <- bandwidth_selection %>%
-    filter(bandwidth %in% c(8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 70000, 90000)) %>%
+    filter(bandwidth %in% bandwidth_table) %>%
     mutate(s_hat = round(main_real * 100, 1),
            s_hat_placebo = round(main_placebo * 100, 4)) %>%
     select(bandwidth, s_hat, s_hat_placebo) # %>%
@@ -1256,7 +1258,7 @@ if (show_fig | show_fig6) {
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
 
   bandwidth_seq = seq(0, 100000, 1000)
-  bandwidth_table = c(8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 70000, 90000)
+  bandwidth_table = c(4000, 5000, 6000, 7000, 8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 70000, 90000)
   numsims <- 200
   results <- matrix(NA_real_, nrow = numsims, ncol = length(bandwidth_seq))
   colnames(results) <- bandwidth_seq
@@ -1386,7 +1388,7 @@ if (show_fig | show_fig6) {
                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
 
   bandwidth_seq = seq(0, 100000, 1000)
-  bandwidth_table = c(8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 70000, 90000)
+  bandwidth_table = c(4000, 5000, 6000, 7000, 8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 70000, 90000)
   numsims <- 200
   results <- matrix(NA_real_, nrow = numsims, ncol = length(bandwidth_seq))
   colnames(results) <- bandwidth_seq
