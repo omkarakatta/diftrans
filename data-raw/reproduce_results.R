@@ -1546,17 +1546,22 @@ if (show_fig | show_fig7){
 ### Figure ?? - Oct 19 ---------------------------
 fignum <- "?"
 set.seed(9 + seedplus)
+BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
+supportB <- prep_data(BTS %>% filter(city == "Beijing"),
+                      prep = "support")
+supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
+                      prep = "support")
 B_pre <- prep_data(Beijing, prep = "pmf",
-                   support = support,
+                   support = supportB,
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
 B_post <- prep_data(Beijing, prep = "pmf",
-                   support = support,
+                   support = supportB,
                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
 T_pre <- prep_data(Tianjin, prep = "pmf",
-                   support = support,
+                   support = supportT,
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
 T_post <- prep_data(Tianjin, prep = "pmf",
-                   support = support,
+                   support = supportT,
                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
 
 
