@@ -1562,7 +1562,7 @@ T_post <- prep_data(Tianjin, prep = "pmf",
 
 max_bw <- 30000
 bandwidth_seq <- seq(0, max_bw, 1000)
-numsim <- 100
+numsim <- 200
 LHS_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
 RHS_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
 diff_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
