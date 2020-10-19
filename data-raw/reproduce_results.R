@@ -1629,6 +1629,31 @@ if (save_fig | save_fig8){
   message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
 }
 
+ggplot(plot_table, aes(x = d)) +
+  geom_smooth(aes(y = value, color = name, linetype = name),
+              method = loess, se = F, size = 0.5) +
+  bmp_plot(data = plot_table,
+         color = name,
+         legendlabels = c("Difference", "LHS", "RHS"),
+         xlab = "d",
+         ylab = "Difference in Transport Cost (%)",
+         ytype = "continuous",
+         # ybreaks = seq(-50, 100, 10),
+         xtype = "continuous",
+         xbreaks = seq(0, max_bw, 5000),
+         sizefont = (fontsize - 8),
+         axissizefont = (fontsizeaxis - 5)) +
+  scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
+                        labels = c("Difference", "LHS", "RHS"),
+                        name = "")
+
+if (save_fig | save_fig8){
+  ggsave(paste("fig", fignum, suffix, "loess", suffix, "OK.jpg", sep = ""), path = img_path,
+         width = default_width+2, height = default_height, units = "in")
+  message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+}
+
+
 
 ### Figure 8 ---------------------------
 fignum <- 8
