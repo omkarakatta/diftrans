@@ -11,10 +11,34 @@
 
 ### Preliminaries ---------------------------
 devtools::load_all()
+library(ggplot2)
 
 source(here::here("data-raw", "prepare_data.R"))
+source(here::here("data-raw", "plotting_functions.R"))
 load(here::here(".hidden/Beijing_cleaned.RData"))
 Beijing <- Beijing_cleaned
+version <- "original"
+
+set.seed(23)
+
+grayscale <- FALSE # toggle to TRUE for black-and-white plots
+temp <- ifelse(grayscale, "grayscale", "color")
+fontsize <- 20 # change font size of plot, axis, and legend titles
+fontsizeaxis <- 15 # change font size of axis labels
+linetype0 <- "solid" # main line type
+linetype1 <- "dashed" # secondary line type
+linetype2 <- "dotted" # tertiary line type
+linetype3 <- "twodash"
+linetype4 <- "longdash"
+img_path <- paste("/Users/omkar_katta/BFI/3_BMP_GP/img/img_misc/Oct23", paste(version, temp, sep = "-"), sep = "/")
+suffix <- "_"
+default_width <- 7
+default_height <- 3
+
+epsilon <- 0.1
+bandwidth_seq <- seq(0, 20000, 1000)
+numsims <- 500
+results <- matrix(NA_real_, nrow = numsims, ncol = length(bandwidth_seq))
 
 common_support <- prep_data(Beijing, prep = "support", lowerdate = "2010-01-01", upperdate = "2013-01-01")
 pre <- prep_data(Beijing, prep = "pmf",
@@ -23,12 +47,6 @@ pre <- prep_data(Beijing, prep = "pmf",
 post <- prep_data(Beijing, prep = "pmf",
                   support = common_support,
                   lowerdate = "2012-01-01", upperdate = "2013-01-01")
-pre_tilde <- data.frame(MSRP = pre$MSRP, count = rmultinom(1, sum(pre$count), pre$count))
-post_tilde <- data.frame(MSRP = post$MSRP, count = rmultinom(1, sum(post$count), post$count))
-
-# bandwidth_seq <- seq(0, 40000, 1000)
-bw <- 0
-epsilon <- 0.1
 
 Lpcost <- function(min_pre_support, min_post_support, p) {
   costm <- matrix(NA_real_, nrow = length(min_pre_support), ncol = length(min_post_support))
@@ -37,52 +55,91 @@ Lpcost <- function(min_pre_support, min_post_support, p) {
   }
   costm
 }
-
 common_cost <- Lpcost(common_support, common_support, p = epsilon)
-hat_OT <- transport(
-  as.numeric(sum(post$count) / sum(pre$count) * pre$count),
-  as.numeric(post$count),
-  common_cost
-)
-tilde_OT <- transport(
-  as.numeric(sum(post_tilde$count) / sum(pre_tilde$count) * pre_tilde$count),
-  as.numeric(post_tilde$count),
-  common_cost
-)
 
-pre_support <- unique(pre$MSRP[pre$count != 0 & !is.na(pre$MSRP)])
-post_support <- unique(post$MSRP[post$count != 0 & !is.na(post$MSRP)])
-pre_tilde_support <- unique(pre_tilde$MSRP[pre_tilde$count != 0 & !is.na(pre_tilde$MSRP)])
-post_tilde_support <- unique(post_tilde$MSRP[post_tilde$count != 0 & !is.na(post_tilde$MSRP)])
+pb <- txtProgressBar(0, numsims)
+for (sim in seq_len(numsims)) {
+  setTxtProgressBar(pb, sim)
+  # print(paste("Simulation ", sim, " out of ", numsims, sep = ""))
 
-hat_OT_revised <- hat_OT %>% 
-  dplyr::rename(hat_mass = mass) %>% 
-  dplyr::mutate(from = pre_support[from]) %>%
-  dplyr::mutate(to = post_support[to])
-tilde_OT_revised <- tilde_OT %>% 
-  dplyr::rename(tilde_mass = mass) %>% 
-  dplyr::mutate(from = pre_tilde_support[from]) %>%
-  dplyr::mutate(to = post_tilde_support[to])
+  pre_tilde <- data.frame(MSRP = pre$MSRP, count = rmultinom(1, sum(pre$count), pre$count))
+  post_tilde <- data.frame(MSRP = post$MSRP, count = rmultinom(1, sum(post$count), post$count))
 
-OT_combine <- dplyr::full_join(hat_OT_revised, tilde_OT_revised, by = c("from", "to"))
-support <- unique(sort(c(OT_combine$from, OT_combine$to)))
+  hat_OT <- transport(
+    as.numeric(sum(post$count) / sum(pre$count) * pre$count),
+    as.numeric(post$count),
+    common_cost
+  )
+  tilde_OT <- transport(
+    as.numeric(sum(post_tilde$count) / sum(pre_tilde$count) * pre_tilde$count),
+    as.numeric(post_tilde$count),
+    common_cost
+  )
 
-OT_final <- OT_combine %>%
-  dplyr::rowwise() %>%
-  dplyr::mutate(from = which(support == from)) %>% 
-  dplyr::mutate(to = which(support == to)) %>%
-  dplyr::ungroup()
+  pre_support <- unique(pre$MSRP[pre$count != 0 & !is.na(pre$MSRP)])
+  post_support <- unique(post$MSRP[post$count != 0 & !is.na(post$MSRP)])
+  pre_tilde_support <- unique(pre_tilde$MSRP[pre_tilde$count != 0 & !is.na(pre_tilde$MSRP)])
+  post_tilde_support <- unique(post_tilde$MSRP[post_tilde$count != 0 & !is.na(post_tilde$MSRP)])
 
-hat_gamma <- matrix(0, nrow = length(support), ncol = length(support))
-tilde_gamma <- matrix(0, nrow = length(support), ncol = length(support))
-for (i in seq_len(nrow(OT_final))) {
-  temprow <- OT_final[i, ]
-  hat_gamma[as.numeric(temprow["from"]), as.numeric(temprow["to"])] <- as.numeric(temprow["hat_mass"])
-  tilde_gamma[as.numeric(temprow["from"]), as.numeric(temprow["to"])] <- as.numeric(temprow["tilde_mass"])
+  hat_OT_revised <- hat_OT %>%
+    dplyr::rename(hat_mass = mass) %>%
+    dplyr::mutate(from = pre_support[from]) %>%
+    dplyr::mutate(to = post_support[to])
+  tilde_OT_revised <- tilde_OT %>%
+    dplyr::rename(tilde_mass = mass) %>%
+    dplyr::mutate(from = pre_tilde_support[from]) %>%
+    dplyr::mutate(to = post_tilde_support[to])
+  OT_combine <- dplyr::full_join(hat_OT_revised, tilde_OT_revised, by = c("from", "to"))
+  support <- unique(sort(c(OT_combine$from, OT_combine$to)))
+  OT_final <- OT_combine %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(from = which(support == from)) %>%
+    dplyr::mutate(to = which(support == to)) %>%
+    dplyr::ungroup()
+
+  hat_gamma <- matrix(0, nrow = length(support), ncol = length(support))
+  tilde_gamma <- matrix(0, nrow = length(support), ncol = length(support))
+  for (i in seq_len(nrow(OT_final))) {
+    temprow <- OT_final[i, ]
+    hat_gamma[as.numeric(temprow["from"]), as.numeric(temprow["to"])] <- as.numeric(temprow["hat_mass"])
+    tilde_gamma[as.numeric(temprow["from"]), as.numeric(temprow["to"])] <- as.numeric(temprow["tilde_mass"])
+  }
+  hat_gamma[is.na(hat_gamma)] <- 0
+  tilde_gamma[is.na(tilde_gamma)] <- 0
+
+  gamma <- tilde_gamma - hat_gamma
+
+  for (bw in seq_along(bandwidth_seq)){
+    bandwidth <- bandwidth_seq[bw]
+    cost <- build_costmatrix(support, bandwidth = bandwidth)
+    results[sim, bw] <- sum(cost * gamma)
+  }
+
 }
-hat_gamma[is.na(hat_gamma)] <- 0
-tilde_gamma[is.na(tilde_gamma)] <- 0
 
-gamma <- tilde_gamma - hat_gamma
-cost <- build_costmatrix(support, bandwidth = bw)
-OT <- sum(cost * gamma)
+probs <- c(0.9, 0.95, 0.99)
+mean_results <- apply(results, 2, mean)
+sd_results <- apply(results, 2, sd)
+quantile_results <- apply(results, 2, quantile, probs)
+plot_table <- data.frame(bandwidth = bandwidth_seq, mean = mean_results, sd = sd_results, t(quantile_results)) %>%
+  tidyr::pivot_longer(cols = c(mean, sd, tidyselect::contains("X"))) %>%
+  dplyr::mutate(name = dplyr::case_when(name == "X90." ~ "90%ile",
+                                        name == "X95." ~ "95%ile",
+                                        name == "X99." ~ "99%ile",
+                                        TRUE ~ name))
+
+ggplot(plot_table) +
+  geom_line(aes(x = bandwidth, y = value, color = name)) +
+  # scale_color_manual(values = get_color_palette(5, grayscale),
+                     # labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
+                     # name = "") +
+  # scale_linetype_manual(values = c(linetype0, linetype1, linetype2, linetype3, linetype4),
+                        # labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
+                        # name = "") +
+  scale_x_continuous(breaks = seq(0, 20000, 2000), labels = seq(0, 20000, 2000)) +
+  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
+            legend.direction = "horizontal",
+            legend.position = c(0.65, 0.3))
+
+ggsave(paste("fig_newcriterion", suffix, "OK.jpg", sep = ""), path = img_path,
+       width = default_width, height = default_height+1, units = "in")
