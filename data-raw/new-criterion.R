@@ -30,7 +30,7 @@ linetype1 <- "dashed" # secondary line type
 linetype2 <- "dotted" # tertiary line type
 linetype3 <- "twodash"
 linetype4 <- "longdash"
-img_path <- paste("/Users/omkar_katta/BFI/3_BMP_GP/img/img_misc/Oct23", paste(version, temp, sep = "-"), sep = "/")
+img_path <- paste("/Users/omkar_katta/BFI/3_BMP_GP/img/img_misc/Oct25", paste(version, temp, sep = "-"), sep = "/")
 suffix <- "_"
 default_width <- 7
 default_height <- 3
@@ -135,17 +135,20 @@ plot_table <- data.frame(bandwidth = bandwidth_seq, mean = mean_results, sd = sd
                                         TRUE ~ name))
 
 ggplot(plot_table) +
-  geom_line(aes(x = bandwidth, y = value, color = name)) +
-  # scale_color_manual(values = get_color_palette(5, grayscale),
-                     # labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
-                     # name = "") +
-  # scale_linetype_manual(values = c(linetype0, linetype1, linetype2, linetype3, linetype4),
-                        # labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
-                        # name = "") +
+  geom_line(aes(x = bandwidth, y = value, 
+                color = factor(name, levels = c("99%ile", "95%ile", "90%ile", "mean", "sd")))) +
+  scale_color_manual(values = get_color_palette(5, grayscale),
+                     labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
+                     name = "") +
+  scale_linetype_manual(values = c(linetype0, linetype1, linetype2, linetype3, linetype4),
+                        labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
+                        name = "") +
+  scale_y_continuous(breaks = seq(0, max(plot_table$value), 2000), 
+                     labels = seq(0, max(plot_table$value), 2000)) +
   scale_x_continuous(breaks = seq(0, 20000, 2000), labels = seq(0, 20000, 2000)) +
   theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
-            legend.direction = "horizontal",
-            legend.position = c(0.65, 0.3))
+            legend.direction = "vertical",
+            legend.position = c(0.85, 0.8))
 
 ggsave(paste("fig_newcriterion", suffix, "OK.jpg", sep = ""), path = img_path,
        width = default_width, height = default_height+1, units = "in")
