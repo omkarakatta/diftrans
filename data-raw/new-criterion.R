@@ -107,7 +107,7 @@ for (sim in seq_len(numsims)) {
   hat_gamma[is.na(hat_gamma)] <- 0
   tilde_gamma[is.na(tilde_gamma)] <- 0
 
-  gamma <- tilde_gamma - hat_gamma
+  gamma <- abs(tilde_gamma - hat_gamma)
 
   # temp_old <- 0
   for (bw in seq_along(bandwidth_seq)){
