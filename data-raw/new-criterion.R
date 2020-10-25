@@ -38,7 +38,7 @@ default_height <- 3
 epsilon <- 0.1
 bandwidth_seq <- seq(0, 20000, 1000)
 numsims <- 500
-results <- matrix(NA_real_, nrow = numsims, ncol = length(bandwidth_seq))
+results_raw <- matrix(NA_real_, nrow = numsims, ncol = length(bandwidth_seq))
 
 common_support <- prep_data(Beijing, prep = "support", lowerdate = "2010-01-01", upperdate = "2013-01-01")
 pre <- prep_data(Beijing, prep = "pmf",
@@ -47,6 +47,7 @@ pre <- prep_data(Beijing, prep = "pmf",
 post <- prep_data(Beijing, prep = "pmf",
                   support = common_support,
                   lowerdate = "2012-01-01", upperdate = "2013-01-01")
+post_total <- sum(post$count)
 
 Lpcost <- function(min_pre_support, min_post_support, p) {
   costm <- matrix(NA_real_, nrow = length(min_pre_support), ncol = length(min_post_support))
@@ -113,7 +114,7 @@ for (sim in seq_len(numsims)) {
   for (bw in seq_along(bandwidth_seq)){
     bandwidth <- bandwidth_seq[bw]
     cost <- build_costmatrix(support, bandwidth = bandwidth)
-    results[sim, bw] <- sum(cost * gamma)
+    results_raw[sim, bw] <- sum(cost * gamma)
     # temp_new <- sum(cost * gamma == 0)
     # if (temp_new < temp_old) {
     #   print(c(sim, bw))
@@ -123,6 +124,7 @@ for (sim in seq_len(numsims)) {
 
 }
 
+results <- results_raw / post_total
 probs <- c(0.9, 0.95, 0.99)
 mean_results <- apply(results, 2, mean)
 sd_results <- apply(results, 2, sd)
@@ -135,7 +137,7 @@ plot_table <- data.frame(bandwidth = bandwidth_seq, mean = mean_results, sd = sd
                                         TRUE ~ name))
 
 ggplot(plot_table) +
-  geom_line(aes(x = bandwidth, y = value, 
+  geom_line(aes(x = bandwidth, y = value * 100, 
                 color = factor(name, levels = c("99%ile", "95%ile", "90%ile", "mean", "sd")))) +
   scale_color_manual(values = get_color_palette(5, grayscale),
                      labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
@@ -143,12 +145,14 @@ ggplot(plot_table) +
   scale_linetype_manual(values = c(linetype0, linetype1, linetype2, linetype3, linetype4),
                         labels = c("99%ile", "95%ile", "90%ile", "mean", "st. dev."),
                         name = "") +
-  scale_y_continuous(breaks = seq(0, max(plot_table$value), 2000), 
-                     labels = seq(0, max(plot_table$value), 2000)) +
+  # scale_y_continuous(breaks = seq(0, max(plot_table$value), 2000),
+                     # labels = seq(0, max(plot_table$value), 2000)) +
+  scale_y_continuous(breaks = seq(0, 8, 0.5), labels = seq(0, 8, 0.5)) +
   scale_x_continuous(breaks = seq(0, 20000, 2000), labels = seq(0, 20000, 2000)) +
+  ylab("Percentage") +
   theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
             legend.direction = "vertical",
             legend.position = c(0.85, 0.8))
 
-ggsave(paste("fig_newcriterion", suffix, "OK.jpg", sep = ""), path = img_path,
+ggsave(paste("fig_newcriterion", suffix,  "perc", suffix, "OK.jpg", sep = ""), path = img_path,
        width = default_width, height = default_height+1, units = "in")
