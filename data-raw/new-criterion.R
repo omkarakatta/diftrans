@@ -156,3 +156,15 @@ ggplot(plot_table) +
 
 ggsave(paste("fig_newcriterion", suffix,  "perc", suffix, "OK.jpg", sep = ""), path = img_path,
        width = default_width, height = default_height+1, units = "in")
+
+gamma_vec <- data.frame(gamma_vec = c(gamma))
+ggplot(gamma_vec) +
+  geom_histogram(aes(x = gamma_vec, y = stat(count)/sum(stat(count))), binwidth = 10) +
+  bmp_plot(data = gamma_vec,
+           xlab = "Absolute Difference in Transport Maps",
+           xtype = "continuous", xbreaks = seq(0, 300, 20), xlabels = seq(0, 300, 20),
+           sizefont = (fontsize - 8),
+           axissizefont = (fontsizeaxis - 5))
+
+ggsave(paste("fig_newcriterion", suffix,  "gamma", suffix, "OK.jpg", sep = ""), path = img_path,
+       width = default_width, height = default_height, units = "in")
