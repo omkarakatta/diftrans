@@ -38,7 +38,6 @@ default_height <- 3
 epsilon <- 0.1
 bandwidth_seq <- seq(0, 40000, 1000)
 numsims <- 500
-results_raw <- matrix(NA_real_, nrow = numsims, ncol = length(bandwidth_seq))
 
 common_support <- prep_data(Beijing, prep = "support", lowerdate = "2010-01-01", upperdate = "2013-01-01")
 pre <- prep_data(Beijing, prep = "pmf",
@@ -58,6 +57,10 @@ Lpcost <- function(min_pre_support, min_post_support, p) {
 }
 common_cost <- Lpcost(common_support, common_support, p = epsilon)
 
+
+results_raw <- matrix(NA_real_, nrow = numsims, ncol = length(bandwidth_seq))
+gamma_raw <- vector(mode = "list", length = numsims)
+support_raw <- vector(mode = "list", length = numsims)
 pb <- txtProgressBar(0, numsims)
 for (sim in seq_len(numsims)) {
   setTxtProgressBar(pb, sim)
@@ -109,6 +112,8 @@ for (sim in seq_len(numsims)) {
   tilde_gamma[is.na(tilde_gamma)] <- 0
 
   gamma <- abs(tilde_gamma - hat_gamma)
+  gamma_raw[[sim]] <- gamma
+  support_raw[[sim]] <- support
 
   # temp_old <- 0
   for (bw in seq_along(bandwidth_seq)){
@@ -158,10 +163,16 @@ ggplot(plot_table) +
 ggsave(paste("fig_newcriterion", suffix,  "perc", suffix, "OK.jpg", sep = ""), path = img_path,
        width = default_width, height = default_height+1, units = "in")
 
-gamma_vec <- data.frame(gamma_vec = c(gamma))
-ggplot(gamma_vec) +
+if (length(unique(support_raw)) == 1) {
+  gamma_list <- lapply(gamma_raw, c)
+  gamma_mat <- matrix(unlist(gamma_raw), ncol = length(gamma_list[[1]]), byrow = T)
+  gamma_vec <- apply(gamma_mat, 2, mean)
+  gamma_dt <- data.frame(gamma_vec = gamma_vec)
+}
+
+ggplot(gamma_dt) +
   geom_histogram(aes(x = gamma_vec, y = stat(count)/sum(stat(count))), binwidth = 10) +
-  bmp_plot(data = gamma_vec,
+  bmp_plot(data = gamma_dt,
            xlab = "Absolute Difference in Transport Maps",
            ylab = "Density",
            xtype = "continuous", xbreaks = seq(0, 600, 30), xlabels = seq(0, 600, 30),
