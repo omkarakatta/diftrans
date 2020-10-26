@@ -30,13 +30,13 @@ linetype1 <- "dashed" # secondary line type
 linetype2 <- "dotted" # tertiary line type
 linetype3 <- "twodash"
 linetype4 <- "longdash"
-img_path <- paste("/Users/omkar_katta/BFI/3_BMP_GP/img/img_misc/Oct25", paste(version, temp, sep = "-"), sep = "/")
+img_path <- paste("/Users/omkar_katta/BFI/3_BMP_GP/img/img_misc/Oct26", paste(version, temp, sep = "-"), sep = "/")
 suffix <- "_"
 default_width <- 7
 default_height <- 3
 
 epsilon <- 0.1
-bandwidth_seq <- seq(0, 20000, 1000)
+bandwidth_seq <- seq(0, 40000, 1000)
 numsims <- 500
 results_raw <- matrix(NA_real_, nrow = numsims, ncol = length(bandwidth_seq))
 
@@ -148,8 +148,9 @@ ggplot(plot_table) +
   # scale_y_continuous(breaks = seq(0, max(plot_table$value), 2000),
                      # labels = seq(0, max(plot_table$value), 2000)) +
   scale_y_continuous(breaks = seq(0, 8, 0.5), labels = seq(0, 8, 0.5)) +
-  scale_x_continuous(breaks = seq(0, 20000, 2000), labels = seq(0, 20000, 2000)) +
+  scale_x_continuous(breaks = seq(0, 40000, 4000), labels = seq(0, 40000, 4000)) +
   ylab("Percentage") +
+  xlab("d") +
   theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
             legend.direction = "vertical",
             legend.position = c(0.85, 0.8))
@@ -162,7 +163,8 @@ ggplot(gamma_vec) +
   geom_histogram(aes(x = gamma_vec, y = stat(count)/sum(stat(count))), binwidth = 10) +
   bmp_plot(data = gamma_vec,
            xlab = "Absolute Difference in Transport Maps",
-           xtype = "continuous", xbreaks = seq(0, 300, 20), xlabels = seq(0, 300, 20),
+           ylab = "Density",
+           xtype = "continuous", xbreaks = seq(0, 600, 30), xlabels = seq(0, 600, 30),
            sizefont = (fontsize - 8),
            axissizefont = (fontsizeaxis - 5))
 
