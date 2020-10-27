@@ -30,7 +30,7 @@ linetype1 <- "dashed" # secondary line type
 linetype2 <- "dotted" # tertiary line type
 linetype3 <- "twodash"
 linetype4 <- "longdash"
-img_path <- paste("/Users/omkar_katta/BFI/3_BMP_GP/img/img_misc/Oct26", paste(version, temp, sep = "-"), sep = "/")
+img_path <- paste("/Users/omkar_katta/BFI/3_BMP_GP/img/img_misc/Oct27", paste(version, temp, sep = "-"), sep = "/")
 suffix <- "_"
 default_width <- 7
 default_height <- 3
@@ -168,6 +168,8 @@ if (length(unique(support_raw)) == 1) {
   gamma_mat <- matrix(unlist(gamma_raw), ncol = length(gamma_list[[1]]), byrow = T)
   gamma_vec <- apply(gamma_mat, 2, mean)
   gamma_dt <- data.frame(gamma_vec = gamma_vec)
+  gamma_sd <- apply(gamma_mat, 2, sd)
+  gamma_max <- apply(gamma_mat, 2, max)
 }
 
 ggplot(gamma_dt) +
