@@ -115,16 +115,10 @@ for (sim in seq_len(numsims)) {
   gamma_raw[[sim]] <- gamma
   support_raw[[sim]] <- support
 
-  # temp_old <- 0
-  for (bw in seq_along(bandwidth_seq)){
+  for (bw in seq_along(bandwidth_seq)) {
     bandwidth <- bandwidth_seq[bw]
     cost <- build_costmatrix(support, bandwidth = bandwidth)
     results_raw[sim, bw] <- sum(cost * gamma)
-    # temp_new <- sum(cost * gamma == 0)
-    # if (temp_new < temp_old) {
-    #   print(c(sim, bw))
-    # }
-    # temp_old <- temp_new
   }
 
 }
