@@ -283,3 +283,45 @@ ggplot() +
 
 ggsave(paste("fig_newcriterion", suffix,  "total_scatter_clean", suffix, "OK.jpg", sep = ""), path = img_path,
        width = default_width, height = default_height + 2, units = "in")
+
+# Binning ------
+binwidth <- 10000
+bins <- seq(0, max(final_support) + binwidth, by = binwidth)
+labels <- paste(">", bins)
+labels <- labels[1:(length(labels)-1)]
+binvalue_raw <- cut(plot_table$abs_diff, breaks = bins, labels = labels,
+                include.lowest = FALSE, right = TRUE)
+binvalue <- addNA(binvalue_raw) #~ ensure <NA> is a factor as NA
+levels(binvalue) <- c(levels(binvalue_raw), "=0") #~ replace level NA with "= 0"
+binvalue <- factor(binvalue, #~ reorganize levels so that "= 0" comes first
+                   levels(binvalue)[c(length(levels(binvalue)),
+                                      1:(length(levels(binvalue))-1))])
+plot_table_bins <- cbind(plot_table, binvalue) %>%
+  dplyr::group_by(binvalue) %>%
+  dplyr::summarise(sum = sum(gamma))
+
+ggplot() +
+  geom_bar(data = plot_table_bins, stat = "identity",
+           aes(x = binvalue, y = sum)) +
+  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
+            xangle = 90) +
+  xlab("binned absolute difference") +
+  ylab("total average mass transferred")
+
+ggsave(paste("fig_newcriterion", suffix,  "total_bin", suffix, "OK.jpg", sep = ""), path = img_path,
+       width = default_width, height = default_height + 2, units = "in")
+
+#~ cleaner plot
+plot_table_bins_cleaned <- plot_table_bins %>%
+  dplyr::filter(sum != 0)
+
+ggplot() +
+  geom_bar(data = plot_table_bins_cleaned, stat = "identity",
+           aes(x = binvalue, y = sum)) +
+  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
+            xangle = 90) +
+  xlab("binned absolute difference") +
+  ylab("total average mass transferred")
+
+ggsave(paste("fig_newcriterion", suffix,  "total_bin_clean", suffix, "OK.jpg", sep = ""), path = img_path,
+       width = default_width, height = default_height + 2, units = "in")
