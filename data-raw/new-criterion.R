@@ -292,7 +292,7 @@ labels <- labels[1:(length(labels)-1)]
 binvalue_raw <- cut(plot_table$abs_diff, breaks = bins, labels = labels,
                 include.lowest = FALSE, right = TRUE)
 binvalue <- addNA(binvalue_raw) #~ ensure <NA> is a factor as NA
-levels(binvalue) <- c(levels(binvalue_raw), "=0") #~ replace level NA with "= 0"
+levels(binvalue) <- c(levels(binvalue_raw), "= 0") #~ replace level NA with "= 0"
 binvalue <- factor(binvalue, #~ reorganize levels so that "= 0" comes first
                    levels(binvalue)[c(length(levels(binvalue)),
                                       1:(length(levels(binvalue))-1))])
