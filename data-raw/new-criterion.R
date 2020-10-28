@@ -30,7 +30,7 @@ linetype1 <- "dashed" # secondary line type
 linetype2 <- "dotted" # tertiary line type
 linetype3 <- "twodash"
 linetype4 <- "longdash"
-img_path <- paste("/Users/omkar_katta/BFI/3_BMP_GP/img/img_misc/Oct27", paste(version, temp, sep = "-"), sep = "/")
+img_path <- paste("/Users/omkar_katta/BFI/3_BMP_GP/img/img_misc/Oct28", paste(version, temp, sep = "-"), sep = "/")
 suffix <- "_"
 default_width <- 7
 default_height <- 3
@@ -178,3 +178,108 @@ ggplot(gamma_dt) +
 
 ggsave(paste("fig_newcriterion", suffix,  "gamma", suffix, "OK.jpg", sep = ""), path = img_path,
        width = default_width, height = default_height, units = "in")
+
+#~ collect all pairs of the support and respective indices
+expand_support <- expand.grid(final_support, final_support) %>%
+  dplyr::rename(from = Var1, to = Var2)
+expand_index <- expand.grid(seq(1, length(final_support)),
+                            seq(1, length(final_support))) %>%
+  dplyr::rename(from_index = Var1, to_index = Var2)
+#~ compute the absolute difference and the mean transfer for each support pair
+plot_table <- cbind(expand_support, expand_index) %>%
+  dplyr::mutate(abs_diff = abs(from - to)) %>%
+  dplyr::rowwise() %>%
+  dplyr::mutate(gamma = gamma_mean_mat[from_index, to_index]) %>%
+  dplyr::ungroup()
+#~ compute mean transfer and total transfer at each absolute difference
+plot_table2 <- plot_table %>%
+  dplyr::group_by(abs_diff) %>%
+  dplyr::summarise(mean = mean(gamma),
+                   sum = sum(gamma))
+
+
+#~ scatter
+ggplot() +
+  geom_point(data = plot_table, aes(x = abs_diff, y = gamma), alpha = 0.5) +
+  ylab("average mass transferred across 500 simulations") +
+  xlab("absolute difference between values of support") +
+  scale_x_continuous(breaks = seq(0, max(plot_table$abs_diff), by = 100000),
+                     labels = seq(0, max(plot_table$abs_diff), by = 100000)) +
+  scale_y_continuous(breaks = seq(0, max(plot_table$gamma), by = 50),
+                     labels = seq(0, max(plot_table$gamma), by = 50)) +
+  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5))
+
+ggsave(paste("fig_newcriterion", suffix,  "scatter", suffix, "OK.jpg", sep = ""), path = img_path,
+       width = default_width, height = default_height + 2, units = "in")
+
+#~ scatter with total
+ymax <- max(plot_table2$sum[plot_table2$abs_diff > 0])
+ggplot() +
+  geom_point(data = plot_table, aes(x = abs_diff, y = gamma), alpha = 0.5) +
+  geom_point(data = plot_table2, aes(x = abs_diff, y = sum), color = "red", size = 0.25) +
+  ylab("average mass transferred across 500 simulations") +
+  xlab("absolute difference between values of support") +
+  scale_x_continuous(breaks = seq(0, max(plot_table$abs_diff), by = 100000),
+                     labels = seq(0, max(plot_table$abs_diff), by = 100000)) +
+  scale_y_continuous(breaks = seq(0, ymax, by = 50),
+                     labels = seq(0, ymax, by = 50),
+                     limits = c(0, ymax)) +
+  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5))
+
+ggsave(paste("fig_newcriterion", suffix,  "total_scatter", suffix, "OK.jpg", sep = ""), path = img_path,
+       width = default_width, height = default_height + 2, units = "in")
+
+#~ scatter with mean
+ggplot() +
+  geom_point(data = plot_table, aes(x = abs_diff, y = gamma), alpha = 0.5) +
+  geom_point(data = plot_table2, aes(x = abs_diff, y = mean), color = "red", size = 0.25) +
+  ylab("average mass transferred across 500 simulations") +
+  xlab("absolute difference between values of support") +
+  scale_x_continuous(breaks = seq(0, max(plot_table$abs_diff), by = 100000),
+                     labels = seq(0, max(plot_table$abs_diff), by = 100000)) +
+  scale_y_continuous(breaks = seq(0, max(plot_table$gamma), by = 50),
+                     labels = seq(0, max(plot_table$gamma), by = 50)) +
+  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5))
+
+ggsave(paste("fig_newcriterion", suffix,  "mean_scatter", suffix, "OK.jpg", sep = ""), path = img_path,
+       width = default_width, height = default_height + 2, units = "in")
+
+#~ remove points that do not contribute to optimal cost
+plot_table_cleaned <- plot_table %>%
+  dplyr::filter(abs_diff != 0) %>%
+  dplyr::filter(gamma != 0)
+plot_table2_cleaned <- plot_table_cleaned %>%
+  dplyr::group_by(abs_diff) %>%
+  dplyr::summarise(mean = mean(gamma),
+                   sum = sum(gamma))
+
+
+#~ scatter
+ggplot() +
+  geom_point(data = plot_table_cleaned, aes(x = abs_diff, y = gamma), alpha = 0.5) +
+  ylab("average mass transferred across 500 simulations") +
+  xlab("absolute difference between values of support") +
+  scale_x_continuous(breaks = seq(0, max(plot_table$abs_diff), by = 100000),
+                     labels = seq(0, max(plot_table$abs_diff), by = 100000)) +
+  scale_y_continuous(breaks = seq(0, max(plot_table$gamma), by = 50),
+                     labels = seq(0, max(plot_table$gamma), by = 50)) +
+  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5))
+
+ggsave(paste("fig_newcriterion", suffix,  "scatter", suffix, "cleaned", "OK.jpg", sep = ""), path = img_path,
+       width = default_width, height = default_height + 2, units = "in")
+
+#~ scatter with total
+ggplot() +
+  geom_point(data = plot_table_cleaned, aes(x = abs_diff, y = gamma), alpha = 0.5) +
+  geom_point(data = plot_table2_cleaned, aes(x = abs_diff, y = sum), color = "red", size = 0.25) +
+  ylab("average mass transferred across 500 simulations") +
+  xlab("absolute difference between values of support") +
+  scale_x_continuous(breaks = seq(0, max(plot_table_cleaned$abs_diff), by = 100000),
+                     labels = seq(0, max(plot_table_cleaned$abs_diff), by = 100000)) +
+  scale_y_continuous(breaks = seq(0, max(plot_table2_cleaned$sum)+50, by = 50),
+                     labels = seq(0, max(plot_table2_cleaned$sum)+50, by = 50),
+                     limits = c(0, max(plot_table2_cleaned$sum))) +
+  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5))
+
+ggsave(paste("fig_newcriterion", suffix,  "total_scatter_clean", suffix, "OK.jpg", sep = ""), path = img_path,
+       width = default_width, height = default_height + 2, units = "in")
