@@ -158,12 +158,13 @@ ggsave(paste("fig_newcriterion", suffix,  "perc", suffix, "OK.jpg", sep = ""), p
        width = default_width, height = default_height+1, units = "in")
 
 if (length(unique(support_raw)) == 1) {
-  gamma_list <- lapply(gamma_raw, c)
-  gamma_mat <- matrix(unlist(gamma_raw), ncol = length(gamma_list[[1]]), byrow = T)
-  gamma_vec <- apply(gamma_mat, 2, mean)
-  gamma_dt <- data.frame(gamma_vec = gamma_vec)
-  gamma_sd <- apply(gamma_mat, 2, sd)
-  gamma_max <- apply(gamma_mat, 2, max)
+  #~ get support of gamma matrix
+  final_support <- support_raw[[1]]
+  #~ get mean of each entry in gamma matrix across all 500 simulations
+  #~ save the result as a matrix and a vector
+  gamma_mean_mat <- apply(simplify2array(gamma_raw), c(1, 2), mean)
+  gamma_mean_vec <- c(gamma_mean_mat)
+  gamma_dt <- data.frame(gamma_vec = gamma_mean_vec)
 }
 
 ggplot(gamma_dt) +
