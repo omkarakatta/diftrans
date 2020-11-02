@@ -509,7 +509,7 @@ if (show_fig | show_fig6){
   message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
 
-### Figure 6 - Nov2 ---------------------------
+### Figure 6 - Nov02 ---------------------------
 fignum <- "6_B1011" # this is what we want :)
 if (show_fig | show_fig6) {
   set.seed(11 + seedplus)
@@ -521,7 +521,7 @@ if (show_fig | show_fig6) {
   post <- prep_data(Beijing, prep = "pmf",
                     support = support,
                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
-  bandwidth_seq = seq(0, 100000, 1000)
+  bandwidth_seq <- seq(0, 100000, 1000)
 
   real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
 
@@ -535,22 +535,22 @@ if (show_fig | show_fig6) {
     # draw n_B,2011 samples from Beijing, 2010
     synth_pre2 <- data.frame(MSRP = pre$MSRP,
                              count = rmultinom(1, sum(post$count), pre$count))
-    placebo <- diftrans(synth_pre1, synth_pre2, 
+    placebo <- diftrans(synth_pre1, synth_pre2,
                         bandwidth_seq = bandwidth_seq, conservative = F)
     placebo_results[i, ] <- placebo$main
   }
 
-  placebo_mean <- apply(placebo_results, 2, mean)*100
-  placebo_sd <- apply(placebo_results, 2, sd)*100
+  placebo_mean <- apply(placebo_results, 2, mean) * 100
+  placebo_sd <- apply(placebo_results, 2, sd) * 100
   probs <- c(0.90, 0.95, 0.99)
-  placebo_quantiles <- apply(placebo_results, 2, quantile, prob = probs)*100
+  placebo_quantiles <- apply(placebo_results, 2, quantile, prob = probs) * 100
 
   plot_mat <- do.call(rbind, list(placebo_mean, placebo_sd, placebo_quantiles))
   rownames(plot_mat) <- c("mean", "sd", paste("quantile", probs, sep = ""))
   plot_table <- t(plot_mat) %>%
     as.data.frame() %>%
     mutate(bandwidth = bandwidth_seq,
-           real = real$main*100) %>%
+           real = real$main * 100) %>%
     select(bandwidth, real, everything())
 
   # close to mean placebo = 0.05%
@@ -610,16 +610,16 @@ if (show_fig | show_fig6) {
     scale_y_continuous(breaks = seq(0, 1.6, 0.1)) +
     scale_x_continuous(breaks = seq(0, 100000, 10000))
 
-  if (save_fig | save_fig6){
+  if (save_fig | save_fig6) {
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""),
            path = img_path, fig6_plot,
            width = default_width, height = default_height, units = "in")
-    message(paste("fig", fignum, " is saved in ", img_path, " as fig", 
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig",
                   fignum, suffix, "OK.jpg", sep = ""))
     ggsave(paste("fig", fignum, suffix,"zoomed", suffix, "OK.jpg", sep = ""),
            path = img_path, fig6_plot2,
            width = default_width, height = default_height, units = "in")
-    message(paste("fig", fignum, "_zoomed", " is saved in ", img_path, " as fig", 
+    message(paste("fig", fignum, "_zoomed", " is saved in ", img_path, " as fig",
                   fignum, suffix, "OK.jpg", sep = ""))
   }
 
@@ -629,7 +629,7 @@ if (show_fig | show_fig6) {
 }
 
 ### Figure 6 - B1011 ---------------------------
-fignum <- "6_B1011" 
+fignum <- "6_B1011"
 if (show_fig | show_fig6){
   set.seed(11 + seedplus)
   support <- prep_data(data = Beijing, prep = "support")
