@@ -586,8 +586,6 @@ if (show_fig | show_fig6) {
               axissizefont = (fontsizeaxis - 5)) +
     scale_x_continuous(breaks = seq(0, 100000, 10000))
 
-  ggsave()
-
   # simulation results (no real cost)
   fig6_plot2 <- ggplot(data = plot_table, aes(x = bandwidth)) +
     geom_line(aes(y = quantile0.99, color = "1", linetype = "1")) +
