@@ -191,3 +191,28 @@ ggplot() +
 
 ggsave(paste("fig", "penalty", "bin", "25000.jpg", sep = "_"),
        path = img_path, width = default_width, height = default_height, units = "in")
+
+
+#~ running sum of penalized optimal transport at d* = 25000
+total_mass <- sum(OT_final$total)
+OT_running_sum <- OT_final %>%
+  dplyr::arrange(desc(abs_diff)) %>%
+  dplyr::mutate(cumulative = cumsum(total)) %>%
+  dplyr::mutate(percentage = cumulative / total_mass * 100) %>%
+  dplyr::arrange(abs_diff)
+
+ggplot(OT_running_sum, aes(x = abs_diff, y = percentage)) +
+  geom_line() +
+  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5)) +
+  xlab("d") +
+  ylab("Mass above d (% of total mass)") +
+  scale_y_continuous(breaks = seq(0, 100, 10)) +
+  scale_x_continuous(breaks = seq(0, max(OT_running_sum$abs_diff), 100000))
+
+ggsave(paste("fig", "penalty", "run", "25000.jpg", sep = "_"),
+       path = img_path, width = default_width, height = default_height, units = "in")
+
+OT_running_sum %>%
+  dplyr::filter(abs_diff %% 10000 < 1000) %>%
+  dplyr::select(abs_diff, cumulative, percentage) %>%
+  knitr::kable(., format = "latex", booktabs = T, linesep = "", longtable = T, align = 'c')
