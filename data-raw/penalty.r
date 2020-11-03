@@ -123,3 +123,71 @@ ggplot(plot_table, aes(x = bandwidth, y = value,
 ggsave(paste("fig", suffix, "penalty", suffix, "OK.jpg", sep = ""),
        path = img_path,
        width = default_width, height = default_height, units = "in")
+
+# HISTOGRAM OF UNIQUE SOLN
+d <- 25000
+lambda <- 0.01
+l1_cost <- Lpcost(support, support, 1)
+l0_cost <- build_costmatrix(support = support, bandwidth = d)
+cost_mat <- l0_cost + lambda + l1_cost
+OT <- transport(
+    as.numeric(sum(post$count) / sum(pre$count) * pre$count),
+    as.numeric(post$count),
+    cost_mat
+)
+
+pre_support <- unique(pre$MSRP[pre$count != 0 & !is.na(pre$MSRP)])
+post_support <- unique(post$MSRP[post$count != 0 & !is.na(post$MSRP)])
+OT_revised <- OT %>%
+  dplyr::mutate(from = pre_support[from]) %>%
+  dplyr::mutate(to = post_support[to])
+common <- unique(sort(c(OT_revised$from, OT_revised$to)))
+OT_final <- OT_revised %>%
+  #~ dplyr::rowwise() %>%
+  #~ dplyr::mutate(from_index = which(common == from)) %>%
+  #~ dplyr::mutate(to_index = which(common == to)) %>%
+  #~ dplyr::ungroup() %>%
+  dplyr::mutate(abs_diff = abs(from - to)) %>%
+  dplyr::group_by(abs_diff) %>%
+  dplyr::summarise(total = sum(mass))
+
+#~ bar graph
+ggplot(OT_final) +
+  geom_bar(aes(x = abs_diff, y = total), stat = "identity")
+
+#~ default histogram
+OT_uncount <- OT_final %>%
+  tidyr::uncount(total)
+ggplot(OT_uncount) +
+  geom_histogram(aes(x = abs_diff))
+
+#~ binning
+OT_final_bin <- OT_revised %>%
+  dplyr::mutate(abs_diff = abs(from - to))
+binwidth <- 10000
+bins <- seq(0, max(common) + binwidth, by = binwidth)
+labels <- paste(">", bins)
+labels <- labels[1:(length(labels)-1)]
+binvalue_raw <- cut(OT_final_bin$abs_diff, breaks = bins, labels = labels,
+                    include.lowest = FALSE, right = TRUE)
+binvalue <- addNA(binvalue_raw) #~ ensure <NA> is a factor as NA
+levels(binvalue) <- c(levels(binvalue_raw), "= 0") #~ replace level NA with "= 0"
+binvalue <- factor(binvalue, #~ reorganize levels so that "= 0" comes first
+                   levels(binvalue)[c(length(levels(binvalue)),
+                                      1:(length(levels(binvalue))-1))])
+OT_plot_bin <- cbind(OT_final_bin, binvalue) %>%
+  dplyr::group_by(binvalue) %>%
+  dplyr::summarise(total = sum(mass))
+
+ggplot() +
+  geom_bar(data = OT_plot_bin, stat = "identity",
+           aes(x = binvalue, y = total)) +
+  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
+            xangle = 90) +
+  scale_y_continuous(breaks = seq(0, 100000, 5000),
+                     labels = seq(0, 100000, 5000)) +
+  xlab("binned absolute difference") +
+  ylab("total mass transferred")
+
+ggsave(paste("fig", "penalty", "bin", "25000.jpg", sep = "_"),
+       path = img_path, width = default_width, height = default_height, units = "in")
