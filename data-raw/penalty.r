@@ -74,7 +74,7 @@ Lpcost <- function(min_pre_support, min_post_support, p) {
   costm
 }
 
-l1_cost <- Lpcost(support, support, 1)
+#~ l1_cost <- Lpcost(support, support, 1)
 
 # initialize values
 bandwidth_seq <- seq(0, 100000, 1000)
@@ -83,48 +83,48 @@ results <- matrix(NA_real_,
                   nrow = length(bandwidth_seq), ncol = length(lambda_seq))
 
 # compute data
-pb <- txtProgressBar(0, length(bandwidth_seq))
-for (i in seq_along(bandwidth_seq)) {
-  setTxtProgressBar(pb, i)
-  bw <- bandwidth_seq[i]
-  l0_cost <- build_costmatrix(support = support, bandwidth = bw)
-  for (j in seq_along(lambda_seq)) {
-    lambda <- lambda_seq[j]
-    cost_mat <- l0_cost + lambda * l1_cost
-    OT <- get_OTcost(pre, post, bandwidth = bw, costmat = cost_mat)$prop_bribe * 100
-    results[i, j] <- OT
-  }
-}
-colnames(results) <- paste("lambda", lambda_seq, sep = "")
+#~ pb <- txtProgressBar(0, length(bandwidth_seq))
+#~ for (i in seq_along(bandwidth_seq)) {
+#~   setTxtProgressBar(pb, i)
+#~   bw <- bandwidth_seq[i]
+#~   l0_cost <- build_costmatrix(support = support, bandwidth = bw)
+#~   for (j in seq_along(lambda_seq)) {
+#~     lambda <- lambda_seq[j]
+#~     cost_mat <- l0_cost + lambda * l1_cost
+#~     OT <- get_OTcost(pre, post, bandwidth = bw, costmat = cost_mat)$prop_bribe * 100
+#~     results[i, j] <- OT
+#~   }
+#~ }
+#~ colnames(results) <- paste("lambda", lambda_seq, sep = "")
+#~ 
+#~ #~ # sanity check
+#~ #~ real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)$main * 100
+#~ #~ test <- results[, "lambda0"]
+#~ #~ stopifnot(identical(real, test))
+#~ 
+#~ plot_table <- data.frame(results) %>%
+#~   dplyr::mutate(bandwidth = bandwidth_seq) %>%
+#~   tidyr::pivot_longer(cols = contains("lambda"))
+#~ 
+#~ ggplot(plot_table, aes(x = bandwidth, y = value,
+#~                        color = name, linetype = name)) +
+#~   geom_line() +
+#~   theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5)) +
+#~   scale_linetype_manual(values = c(linetype0, linetype1),
+#~                         labels = c("real", "lambda = 0.01"), name = "") +
+#~   scale_color_manual(values = get_color_palette(2, grayscale),
+#~                      labels = c("real", "lambda = 0.01"),
+#~                      name = "") +
+#~   scale_x_continuous(breaks = seq(0, 100000, 10000), labels = seq(0, 100000, 10000)) +
+#~   scale_y_continuous(breaks = seq(0, 40, 5)) +
+#~   xlab("d") +
+#~   ylab("Transport Cost (%)")
+#~ 
+#~ ggsave(paste("fig", suffix, "penalty", suffix, "OK.jpg", sep = ""),
+#~        path = img_path,
+#~        width = default_width, height = default_height, units = "in")
 
-#~ # sanity check
-#~ real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)$main * 100
-#~ test <- results[, "lambda0"]
-#~ stopifnot(identical(real, test))
-
-plot_table <- data.frame(results) %>%
-  dplyr::mutate(bandwidth = bandwidth_seq) %>%
-  tidyr::pivot_longer(cols = contains("lambda"))
-
-ggplot(plot_table, aes(x = bandwidth, y = value,
-                       color = name, linetype = name)) +
-  geom_line() +
-  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5)) +
-  scale_linetype_manual(values = c(linetype0, linetype1),
-                        labels = c("real", "lambda = 0.01"), name = "") +
-  scale_color_manual(values = get_color_palette(2, grayscale),
-                     labels = c("real", "lambda = 0.01"),
-                     name = "") +
-  scale_x_continuous(breaks = seq(0, 100000, 10000), labels = seq(0, 100000, 10000)) +
-  scale_y_continuous(breaks = seq(0, 40, 5)) +
-  xlab("d") +
-  ylab("Transport Cost (%)")
-
-ggsave(paste("fig", suffix, "penalty", suffix, "OK.jpg", sep = ""),
-       path = img_path,
-       width = default_width, height = default_height, units = "in")
-
-# HISTOGRAM OF UNIQUE SOLN
+# This is what we want!
 d <- 25000
 lambda <- 0.01
 l1_cost <- Lpcost(support, support, 1)
@@ -151,46 +151,46 @@ OT_final <- OT_revised %>%
   dplyr::group_by(abs_diff) %>%
   dplyr::summarise(total = sum(mass))
 
-#~ bar graph
-ggplot(OT_final) +
-  geom_bar(aes(x = abs_diff, y = total), stat = "identity")
-
-#~ default histogram
-OT_uncount <- OT_final %>%
-  tidyr::uncount(total)
-ggplot(OT_uncount) +
-  geom_histogram(aes(x = abs_diff))
-
-#~ binning
-OT_final_bin <- OT_revised %>%
-  dplyr::mutate(abs_diff = abs(from - to))
-binwidth <- 10000
-bins <- seq(0, max(common) + binwidth, by = binwidth)
-labels <- paste(">", bins)
-labels <- labels[1:(length(labels)-1)]
-binvalue_raw <- cut(OT_final_bin$abs_diff, breaks = bins, labels = labels,
-                    include.lowest = FALSE, right = TRUE)
-binvalue <- addNA(binvalue_raw) #~ ensure <NA> is a factor as NA
-levels(binvalue) <- c(levels(binvalue_raw), "= 0") #~ replace level NA with "= 0"
-binvalue <- factor(binvalue, #~ reorganize levels so that "= 0" comes first
-                   levels(binvalue)[c(length(levels(binvalue)),
-                                      1:(length(levels(binvalue))-1))])
-OT_plot_bin <- cbind(OT_final_bin, binvalue) %>%
-  dplyr::group_by(binvalue) %>%
-  dplyr::summarise(total = sum(mass))
-
-ggplot() +
-  geom_bar(data = OT_plot_bin, stat = "identity",
-           aes(x = binvalue, y = total)) +
-  theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
-            xangle = 90) +
-  scale_y_continuous(breaks = seq(0, 100000, 5000),
-                     labels = seq(0, 100000, 5000)) +
-  xlab("binned absolute difference") +
-  ylab("total mass transferred")
-
-ggsave(paste("fig", "penalty", "bin", "25000.jpg", sep = "_"),
-       path = img_path, width = default_width, height = default_height, units = "in")
+#~ #~ bar graph
+#~ ggplot(OT_final) +
+#~   geom_bar(aes(x = abs_diff, y = total), stat = "identity")
+#~ 
+#~ #~ default histogram
+#~ OT_uncount <- OT_final %>%
+#~   tidyr::uncount(total)
+#~ ggplot(OT_uncount) +
+#~   geom_histogram(aes(x = abs_diff))
+#~ 
+#~ #~ binning
+#~ OT_final_bin <- OT_revised %>%
+#~   dplyr::mutate(abs_diff = abs(from - to))
+#~ binwidth <- 10000
+#~ bins <- seq(0, max(common) + binwidth, by = binwidth)
+#~ labels <- paste(">", bins)
+#~ labels <- labels[1:(length(labels)-1)]
+#~ binvalue_raw <- cut(OT_final_bin$abs_diff, breaks = bins, labels = labels,
+#~                     include.lowest = FALSE, right = TRUE)
+#~ binvalue <- addNA(binvalue_raw) #~ ensure <NA> is a factor as NA
+#~ levels(binvalue) <- c(levels(binvalue_raw), "= 0") #~ replace level NA with "= 0"
+#~ binvalue <- factor(binvalue, #~ reorganize levels so that "= 0" comes first
+#~                    levels(binvalue)[c(length(levels(binvalue)),
+#~                                       1:(length(levels(binvalue))-1))])
+#~ OT_plot_bin <- cbind(OT_final_bin, binvalue) %>%
+#~   dplyr::group_by(binvalue) %>%
+#~   dplyr::summarise(total = sum(mass))
+#~ 
+#~ ggplot() +
+#~   geom_bar(data = OT_plot_bin, stat = "identity",
+#~            aes(x = binvalue, y = total)) +
+#~   theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5),
+#~             xangle = 90) +
+#~   scale_y_continuous(breaks = seq(0, 100000, 5000),
+#~                      labels = seq(0, 100000, 5000)) +
+#~   xlab("binned absolute difference") +
+#~   ylab("total mass transferred")
+#~ 
+#~ ggsave(paste("fig", "penalty", "bin", "25000.jpg", sep = "_"),
+#~        path = img_path, width = default_width, height = default_height, units = "in")
 
 
 #~ running sum of penalized optimal transport at d* = 25000
