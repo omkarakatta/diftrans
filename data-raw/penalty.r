@@ -30,7 +30,7 @@ linetype2 <- "dotted" # tertiary line type
 linetype3 <- "twodash"
 linetype4 <- "longdash"
 
-img_path <- paste("/Users/omkar_katta/BFI/3_BMP_GP/img/img_misc/Nov03", paste(version, temp, sep = "-"), sep = "/")
+img_path <- paste("/Users/omkar_katta/BFI/3_BMP_GP/img/img_misc/Nov04", paste(version, temp, sep = "-"), sep = "/")
 suffix <- "_"
 default_width <- 7
 default_height <- 3
@@ -197,22 +197,25 @@ ggsave(paste("fig", "penalty", "bin", "25000.jpg", sep = "_"),
 total_mass <- sum(OT_final$total[OT_final$abs_diff > 25000])
 OT_running_sum <- OT_final %>%
   dplyr::arrange(desc(abs_diff)) %>%
-  dplyr::mutate(cumulative = cumsum(total)) %>%
+  dplyr::mutate(total_lag = dplyr::lag(total)) %>%
+  tidyr::replace_na(list(total_lag = 0)) %>%
+  dplyr::mutate(cumulative = cumsum(total_lag)) %>%
   dplyr::mutate(percentage = cumulative / total_mass * 100) %>%
-  dplyr::arrange(abs_diff)
+  dplyr::arrange(abs_diff) %>%
+  dplyr::filter(abs_diff >= 25000)
 
 ggplot(OT_running_sum, aes(x = abs_diff, y = percentage)) +
   geom_line() +
   theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5)) +
   xlab("d") +
   ylab("Mass above d (% of total mass > 25000)") +
-  scale_y_continuous(breaks = seq(0, max(OT_running_sum$percentage) + 100, 100)) +
-  scale_x_continuous(breaks = seq(0, max(OT_running_sum$abs_diff), 100000))
+  scale_y_continuous(breaks = seq(0, max(OT_running_sum$percentage), 10)) +
+  scale_x_continuous(breaks = seq(25000, max(OT_running_sum$abs_diff), 100000))
 
 ggsave(paste("fig", "penalty", "run", "25000.jpg", sep = "_"),
        path = img_path, width = default_width, height = default_height, units = "in")
 
 OT_running_sum %>%
-  dplyr::filter(abs_diff %% 10000 < 1000) %>%
+  dplyr::filter(abs_diff %% 5000 < 1000) %>%
   dplyr::select(abs_diff, cumulative, percentage) %>%
   knitr::kable(., format = "latex", booktabs = T, linesep = "", longtable = T, align = 'c')
