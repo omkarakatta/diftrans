@@ -873,7 +873,7 @@ nrow(fig3_prep)
 summary(fig3_prep$diff)
 
 # Diff-in-diff
-if (show_diff_in_diff){
+if (show_diff_in_diff) {
   did_BT <- do.call("rbind", list(Beijing, Tianjin)) %>%
     filter(ym < "2012-01-01") %>%
     filter(city == "Beijing" | city == "Tianjin") %>%
@@ -919,11 +919,5 @@ if (show_diff_in_diff){
             dep.var.labels.include = FALSE,
             # single.row = TRUE,
             notes = c("t-statistics are in parentheses."))
-
-  # add caption
-  # add \hline after header row
-  # change label as necessary
-  # change float as necessary
-
 }
 
