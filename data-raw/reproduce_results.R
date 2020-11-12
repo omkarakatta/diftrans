@@ -117,13 +117,13 @@ linetype4 <- "longdash"
 
 ### Prepare Data ---------------------------
 
-if (version == "original"){
+if (version == "original") {
   Beijing <- Beijing_sample
   Tianjin <- Tianjin_sample
   Shijiazhuang <- Shijiazhuang_sample
-  seedplus <- 0 # i.e. do not modify seed
+  seedplus <- 0
   message(paste("Version: ", version, sep = ""))
-} else if (version == "v1"){
+} else if (version == "v1") {
   # filter out Dec 2010
   Beijing <- Beijing_sample %>%
     filter(!(year == 2010 & month == 12))
@@ -133,7 +133,7 @@ if (version == "original"){
     filter(!(year == 2010 & month == 12))
   seedplus <- 1
   message(paste("Version: ", version, sep = ""))
-} else if (version == "v2"){
+} else if (version == "v2") {
   # filter out Dec 2010, Jan 2011, and Feb 2011
   Beijing <- Beijing_sample %>%
     filter(!(year == 2010 & month == 12)) %>%
@@ -152,7 +152,7 @@ if (version == "original"){
 
 ### Figure 1 ---------------------------
 fignum <- 1
-if (show_fig | show_fig1){
+if (show_fig | show_fig1) {
   BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
   fig1_prep <- BTS %>%
     select(ym, city, swtprice) %>%
@@ -165,7 +165,8 @@ if (show_fig | show_fig1){
     bmp_point(x = ym,
               y = swtprice,
               data = fig1_prep,
-              color = factor(city, levels = c("Beijing", "Tianjin", "Shijiazhuang")),
+              color = factor(city,
+                             levels = c("Beijing", "Tianjin", "Shijiazhuang")),
               size = 1.5,
               alpha = 0.5,
               show.legend = F) +
@@ -182,8 +183,10 @@ if (show_fig | show_fig1){
              sizefont = (fontsize - 8),
              axissizefont = (fontsizeaxis - 5)) +
     geom_line(data = fig1_prep, aes(x = ym, y = swtprice,
-                                    color = factor(city, levels = c("Beijing", "Tianjin", "Shijiazhuang")),
-                                    linetype = factor(city, levels = c("Beijing", "Tianjin", "Shijiazhuang"))),
+                                    color = factor(city,
+                                                   levels = c("Beijing", "Tianjin", "Shijiazhuang")),
+                                    linetype = factor(city,
+                                                      levels = c("Beijing", "Tianjin", "Shijiazhuang"))),
               size = 0.5) +
     scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
                           name = "")
@@ -198,10 +201,11 @@ if (show_fig | show_fig1){
 
 ### Figure 2 ---------------------------
 fignum <- 2
-if (show_fig | show_fig2){
+if (show_fig | show_fig2) {
   pre <- prep_data(Beijing, prep = "pmf",
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
-  post <- Beijing %>% # find prices of new cars in 2011
+  # find prices of new cars in 2011
+  post <- Beijing %>%
     filter(ym < as.Date("2012-01-01")) %>%
     pivot_wider(id_cols = c(month, color, noticenum),
                        names_from = year,
@@ -232,7 +236,7 @@ if (show_fig | show_fig2){
              ylab = "Density",
              sizefont = (fontsize - 8),
              axissizefont = (fontsizeaxis - 5))
-  if (save_fig | save_fig2){
+  if (save_fig | save_fig2) {
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width, height = default_height+1, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
@@ -243,7 +247,7 @@ if (show_fig | show_fig2){
 
 ### Figure 3 ---------------------------
 fignum <- 3
-if (show_fig | show_fig3){
+if (show_fig | show_fig3) {
   pre <- prep_data(Beijing, prep = "dist",
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
   post <- prep_data(Beijing, prep = "dist",
@@ -264,7 +268,7 @@ if (show_fig | show_fig3){
              ylab = "Density",
              sizefont = (fontsize - 8),
              axissizefont = (fontsizeaxis - 5))
-  if (save_fig | save_fig3){
+  if (save_fig | save_fig3) {
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width, height = default_height+1, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
@@ -275,7 +279,7 @@ if (show_fig | show_fig3){
 
 ### Figure 4 ---------------------------
 fignum <- 4
-if (show_fig | show_fig4){
+if (show_fig | show_fig4) {
   pre <- prep_data(Beijing, prep = "pmf",
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
   post <- prep_data(Beijing, prep = "pmf",
@@ -325,7 +329,7 @@ if (show_fig | show_fig4){
              axissizefont = (fontsizeaxis - 5))
   # fig4_plot_show <- grid.arrange(fig4a_OK, fig4b_OK, ncol = 2)
   fig4_plot <- arrangeGrob(fig4a_OK, fig4b_OK, ncol = 2)
-  if (save_fig | save_fig4){
+  if (save_fig | save_fig4) {
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), fig4_plot, path = img_path,
            width = default_width, height = default_height+1, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
@@ -336,7 +340,7 @@ if (show_fig | show_fig4){
 
 ### Figure 5 ---------------------------
 fignum <- 5
-if (show_fig | show_fig5){
+if (show_fig | show_fig5) {
   pre <- prep_data(Beijing, prep = "dist",
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
   post <- prep_data(Beijing, prep = "dist",
@@ -435,7 +439,7 @@ if (show_fig | show_fig5){
                            fig5c_OK, fig5d_OK,
                            nrow = 2)
 
-  if (save_fig | save_fig5){
+  if (save_fig | save_fig5) {
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), fig5_plot, path = img_path,
            width = default_width, height = default_height+5, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
@@ -445,72 +449,7 @@ if (show_fig | show_fig5){
 }
 
 ### Figure 6 ---------------------------
-fignum <- 6
-if (show_fig | show_fig6){
-  set.seed(11 + seedplus)
-  support <- prep_data(data = Beijing, prep = "support")
-
-  pre <- prep_data(Beijing, prep = "pmf",
-                   support = support,
-                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
-  post <- prep_data(Beijing, prep = "pmf",
-                    support = support,
-                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
-
-  synth_pre1 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-  synth_pre2 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-
-  bandwidth_seq = seq(0, 100000, 1000)
-
-  real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
-  placebo <- diftrans(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
-
-  bandwidth_selection <- left_join(real, placebo, by = "bandwidth", suffix = c("_real", "_placebo")) %>%
-    mutate(ratio = main_real / main_placebo) %>%
-    mutate(order2 = ratio > 100)
-
-  d1000 <- bandwidth_selection %>%
-    filter(bandwidth == 10000) %>%
-    .$main_real
-
-  message(paste("Figure 6 analysis: the tranport cost at d = 10000 is ", d1000, sep = ""))
-
-  d_table <- bandwidth_selection %>%
-    filter(bandwidth %in% seq(10000, 90000, by = 10000))
-
-  fig6_plot <- ggplot(data = bandwidth_selection, aes(x = bandwidth)) +
-    geom_smooth(aes(y = 100*main_real, color = "0", linetype = "0"),
-                method = loess,
-                se = F,
-                size = 0.5) +
-    geom_line(aes(y = 100*main_real, color = "1", linetype = "1")) +
-    geom_line(aes(y = 100*main_placebo, color = "2", linetype = "2")) +
-    scale_color_manual(values = get_color_palette(3, grayscale),
-                       labels = c("smoothed", "real", "placebo"),
-                       name = "") +
-    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                          labels = c("smoothed", "real", "placebo"),
-                          name = "") +
-    xlab("d") +
-    ylab("Transport Cost (%)") +
-    theme_bmp(sizefont = (fontsize - 8),
-              axissizefont = (fontsizeaxis - 5)) +
-    scale_y_continuous(breaks = seq(0, 100, 10)) +
-    scale_x_continuous(breaks = seq(0, 100000, 10000))
-
-  if (save_fig | save_fig6){
-    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
-           width = default_width, height = default_height, units = "in")
-    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-  }
-
-  message(paste("Figure ", fignum, " is complete.", sep = ""))
-}
-
-### Figure 6 - Nov02 ---------------------------
-fignum <- "6_B1011" # this is what we want :)
+fignum <- "6_B1011"
 if (show_fig | show_fig6) {
   set.seed(11 + seedplus)
   support <- prep_data(data = Beijing, prep = "support")
@@ -558,7 +497,7 @@ if (show_fig | show_fig6) {
   upper <- 0.06
   valid <- plot_table$bandwidth[plot_table$mean < upper & plot_table$mean > lower]
 
-  # knitr table
+  # table 4
   d_table <- plot_table %>%
     filter(bandwidth %in% c(valid,
                             4000, 5000, 6000, 7000, 8000, 9000, 10000,
@@ -566,7 +505,7 @@ if (show_fig | show_fig6) {
                             50000, 70000, 90000))
   knitr::kable(d_table, format = "latex", booktabs = T, linesep = "")
 
-  # plot real and mean - fig6
+  # plot real cost and mean placebo cost - fig6
   fig6_plot <- ggplot(data = plot_table, aes(x = bandwidth)) +
     geom_line(aes(y = real, color = "0", linetype = "0")) +
     #~ geom_line(aes(y = quantile0.99, color = "1", linetype = "1")) +
@@ -586,7 +525,7 @@ if (show_fig | show_fig6) {
               axissizefont = (fontsizeaxis - 5)) +
     scale_x_continuous(breaks = seq(0, 100000, 10000))
 
-  # simulation results (no real cost)
+  # simulation results only, no real cost (additional figure)
   fig6_plot2 <- ggplot(data = plot_table, aes(x = bandwidth)) +
     geom_line(aes(y = quantile0.99, color = "1", linetype = "1")) +
     geom_line(aes(y = quantile0.95, color = "2", linetype = "2")) +
@@ -614,6 +553,7 @@ if (show_fig | show_fig6) {
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig",
                   fignum, suffix, "OK.jpg", sep = ""))
+
     ggsave(paste("fig", fignum, suffix,"zoomed", suffix, "OK.jpg", sep = ""),
            path = img_path, fig6_plot2,
            width = default_width, height = default_height, units = "in")
@@ -624,343 +564,6 @@ if (show_fig | show_fig6) {
   message(paste("Figure ", fignum, " is complete.", sep = ""))
 
 
-}
-
-### Figure 6 - B1011 ---------------------------
-fignum <- "6_B1011"
-if (show_fig | show_fig6){
-  set.seed(11 + seedplus)
-  support <- prep_data(data = Beijing, prep = "support")
-
-  pre <- prep_data(Beijing, prep = "pmf",
-                   support = support,
-                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
-  post <- prep_data(Beijing, prep = "pmf",
-                    support = support,
-                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
-
-  synth_pre1 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-  synth_pre2 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-
-  bandwidth_seq = seq(0, 100000, 1000)
-
-  real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
-  placebo <- diftrans(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
-
-  bandwidth_selection <- left_join(real, placebo, by = "bandwidth", suffix = c("_real", "_placebo")) %>%
-    mutate(ratio = main_real / main_placebo) %>%
-    mutate(order2 = ratio > 100)
-
-  d1000 <- bandwidth_selection %>%
-    filter(bandwidth == 10000) %>%
-    .$main_real
-
-  message(paste("Figure 6 analysis: the tranport cost at d = 10000 is ", d1000, sep = ""))
-
-  bandwidth_table = c(4000, 5000, 6000, 7000, 8000, 9000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 70000, 90000)
-
-  d_table <- bandwidth_selection %>%
-    filter(bandwidth %in% bandwidth_table) %>%
-    mutate(s_hat = round(main_real * 100, 1),
-           s_hat_placebo = round(main_placebo * 100, 4)) %>%
-    select(bandwidth, s_hat, s_hat_placebo) # %>%
-    # pivot_longer(cols = c(s_hat, s_hat_placebo), names_to = "type", values_to = "cost") %>%
-    # pivot_wider(names_from = bandwidth, values_from = cost)
-  knitr::kable(d_table, format = "latex", booktabs = T, linesep = "")
-
-  message(paste("Figure ", fignum, " is complete.", sep = ""))
-}
-
-
-### Figure 6 - B1112 ---------------------------
-fignum <- "6_B1112"
-if (show_fig | show_fig6){
-  set.seed(11 + seedplus)
-  support <- prep_data(data = Beijing, prep = "support")
-
-  pre <- prep_data(Beijing, prep = "pmf",
-                   support = support,
-                   lowerdate = "2011-01-01", upperdate = "2012-01-01")
-  post <- prep_data(Beijing, prep = "pmf",
-                    support = support,
-                    lowerdate = "2012-01-01", upperdate = "2013-01-01")
-
-  synth_pre1 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-  synth_pre2 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-
-  bandwidth_seq = seq(0, 100000, 1000)
-
-  real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
-  placebo <- diftrans(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
-
-  bandwidth_selection <- left_join(real, placebo, by = "bandwidth", suffix = c("_real", "_placebo")) %>%
-    mutate(ratio = main_real / main_placebo) %>%
-    mutate(order2 = ratio > 100)
-
-  d1000 <- bandwidth_selection %>%
-    filter(bandwidth == 10000) %>%
-    .$main_real
-
-  message(paste("Figure 6 analysis: the tranport cost at d = 10000 is ", d1000, sep = ""))
-
-  d_table <- bandwidth_selection %>%
-    filter(bandwidth %in% c(8000, 9000, 10000, 20000, 30000, 50000, 70000, 90000)) %>%
-    mutate(s_hat = round(main_real * 100, 1),
-           s_hat_placebo = main_placebo * 100) %>%
-    select(bandwidth, s_hat, s_hat_placebo) %>%
-    pivot_longer(cols = c(s_hat, s_hat_placebo), names_to = "type", values_to = "cost") %>%
-    pivot_wider(names_from = bandwidth, values_from = cost)
-  knitr::kable(d_table, format = "latex", booktabs = T)
-
-  fig6_plot <- ggplot(data = bandwidth_selection, aes(x = bandwidth)) +
-    geom_smooth(aes(y = 100*main_real, color = "0", linetype = "0"),
-                method = loess,
-                se = F,
-                size = 0.5) +
-    geom_line(aes(y = 100*main_real, color = "1", linetype = "1")) +
-    geom_line(aes(y = 100*main_placebo, color = "2", linetype = "2")) +
-    scale_color_manual(values = get_color_palette(3, grayscale),
-                       labels = c("smoothed", "real", "placebo"),
-                       name = "") +
-    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                          labels = c("smoothed", "real", "placebo"),
-                          name = "") +
-    xlab("d") +
-    ylab("Transport Cost (%)") +
-    theme_bmp(sizefont = (fontsize - 8),
-              axissizefont = (fontsizeaxis - 5)) +
-    scale_y_continuous(breaks = seq(0, 100, 10)) +
-    scale_x_continuous(breaks = seq(0, 100000, 10000))
-
-  if (save_fig | save_fig6){
-    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
-           width = default_width, height = default_height, units = "in")
-    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-  }
-
-  message(paste("Figure ", fignum, " is complete.", sep = ""))
-}
-
-
-
-### Figure 6 - B1415 ---------------------------
-fignum <- "6_B1415"
-if (show_fig | show_fig6){
-  set.seed(11 + seedplus)
-  support <- prep_data(data = Beijing, prep = "support")
-
-  pre <- prep_data(Beijing, prep = "pmf",
-                   support = support,
-                   lowerdate = "2014-01-01", upperdate = "2015-01-01")
-  post <- prep_data(Beijing, prep = "pmf",
-                    support = support,
-                    lowerdate = "2015-01-01", upperdate = "2016-01-01")
-
-  synth_pre1 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-  synth_pre2 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-
-  bandwidth_seq = seq(0, 100000, 1000)
-
-  real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
-  placebo <- diftrans(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
-
-  bandwidth_selection <- left_join(real, placebo, by = "bandwidth", suffix = c("_real", "_placebo")) %>%
-    mutate(ratio = main_real / main_placebo) %>%
-    mutate(order2 = ratio > 100)
-
-  d1000 <- bandwidth_selection %>%
-    filter(bandwidth == 10000) %>%
-    .$main_real
-
-  message(paste("Figure 6 analysis: the tranport cost at d = 10000 is ", d1000, sep = ""))
-
-  d_table <- bandwidth_selection %>%
-    filter(bandwidth %in% c(8000, 9000, 10000, 20000, 30000, 50000, 70000, 90000)) %>%
-    mutate(s_hat = round(main_real * 100, 1),
-           s_hat_placebo = main_placebo * 100) %>%
-    select(bandwidth, s_hat, s_hat_placebo) %>%
-    pivot_longer(cols = c(s_hat, s_hat_placebo), names_to = "type", values_to = "cost") %>%
-    pivot_wider(names_from = bandwidth, values_from = cost)
-  knitr::kable(d_table, format = "latex", booktabs = T)
-
-  fig6_plot <- ggplot(data = bandwidth_selection, aes(x = bandwidth)) +
-    geom_smooth(aes(y = 100*main_real, color = "0", linetype = "0"),
-                method = loess,
-                se = F,
-                size = 0.5) +
-    geom_line(aes(y = 100*main_real, color = "1", linetype = "1")) +
-    geom_line(aes(y = 100*main_placebo, color = "2", linetype = "2")) +
-    scale_color_manual(values = get_color_palette(3, grayscale),
-                       labels = c("smoothed", "real", "placebo"),
-                       name = "") +
-    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                          labels = c("smoothed", "real", "placebo"),
-                          name = "") +
-    xlab("d") +
-    ylab("Transport Cost (%)") +
-    theme_bmp(sizefont = (fontsize - 8),
-              axissizefont = (fontsizeaxis - 5)) +
-    scale_y_continuous(breaks = seq(0, 100, 10)) +
-    scale_x_continuous(breaks = seq(0, 100000, 10000))
-
-  if (save_fig | save_fig6){
-    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
-           width = default_width, height = default_height, units = "in")
-    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-  }
-
-  message(paste("Figure ", fignum, " is complete.", sep = ""))
-}
-
-
-### Figure 6 - T1415 ---------------------------
-fignum <- "6_T1415"
-if (show_fig | show_fig6){
-  set.seed(11 + seedplus)
-  support <- prep_data(data = Tianjin, prep = "support")
-
-  pre <- prep_data(Tianjin, prep = "pmf",
-                   support = support,
-                   lowerdate = "2014-01-01", upperdate = "2015-01-01")
-  post <- prep_data(Tianjin, prep = "pmf",
-                    support = support,
-                    lowerdate = "2015-01-01", upperdate = "2016-01-01")
-
-  synth_pre1 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-  synth_pre2 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-
-  bandwidth_seq = seq(0, 100000, 1000)
-
-  real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
-  placebo <- diftrans(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
-
-  bandwidth_selection <- left_join(real, placebo, by = "bandwidth", suffix = c("_real", "_placebo")) %>%
-    mutate(ratio = main_real / main_placebo) %>%
-    mutate(order2 = ratio > 100)
-
-  d1000 <- bandwidth_selection %>%
-    filter(bandwidth == 10000) %>%
-    .$main_real
-
-  message(paste("Figure 6 analysis: the tranport cost at d = 10000 is ", d1000, sep = ""))
-
-  d_table <- bandwidth_selection %>%
-    filter(bandwidth %in% c(8000, 9000, 10000, 20000, 30000, 50000, 70000, 90000)) %>%
-    mutate(s_hat = round(main_real * 100, 4),
-           s_hat_placebo = main_placebo * 100) %>%
-    select(bandwidth, s_hat, s_hat_placebo) %>%
-    pivot_longer(cols = c(s_hat, s_hat_placebo), names_to = "type", values_to = "cost") %>%
-    pivot_wider(names_from = bandwidth, values_from = cost)
-  knitr::kable(d_table, format = "latex", booktabs = T)
-
-  fig6_plot <- ggplot(data = bandwidth_selection, aes(x = bandwidth)) +
-    geom_smooth(aes(y = 100*main_real, color = "0", linetype = "0"),
-                method = loess,
-                se = F,
-                size = 0.5) +
-    geom_line(aes(y = 100*main_real, color = "1", linetype = "1")) +
-    geom_line(aes(y = 100*main_placebo, color = "2", linetype = "2")) +
-    scale_color_manual(values = get_color_palette(3, grayscale),
-                       labels = c("smoothed", "real", "placebo"),
-                       name = "") +
-    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                          labels = c("smoothed", "real", "placebo"),
-                          name = "") +
-    xlab("d") +
-    ylab("Transport Cost (%)") +
-    theme_bmp(sizefont = (fontsize - 8),
-              axissizefont = (fontsizeaxis - 5)) +
-    scale_y_continuous(breaks = seq(0, 100, 10)) +
-    scale_x_continuous(breaks = seq(0, 100000, 10000))
-
-  if (save_fig | save_fig6){
-    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
-           width = default_width, height = default_height, units = "in")
-    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-  }
-
-  message(paste("Figure ", fignum, " is complete.", sep = ""))
-}
-
-
-
-### Figure 6 - T1314 ---------------------------
-fignum <- "6_T1314"
-if (show_fig | show_fig6){
-  set.seed(11 + seedplus)
-  support <- prep_data(data = Tianjin, prep = "support")
-
-  pre <- prep_data(Tianjin, prep = "pmf",
-                   support = support,
-                   lowerdate = "2013-01-01", upperdate = "2014-01-01")
-  post <- prep_data(Tianjin, prep = "pmf",
-                    support = support,
-                    lowerdate = "2014-01-01", upperdate = "2015-01-01")
-
-  synth_pre1 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-  synth_pre2 <- data.frame(MSRP = pre$MSRP,
-                           count = rmultinom(1, sum(pre$count), pre$count))
-
-  bandwidth_seq = seq(0, 100000, 1000)
-
-  real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
-  placebo <- diftrans(synth_pre1, synth_pre2, bandwidth_seq = bandwidth_seq, conservative = F)
-
-  bandwidth_selection <- left_join(real, placebo, by = "bandwidth", suffix = c("_real", "_placebo")) %>%
-    mutate(ratio = main_real / main_placebo) %>%
-    mutate(order2 = ratio > 100)
-
-  d1000 <- bandwidth_selection %>%
-    filter(bandwidth == 10000) %>%
-    .$main_real
-
-  message(paste("Figure 6 analysis: the tranport cost at d = 10000 is ", d1000, sep = ""))
-
-  d_table <- bandwidth_selection %>%
-    filter(bandwidth %in% c(8000, 9000, 10000, 20000, 30000, 50000, 70000, 90000)) %>%
-    mutate(s_hat = round(main_real * 100, 4),
-           s_hat_placebo = main_placebo * 100) %>%
-    select(bandwidth, s_hat, s_hat_placebo) %>%
-    pivot_longer(cols = c(s_hat, s_hat_placebo), names_to = "type", values_to = "cost") %>%
-    pivot_wider(names_from = bandwidth, values_from = cost)
-  knitr::kable(d_table, format = "latex", booktabs = T)
-
-  fig6_plot <- ggplot(data = bandwidth_selection, aes(x = bandwidth)) +
-    geom_smooth(aes(y = 100*main_real, color = "0", linetype = "0"),
-                method = loess,
-                se = F,
-                size = 0.5) +
-    geom_line(aes(y = 100*main_real, color = "1", linetype = "1")) +
-    geom_line(aes(y = 100*main_placebo, color = "2", linetype = "2")) +
-    scale_color_manual(values = get_color_palette(3, grayscale),
-                       labels = c("smoothed", "real", "placebo"),
-                       name = "") +
-    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                          labels = c("smoothed", "real", "placebo"),
-                          name = "") +
-    xlab("d") +
-    ylab("Transport Cost (%)") +
-    theme_bmp(sizefont = (fontsize - 8),
-              axissizefont = (fontsizeaxis - 5)) +
-    scale_y_continuous(breaks = seq(0, 100, 10)) +
-    scale_x_continuous(breaks = seq(0, 100000, 10000))
-
-  if (save_fig | save_fig6){
-    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
-           width = default_width, height = default_height, units = "in")
-    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-  }
-
-  message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
 
 ### FIG 6 VARIANT
