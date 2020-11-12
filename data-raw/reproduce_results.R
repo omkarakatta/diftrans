@@ -151,6 +151,7 @@ if (version == "original") {
 }
 
 ### Figure 1 ---------------------------
+
 fignum <- 1
 if (show_fig | show_fig1) {
   BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
@@ -200,6 +201,7 @@ if (show_fig | show_fig1) {
 }
 
 ### Figure 2 ---------------------------
+
 fignum <- 2
 if (show_fig | show_fig2) {
   pre <- prep_data(Beijing, prep = "pmf",
@@ -246,6 +248,7 @@ if (show_fig | show_fig2) {
 }
 
 ### Figure 3 ---------------------------
+
 fignum <- 3
 if (show_fig | show_fig3) {
   pre <- prep_data(Beijing, prep = "dist",
@@ -278,6 +281,7 @@ if (show_fig | show_fig3) {
 }
 
 ### Figure 4 ---------------------------
+
 fignum <- 4
 if (show_fig | show_fig4) {
   pre <- prep_data(Beijing, prep = "pmf",
@@ -339,6 +343,7 @@ if (show_fig | show_fig4) {
 }
 
 ### Figure 5 ---------------------------
+
 fignum <- 5
 if (show_fig | show_fig5) {
   pre <- prep_data(Beijing, prep = "dist",
@@ -449,6 +454,7 @@ if (show_fig | show_fig5) {
 }
 
 ### Figure 6 ---------------------------
+
 fignum <- "6_B1011"
 if (show_fig | show_fig6) {
   set.seed(11 + seedplus)
@@ -567,8 +573,9 @@ if (show_fig | show_fig6) {
 }
 
 ### Figure 7 ---------------------------
+
 fignum <- 7
-if (show_fig | show_fig7){
+if (show_fig | show_fig7) {
   pre <- prep_data(Tianjin, prep = "dist",
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
   post <- prep_data(Tianjin, prep = "dist",
@@ -592,7 +599,7 @@ if (show_fig | show_fig7){
              sizefont = (fontsize - 8),
              axissizefont = (fontsizeaxis - 5))
 
-  if (save_fig | save_fig7){
+  if (save_fig | save_fig7) {
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
@@ -603,118 +610,122 @@ if (show_fig | show_fig7){
 
 
 ### Figure 8 ---------------------------
+
 fignum <- "?"
-set.seed(9 + seedplus)
-BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
-supportB <- prep_data(BTS %>% filter(city == "Beijing"),
-                      prep = "support")
-supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
-                      prep = "support")
-B_pre <- prep_data(Beijing, prep = "pmf",
-                   support = supportB,
-                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
-B_post <- prep_data(Beijing, prep = "pmf",
-                   support = supportB,
-                   lowerdate = "2011-01-01", upperdate = "2012-01-01")
-T_pre <- prep_data(Tianjin, prep = "pmf",
-                   support = supportT,
-                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
-T_post <- prep_data(Tianjin, prep = "pmf",
-                   support = supportT,
-                   lowerdate = "2011-01-01", upperdate = "2012-01-01")
+if (show_fig | show_fig8) {
+  set.seed(9 + seedplus)
+  BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
+  supportB <- prep_data(BTS %>% filter(city == "Beijing"),
+                        prep = "support")
+  supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
+                        prep = "support")
+  B_pre <- prep_data(Beijing, prep = "pmf",
+                     support = supportB,
+                     lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  B_post <- prep_data(Beijing, prep = "pmf",
+                     support = supportB,
+                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  T_pre <- prep_data(Tianjin, prep = "pmf",
+                     support = supportT,
+                     lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  T_post <- prep_data(Tianjin, prep = "pmf",
+                     support = supportT,
+                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
 
 
-max_bw <- 20000
-bandwidth_seq <- seq(0, max_bw, 1000)
-numsim <- 500
-LHS_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
-RHS_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
-diff_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  max_bw <- 20000
+  bandwidth_seq <- seq(0, max_bw, 1000)
+  numsim <- 500
+  LHS_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  RHS_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  diff_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
 
-for (i in seq_len(numsim)){
-  print(paste("Simulation Number: ", i, " out of ", numsim, sep = ""))
-  B_pre_tilde <- data.frame(MSRP = B_pre$MSRP, 
-                            count = rmultinom(1, sum(B_pre$count), B_pre$count))
-  B_post_tilde <- data.frame(MSRP = B_post$MSRP, 
-                            count = rmultinom(1, sum(B_post$count), B_post$count))
-  T_pre_tilde <- data.frame(MSRP = T_pre$MSRP, 
-                            count = rmultinom(1, sum(T_pre$count), T_pre$count))
-  T_post_tilde <- data.frame(MSRP = T_post$MSRP, 
-                            count = rmultinom(1, sum(T_post$count), T_post$count))
+  for (i in seq_len(numsim)){
+    print(paste("Simulation Number: ", i, " out of ", numsim, sep = ""))
+    B_pre_tilde <- data.frame(MSRP = B_pre$MSRP, 
+                              count = rmultinom(1, sum(B_pre$count), B_pre$count))
+    B_post_tilde <- data.frame(MSRP = B_post$MSRP, 
+                              count = rmultinom(1, sum(B_post$count), B_post$count))
+    T_pre_tilde <- data.frame(MSRP = T_pre$MSRP, 
+                              count = rmultinom(1, sum(T_pre$count), T_pre$count))
+    T_post_tilde <- data.frame(MSRP = T_post$MSRP, 
+                              count = rmultinom(1, sum(T_post$count), T_post$count))
 
-  LHS1 <- diftrans(B_pre_tilde, B_post_tilde, bandwidth = bandwidth_seq, conservative = T)
-  LHS2 <- diftrans(B_pre, B_post, bandwidth = bandwidth_seq, conservative = T)
-  RHS1 <- diftrans(T_pre_tilde, T_post_tilde, bandwidth = bandwidth_seq, conservative = F)
-  RHS2 <- diftrans(T_pre, T_post, bandwidth = bandwidth_seq, conservative = F)
-  LHS <- 100*LHS1$main2d - 100*LHS2$main2d
-  RHS <- 100*RHS1$main - 100*RHS2$main
-  diff <- RHS - LHS
+    LHS1 <- diftrans(B_pre_tilde, B_post_tilde, bandwidth = bandwidth_seq, conservative = T)
+    LHS2 <- diftrans(B_pre, B_post, bandwidth = bandwidth_seq, conservative = T)
+    RHS1 <- diftrans(T_pre_tilde, T_post_tilde, bandwidth = bandwidth_seq, conservative = F)
+    RHS2 <- diftrans(T_pre, T_post, bandwidth = bandwidth_seq, conservative = F)
+    LHS <- 100*LHS1$main2d - 100*LHS2$main2d
+    RHS <- 100*RHS1$main - 100*RHS2$main
+    diff <- RHS - LHS
 
-  LHS_all[i, ] <- LHS
-  RHS_all[i, ] <- RHS
-  diff_all[i, ] <- diff
-}
+    LHS_all[i, ] <- LHS
+    RHS_all[i, ] <- RHS
+    diff_all[i, ] <- diff
+  }
 
-LHS_mean <- apply(LHS_all, 2, mean)
-RHS_mean <- apply(RHS_all, 2, mean)
-diff_mean <- apply(diff_all, 2, mean)
+  LHS_mean <- apply(LHS_all, 2, mean)
+  RHS_mean <- apply(RHS_all, 2, mean)
+  diff_mean <- apply(diff_all, 2, mean)
 
 
-sum(LHS_mean < RHS_mean)
-plot_table <- data.frame(d = bandwidth_seq, LHS = LHS_mean, RHS = RHS_mean, diff = diff_mean) %>%
-  pivot_longer(cols = c(LHS, RHS, diff))
-bandwidth_seq[diff_mean >= 0]
+  sum(LHS_mean < RHS_mean)
+  plot_table <- data.frame(d = bandwidth_seq, LHS = LHS_mean, RHS = RHS_mean, diff = diff_mean) %>%
+    pivot_longer(cols = c(LHS, RHS, diff))
+  bandwidth_seq[diff_mean >= 0]
 
-ggplot(plot_table, aes(x = d)) +
-  geom_line(aes(y = value, color = name, linetype = name)) +
-  bmp_plot(data = plot_table,
-         color = name,
-         legendlabels = c("Difference", "LHS", "RHS"),
-         xlab = "d",
-         ylab = "Difference in Transport Cost (%)",
-         ytype = "continuous",
-         # ybreaks = seq(-50, 100, 10),
-         xtype = "continuous",
-         xbreaks = seq(0, max_bw, 5000),
-         sizefont = (fontsize - 8),
-         axissizefont = (fontsizeaxis - 5)) +
-  scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                        labels = c("Difference", "LHS", "RHS"),
-                        name = "")
+  ggplot(plot_table, aes(x = d)) +
+    geom_line(aes(y = value, color = name, linetype = name)) +
+    bmp_plot(data = plot_table,
+           color = name,
+           legendlabels = c("Difference", "LHS", "RHS"),
+           xlab = "d",
+           ylab = "Difference in Transport Cost (%)",
+           ytype = "continuous",
+           # ybreaks = seq(-50, 100, 10),
+           xtype = "continuous",
+           xbreaks = seq(0, max_bw, 5000),
+           sizefont = (fontsize - 8),
+           axissizefont = (fontsizeaxis - 5)) +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
+                          labels = c("Difference", "LHS", "RHS"),
+                          name = "")
 
-if (save_fig | save_fig8){
-  ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
-         width = default_width+2, height = default_height, units = "in")
-  message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-}
+  if (save_fig | save_fig8){
+    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width+2, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
 
-ggplot(plot_table, aes(x = d)) +
-  geom_smooth(aes(y = value, color = name, linetype = name),
-              method = loess, se = F, size = 0.5) +
-  bmp_plot(data = plot_table,
-         color = name,
-         legendlabels = c("Difference", "LHS", "RHS"),
-         xlab = "d",
-         ylab = "Difference in Transport Cost (%)",
-         ytype = "continuous",
-         # ybreaks = seq(-50, 100, 10),
-         xtype = "continuous",
-         xbreaks = seq(0, max_bw, 5000),
-         sizefont = (fontsize - 8),
-         axissizefont = (fontsizeaxis - 5)) +
-  scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                        labels = c("Difference", "LHS", "RHS"),
-                        name = "")
+  ggplot(plot_table, aes(x = d)) +
+    geom_smooth(aes(y = value, color = name, linetype = name),
+                method = loess, se = F, size = 0.5) +
+    bmp_plot(data = plot_table,
+           color = name,
+           legendlabels = c("Difference", "LHS", "RHS"),
+           xlab = "d",
+           ylab = "Difference in Transport Cost (%)",
+           ytype = "continuous",
+           # ybreaks = seq(-50, 100, 10),
+           xtype = "continuous",
+           xbreaks = seq(0, max_bw, 5000),
+           sizefont = (fontsize - 8),
+           axissizefont = (fontsizeaxis - 5)) +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
+                          labels = c("Difference", "LHS", "RHS"),
+                          name = "")
 
-if (save_fig | save_fig8){
-  ggsave(paste("fig", fignum, suffix, "loess", suffix, "OK.jpg", sep = ""), path = img_path,
-         width = default_width+2, height = default_height, units = "in")
-  message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  if (save_fig | save_fig8){
+    ggsave(paste("fig", fignum, suffix, "loess", suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width+2, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
 }
 
 ### Figure 9 ---------------------------
+
 fignum <- 9
-if (show_fig | show_fig9){
+if (show_fig | show_fig9) {
   BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
   supportB <- prep_data(BTS %>% filter(city == "Beijing"),
                         prep = "support")
@@ -769,7 +780,7 @@ if (show_fig | show_fig9){
                           labels = c("Difference", "Beijing placebo", "Tianjin placebo"),
                           name = "")
 
-  if (save_fig | save_fig9){
+  if (save_fig | save_fig9) {
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
@@ -779,8 +790,9 @@ if (show_fig | show_fig9){
 }
 
 ### Figure 10 ---------------------------
+
 fignum <- 10
-if (show_fig | show_fig10){
+if (show_fig | show_fig10) {
   # BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
   supportB <- prep_data(Beijing,
                         prep = "support")
@@ -849,7 +861,8 @@ if (show_fig | show_fig10){
     scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
                           labels = c("Difference", "Beijing", "Tianjin"),
                           name = "")
-  if (save_fig | save_fig10){
+
+  if (save_fig | save_fig10) {
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
