@@ -7,6 +7,8 @@
 ### Author: Omkar A. Katta
 ###
 ### Notes: See email exchange with Guillaume (Oct 21, 23)
+###     Look at difference in transport maps and the resulting cost.
+###     This ultimately did not work the way we needed it to.
 ###
 
 ### Preliminaries ---------------------------

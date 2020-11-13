@@ -8,7 +8,10 @@
 ###
 ### ---------------------------
 ###
-### Notes:
+### Notes: Look at the unique solution implied by penalized optimal transport problem.
+### Upon inspection of the transport map corresponding to the unique solution at the bandwidth
+### chosen by our before-and-after-estimator of the penalized optimal transport problem,
+### roughly 99% of trades that account for the estimated total are for more than RMB 100K.
 ###
 ###
 
