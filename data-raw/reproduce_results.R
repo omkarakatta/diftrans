@@ -70,6 +70,7 @@ show_fig <- TRUE
 show_fig1 <- FALSE
 show_fig2 <- FALSE
 show_fig3 <- FALSE
+show_footnote8 <- FALSE
 show_fig4 <- FALSE
 show_fig5 <- FALSE
 show_fig6 <- FALSE
@@ -279,6 +280,84 @@ if (show_fig | show_fig3) {
 
   message(paste("Figure ", fignum, " is complete.", sep = ""))
 }
+
+### Footnote 8 ---------------------------
+
+if (show_fig | show_footnote8) {
+  support <- prep_data(data = Beijing, prep = "support")
+  pre <- prep_data(Beijing, prep = "pmf",
+                   support = support,
+                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  post <- prep_data(Beijing, prep = "pmf",
+                    support = support,
+                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
+
+  # create L1 penalty cost
+  Lpcost <- function(min_pre_support, min_post_support, p) {
+    costm <- matrix(NA_real_, nrow = length(min_pre_support), ncol = length(min_post_support))
+    for (i in seq_along(min_pre_support)) {
+        costm[i, ] <- abs(min_pre_support[i] - min_post_support)^p
+    }
+    costm
+  }
+
+
+  # initialize values
+  bandwidth_seq <- seq(0, 100000, 1000)
+  lambda_seq <- c(0, 0.01)
+  results <- matrix(NA_real_,
+                    nrow = length(bandwidth_seq), ncol = length(lambda_seq))
+
+
+  d <- 25000
+  lambda <- 0.01
+  l1_cost <- Lpcost(support, support, 1)
+  l0_cost <- build_costmatrix(support = support, bandwidth = d)
+  cost_mat <- l0_cost + lambda + l1_cost
+  OT <- transport(
+      as.numeric(sum(post$count) / sum(pre$count) * pre$count),
+      as.numeric(post$count),
+      cost_mat
+  )
+
+  pre_support <- unique(pre$MSRP[pre$count != 0 & !is.na(pre$MSRP)])
+  post_support <- unique(post$MSRP[post$count != 0 & !is.na(post$MSRP)])
+  OT_revised <- OT %>%
+    dplyr::mutate(from = pre_support[from]) %>%
+    dplyr::mutate(to = post_support[to])
+  common <- unique(sort(c(OT_revised$from, OT_revised$to)))
+  OT_final <- OT_revised %>%
+    dplyr::mutate(abs_diff = abs(from - to)) %>%
+    dplyr::group_by(abs_diff) %>%
+    dplyr::summarise(total = sum(mass))
+
+  #~ running sum of penalized optimal transport at d* = 25000
+  total_mass <- sum(OT_final$total[OT_final$abs_diff > 25000])
+  OT_running_sum <- OT_final %>%
+    dplyr::arrange(desc(abs_diff)) %>%
+    dplyr::mutate(total_lag = dplyr::lag(total)) %>%
+    tidyr::replace_na(list(total_lag = 0)) %>%
+    dplyr::mutate(cumulative = cumsum(total_lag)) %>%
+    dplyr::mutate(percentage = cumulative / total_mass * 100) %>%
+    dplyr::arrange(abs_diff) %>%
+    dplyr::filter(abs_diff >= 25000)
+
+  # plot
+  ggplot(OT_running_sum, aes(x = abs_diff, y = percentage)) +
+    geom_line() +
+    theme_bmp(sizefont = (fontsize - 8), axissizefont = (fontsizeaxis - 5)) +
+    xlab("d") +
+    ylab("Mass above d (% of total mass > 25000)") +
+    scale_y_continuous(breaks = seq(0, max(OT_running_sum$percentage), 10)) +
+    scale_x_continuous(breaks = seq(25000, max(OT_running_sum$abs_diff), 100000))
+
+  # table
+  OT_running_sum %>%
+    dplyr::filter(abs_diff %% 5000 < 1000) %>%
+    dplyr::select(abs_diff, cumulative, percentage) %>%
+    knitr::kable(., format = "rst", booktabs = T, linesep = "", longtable = T, align = 'c')
+}
+
 
 ### Figure 4 ---------------------------
 
