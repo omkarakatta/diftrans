@@ -54,6 +54,13 @@ get_color_palette <- function(number, grayscale = grayscale){
     col3 <- green
     return(c(col1, col2, col3))
   }
+  if (number == 4 & !grayscale){
+    col1 <- orange
+    col2 <- blue
+    col3 <- green
+    col4 <- darkblue
+    return(c(col1, col2, col3, col4))
+  }
   if (number == 5 & !grayscale){
     col1 <- orange
     col2 <- blue
@@ -77,6 +84,13 @@ get_color_palette <- function(number, grayscale = grayscale){
     col2 <- mid
     col3 <- light
     return(c(col1, col2, col3))
+  }
+  if (number == 4 & grayscale){
+    col1 <- black
+    col2 <- dark
+    col3 <- mid
+    col4 <- light
+    return(c(col1, col2, col3, col4))
   }
   if (number == 5 & grayscale){
     col1 <- black

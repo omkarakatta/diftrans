@@ -714,11 +714,11 @@ if (show_fig | show_fig8) {
 
   max_bw <- 20000
   bandwidth_seq <- seq(0, max_bw, 1000)
-  numsim <- 500
-  B_emp_pre <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
-  B_sim_pre <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
-  T_emp_pre <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
-  T_sim_pre <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  numsim <- 2 #500
+  B_emp <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  B_sim <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  T_emp <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  T_sim <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
 
   for (i in seq_len(numsim)){
     print(paste("Simulation Number: ", i, " out of ", numsim, sep = ""))
@@ -731,14 +731,14 @@ if (show_fig | show_fig8) {
     T_post_tilde <- data.frame(MSRP = T_post$MSRP, 
                               count = rmultinom(1, sum(T_post$count), T_post$count))
 
-    B_sim_pre[i, ] <- diftrans(B_pre_tilde, B_post_tilde, bandwidth = bandwidth_seq, conservative = T)$main2d
-    B_emp_pre[i, ] <- diftrans(B_pre, B_post, bandwidth = bandwidth_seq, conservative = T)$main2d
-    T_sim_pre[i, ] <- diftrans(T_pre_tilde, T_post_tilde, bandwidth = bandwidth_seq, conservative = F)$main
-    T_emp_pre[i, ] <- diftrans(T_pre, T_post, bandwidth = bandwidth_seq, conservative = F)$main
+    B_sim[i, ] <- diftrans(B_pre_tilde, B_post_tilde, bandwidth = bandwidth_seq, conservative = T)$main2d
+    B_emp[i, ] <- diftrans(B_pre, B_post, bandwidth = bandwidth_seq, conservative = T)$main2d
+    T_sim[i, ] <- diftrans(T_pre_tilde, T_post_tilde, bandwidth = bandwidth_seq, conservative = F)$main
+    T_emp[i, ] <- diftrans(T_pre, T_post, bandwidth = bandwidth_seq, conservative = F)$main
   }
 
-  LHS <- B_sim_pre - B_emp_pre
-  RHS <- T_sim_pre - T_emp_pre
+  LHS <- B_sim - B_emp
+  RHS <- T_sim - T_emp
   diff <- RHS - LHS
 
   LHS_mean <- apply(LHS, 2, mean)
@@ -751,6 +751,7 @@ if (show_fig | show_fig8) {
     pivot_longer(cols = c(LHS, RHS, diff))
   bandwidth_seq[diff_mean >= 0]
 
+  #~ no smoothing, LHS vs RHS vs RHS-LHS
   ggplot(plot_table, aes(x = d)) +
     geom_line(aes(y = value, color = name, linetype = name)) +
     bmp_plot(data = plot_table,
@@ -774,6 +775,7 @@ if (show_fig | show_fig8) {
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
 
+  #~ with smoothing, LHS vs RHS vs RHS-LHS
   ggplot(plot_table, aes(x = d)) +
     geom_smooth(aes(y = value, color = name, linetype = name),
                 method = loess, se = F, size = 0.5) +
@@ -797,6 +799,43 @@ if (show_fig | show_fig8) {
            width = default_width+2, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
+
+  #~ for exploring: all four terms of (16)
+  B_sim_mean <- apply(B_sim, 2, mean)
+  B_emp_mean <- apply(B_emp, 2, mean)
+  T_sim_mean <- apply(T_sim, 2, mean)
+  T_emp_mean <- apply(T_emp, 2, mean)
+  plot_table <- data.frame(d = bandwidth_seq,
+                           B_sim = B_sim_mean,
+                           B_emp = B_emp_mean,
+                           T_sim = T_sim_mean,
+                           T_emp = T_emp_mean) %>%
+    pivot_longer(cols = c(B_emp, B_sim, T_emp, T_sim))
+
+  ggplot(plot_table, aes(x = d)) +
+    geom_line(aes(y = value, color = name, linetype = name)) +
+    bmp_plot(data = plot_table,
+             color = name,
+             legendlabels = c("Empirical Beijing", "Simulated Beijing",
+                              "Empirical Tianjin", "Simulated Tianjin"),
+             xlab = "d",
+             ylab = "Difference in Transport Cost (%)",
+             ytype = "continuous",
+             # ybreaks = seq(-50, 100, 10),
+             xtype = "continuous",
+             xbreaks = seq(0, max_bw, 5000),
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5)) +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2, linetype3),
+                          labels = c("Empirical Beijing", "Simulated Beijing",
+                                     "Empirical Tianjin", "Simulated Tianjin"),
+                          name = "")
+  if (save_fig | save_fig8){
+    ggsave(paste("fig", fignum, suffix, "fourterms", suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width+2, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+
 }
 
 ### Figure 9 ---------------------------
