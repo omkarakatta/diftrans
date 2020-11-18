@@ -770,7 +770,7 @@ if (show_fig | show_fig8) {
                           name = "")
 
   if (save_fig | save_fig8){
-    ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
+    ggsave(paste("fig", fignum, suffix, "by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width+2, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
@@ -795,7 +795,7 @@ if (show_fig | show_fig8) {
                           name = "")
 
   if (save_fig | save_fig8){
-    ggsave(paste("fig", fignum, suffix, "loess", suffix, "OK.jpg", sep = ""), path = img_path,
+    ggsave(paste("fig", fignum, suffix, "loess_by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width+2, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
@@ -830,8 +830,9 @@ if (show_fig | show_fig8) {
                           labels = c("Empirical Beijing", "Simulated Beijing",
                                      "Empirical Tianjin", "Simulated Tianjin"),
                           name = "")
+
   if (save_fig | save_fig8){
-    ggsave(paste("fig", fignum, suffix, "fourterms", suffix, "OK.jpg", sep = ""), path = img_path,
+    ggsave(paste("fig", fignum, suffix, "fourterms_by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width+2, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
