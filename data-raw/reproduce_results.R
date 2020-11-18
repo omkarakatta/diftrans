@@ -714,7 +714,7 @@ if (show_fig | show_fig8) {
 
   max_bw <- 20000
   bandwidth_seq <- seq(0, max_bw, 1000)
-  numsim <- 2 #500
+  numsim <- 500
   B_emp <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
   B_sim <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
   T_emp <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
