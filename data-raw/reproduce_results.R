@@ -715,9 +715,10 @@ if (show_fig | show_fig8) {
   max_bw <- 20000
   bandwidth_seq <- seq(0, max_bw, 1000)
   numsim <- 500
-  LHS_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
-  RHS_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
-  diff_all <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  B_emp_pre <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  B_sim_pre <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  T_emp_pre <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  T_sim_pre <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
 
   for (i in seq_len(numsim)){
     print(paste("Simulation Number: ", i, " out of ", numsim, sep = ""))
@@ -730,22 +731,19 @@ if (show_fig | show_fig8) {
     T_post_tilde <- data.frame(MSRP = T_post$MSRP, 
                               count = rmultinom(1, sum(T_post$count), T_post$count))
 
-    LHS1 <- diftrans(B_pre_tilde, B_post_tilde, bandwidth = bandwidth_seq, conservative = T)
-    LHS2 <- diftrans(B_pre, B_post, bandwidth = bandwidth_seq, conservative = T)
-    RHS1 <- diftrans(T_pre_tilde, T_post_tilde, bandwidth = bandwidth_seq, conservative = F)
-    RHS2 <- diftrans(T_pre, T_post, bandwidth = bandwidth_seq, conservative = F)
-    LHS <- 100*LHS1$main2d - 100*LHS2$main2d
-    RHS <- 100*RHS1$main - 100*RHS2$main
-    diff <- RHS - LHS
-
-    LHS_all[i, ] <- LHS
-    RHS_all[i, ] <- RHS
-    diff_all[i, ] <- diff
+    B_sim_pre[i, ] <- diftrans(B_pre_tilde, B_post_tilde, bandwidth = bandwidth_seq, conservative = T)$main2d
+    B_emp_pre[i, ] <- diftrans(B_pre, B_post, bandwidth = bandwidth_seq, conservative = T)$main2d
+    T_sim_pre[i, ] <- diftrans(T_pre_tilde, T_post_tilde, bandwidth = bandwidth_seq, conservative = F)$main
+    T_emp_pre[i, ] <- diftrans(T_pre, T_post, bandwidth = bandwidth_seq, conservative = F)$main
   }
 
-  LHS_mean <- apply(LHS_all, 2, mean)
-  RHS_mean <- apply(RHS_all, 2, mean)
-  diff_mean <- apply(diff_all, 2, mean)
+  LHS <- B_sim_pre - B_emp_pre
+  RHS <- T_sim_pre - T_emp_pre
+  diff <- RHS - LHS
+
+  LHS_mean <- apply(LHS, 2, mean)
+  RHS_mean <- apply(RHS, 2, mean)
+  diff_mean <- apply(diff, 2, mean)
 
 
   sum(LHS_mean < RHS_mean)
