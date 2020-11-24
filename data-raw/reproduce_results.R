@@ -156,12 +156,14 @@ if (version == "original") {
 
 fignum <- 1
 if (show_fig | show_fig1) {
+
   BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
   fig1_prep <- BTS %>%
     select(ym, city, swtprice) %>%
     group_by(ym, city) %>%
     summarize(swtprice = mean(swtprice, na.rm = T)) %>%
     ungroup()
+
   fig1_plot <- ggplot() +
     bmp_vline(xint = as.Date("2011-01-01")) +
     bmp_vline(xint = as.Date("2014-01-01")) +
@@ -193,6 +195,7 @@ if (show_fig | show_fig1) {
               size = 0.5) +
     scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
                           name = "")
+
   if (save_fig | save_fig1){
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width, height = default_height+1, units = "in")
@@ -206,6 +209,7 @@ if (show_fig | show_fig1) {
 
 fignum <- 2
 if (show_fig | show_fig2) {
+
   pre <- prep_data(Beijing, prep = "pmf",
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
   # find prices of new cars in 2011
@@ -217,6 +221,7 @@ if (show_fig | show_fig2) {
     filter(is.na(`2010`)) %>%
     rename(MSRP = `2011`) %>%
     select(MSRP)
+
   fig2_plot <- ggplot() +
     bmp_twohist(data1 = pre, data2 = post,
                 x = log(MSRP), scale = 1, binwidth = 1/6) +
@@ -240,6 +245,7 @@ if (show_fig | show_fig2) {
              ylab = "Density",
              sizefont = (fontsize - 8),
              axissizefont = (fontsizeaxis - 5))
+
   if (save_fig | save_fig2) {
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width, height = default_height+1, units = "in")
@@ -253,10 +259,12 @@ if (show_fig | show_fig2) {
 
 fignum <- 3
 if (show_fig | show_fig3) {
+
   pre <- prep_data(Beijing, prep = "dist",
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
   post <- prep_data(Beijing, prep = "dist",
                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
+
   fig3_plot <- ggplot() +
     bmp_twohist(data1 = pre, data2 = post,
                 scale = 1000,
@@ -273,6 +281,7 @@ if (show_fig | show_fig3) {
              ylab = "Density",
              sizefont = (fontsize - 8),
              axissizefont = (fontsizeaxis - 5))
+
   if (save_fig | save_fig3) {
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width, height = default_height+1, units = "in")
@@ -364,6 +373,7 @@ if (show_fig | show_footnote8) {
 
 fignum <- 4
 if (show_fig | show_fig4) {
+
   pre <- prep_data(Beijing, prep = "pmf",
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
   post <- prep_data(Beijing, prep = "pmf",
@@ -391,6 +401,7 @@ if (show_fig | show_fig4) {
              ggtitle = "Pre-Lottery",
              sizefont = (fontsize - 8),
              axissizefont = (fontsizeaxis - 5))
+
   color_fig4b <- ifelse(grayscale,
                         get_color_palette(3, grayscale)[[2]],
                         get_color_palette(2, grayscale)[[2]])
@@ -411,8 +422,10 @@ if (show_fig | show_fig4) {
              ggtitle = "Post-Lottery",
              sizefont = (fontsize - 8),
              axissizefont = (fontsizeaxis - 5))
+
   # fig4_plot_show <- grid.arrange(fig4a_OK, fig4b_OK, ncol = 2)
   fig4_plot <- arrangeGrob(fig4a_OK, fig4b_OK, ncol = 2)
+
   if (save_fig | save_fig4) {
     ggsave(paste("fig", fignum, suffix, "OK.jpg", sep = ""), fig4_plot, path = img_path,
            width = default_width, height = default_height+1, units = "in")
@@ -426,6 +439,7 @@ if (show_fig | show_fig4) {
 
 fignum <- 5
 if (show_fig | show_fig5) {
+
   pre <- prep_data(Beijing, prep = "dist",
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
   post <- prep_data(Beijing, prep = "dist",
@@ -450,9 +464,9 @@ if (show_fig | show_fig5) {
              # xlab = "MSRP (RMB 1000)",
              ylab = "Density",
              xangle = 45,
-             ggtitle = paste("d = ", da*scale, sep = ""),
              sizefont = (fontsize - 8),
-             axissizefont = (fontsizeaxis - 5))
+             axissizefont = (fontsizeaxis - 5)) +
+    ggtitle(TeX(paste("\\textit{d} = ", da*scale, sep = "")))
   # fig5a_OK
 
   db <- 50000 / scale
@@ -473,7 +487,8 @@ if (show_fig | show_fig5) {
              xangle = 45,
              ggtitle = paste("d = ", db*scale, sep = ""),
              sizefont = (fontsize - 8),
-             axissizefont = (fontsizeaxis - 5))
+             axissizefont = (fontsizeaxis - 5)) +
+    ggtitle(TeX(paste("\\textit{d} = ", db*scale, sep = "")))
   # fig5b_OK
 
   dc <- 70000 / scale
@@ -494,7 +509,8 @@ if (show_fig | show_fig5) {
              xangle = 45,
              ggtitle = paste("d = ", dc*scale, sep = ""),
              sizefont = (fontsize - 8),
-             axissizefont = (fontsizeaxis - 5))
+             axissizefont = (fontsizeaxis - 5)) +
+    ggtitle(TeX(paste("\\textit{d} = ", dc*scale, sep = "")))
   # fig5c_OK
 
   dd <- 90000 / scale
@@ -515,8 +531,10 @@ if (show_fig | show_fig5) {
              xangle = 45,
              ggtitle = paste("d = ", dd*scale, sep = ""),
              sizefont = (fontsize - 8),
-             axissizefont = (fontsizeaxis - 5))
+             axissizefont = (fontsizeaxis - 5)) +
+    ggtitle(TeX(paste("\\textit{d} = ", dd*scale, sep = "")))
   # fig5d_OK
+
   # fig5_plot_show <- grid.arrange(fig5a_OK, fig5b_OK,
   #                                fig5c_OK, fig5d_OK,
   #                                nrow = 2)
@@ -535,8 +553,9 @@ if (show_fig | show_fig5) {
 
 ### Figure 6 ---------------------------
 
-fignum <- "6_B1011"
+fignum <- "6"
 if (show_fig | show_fig6) {
+
   set.seed(11 + seedplus)
   support <- prep_data(data = Beijing, prep = "support")
 
@@ -594,9 +613,6 @@ if (show_fig | show_fig6) {
   # plot real cost and mean placebo cost - fig6
   fig6_plot <- ggplot(data = plot_table, aes(x = bandwidth)) +
     geom_line(aes(y = real, color = "0", linetype = "0")) +
-    #~ geom_line(aes(y = quantile0.99, color = "1", linetype = "1")) +
-    #~ geom_line(aes(y = quantile0.95, color = "2", linetype = "2")) +
-    #~ geom_line(aes(y = quantile0.9, color = "3", linetype = "3")) +
     geom_line(aes(y = mean, color = "5", linetype = "5")) +
     scale_color_manual(values = get_color_palette(2, grayscale),
                        labels = c("real", "placebo"),
@@ -605,7 +621,7 @@ if (show_fig | show_fig6) {
                           labels = c("real", "placebo"),
                           name = "") +
     bmp_vline(xint = 25000) +
-    xlab("d") +
+    xlab(TeX("\\textit{d}")) +
     ylab("Transport Cost (%)") +
     theme_bmp(sizefont = (fontsize - 8),
               axissizefont = (fontsizeaxis - 5)) +
@@ -625,7 +641,7 @@ if (show_fig | show_fig6) {
                           labels = c("99%ile", "95%ile", "90%ile", "mean", "sd"),
                           name = "") +
     bmp_vline(xint = 25000) +
-    xlab("d") +
+    xlab(TeX("\\textit{d}")) +
     ylab("Transport Cost (%)") +
     theme_bmp(sizefont = (fontsize - 8),
               axissizefont = (fontsizeaxis - 5),
@@ -656,10 +672,12 @@ if (show_fig | show_fig6) {
 
 fignum <- 7
 if (show_fig | show_fig7) {
+
   pre <- prep_data(Tianjin, prep = "dist",
                    lowerdate = "2010-01-01", upperdate = "2011-01-01")
   post <- prep_data(Tianjin, prep = "dist",
                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
+
   fig7_plot <- ggplot() +
     bmp_twohist(data1 = pre,
                 data2 = post,
@@ -691,8 +709,9 @@ if (show_fig | show_fig7) {
 
 ### Figure 8 ---------------------------
 
-fignum <- "?"
+fignum <- "8"
 if (show_fig | show_fig8) {
+
   set.seed(9 + seedplus)
   BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
   supportB <- prep_data(BTS %>% filter(city == "Beijing"),
@@ -758,7 +777,7 @@ if (show_fig | show_fig8) {
     bmp_plot(data = plot_table,
            color = name,
            legendlabels = c("Difference", "LHS", "RHS"),
-           xlab = "d",
+           xlab = TeX("\\textit{d}"),
            ylab = "Difference in Transport Cost (%)",
            ytype = "continuous",
            # ybreaks = seq(-50, 100, 10),
@@ -783,7 +802,7 @@ if (show_fig | show_fig8) {
     bmp_plot(data = plot_table,
            color = name,
            legendlabels = c("Difference", "LHS", "RHS"),
-           xlab = "d",
+           xlab = TeX("\\textit{d}"),
            ylab = "Difference in Transport Cost (%)",
            ytype = "continuous",
            # ybreaks = seq(-50, 100, 10),
@@ -819,7 +838,7 @@ if (show_fig | show_fig8) {
              color = name,
              legendlabels = c("Empirical Beijing", "Simulated Beijing",
                               "Empirical Tianjin", "Simulated Tianjin"),
-             xlab = "d",
+             xlab = TeX("\\textit{d}"),
              ylab = "Difference in Transport Cost (%)",
              ytype = "continuous",
              # ybreaks = seq(-50, 100, 10),
@@ -844,6 +863,7 @@ if (show_fig | show_fig8) {
 
 fignum <- 9
 if (show_fig | show_fig9) {
+
   BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
   supportB <- prep_data(BTS %>% filter(city == "Beijing"),
                         prep = "support")
@@ -886,7 +906,7 @@ if (show_fig | show_fig9) {
     bmp_plot(data = bandwidth_selection,
              color = type,
              legendlabels = c("Difference", "Beijing placebo", "Tianjin placebo"),
-             xlab = "d",
+             xlab = TeX("\\textit{d}"),
              ylab = "Transport Cost (%)",
              ytype = "continuous",
              ybreaks = seq(-50, 100, 10),
@@ -911,6 +931,7 @@ if (show_fig | show_fig9) {
 
 fignum <- 10
 if (show_fig | show_fig10) {
+
   # BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
   supportB <- prep_data(Beijing,
                         prep = "support")
@@ -953,7 +974,6 @@ if (show_fig | show_fig10) {
                             type == "diff" ~ "a",
                             type == "diff2d" ~ "b"))
 
-
   mostinform <- dit$optimal_bandwidth
   mostinform2 <- cons_dit$optimal_bandwidth
 
@@ -968,7 +988,7 @@ if (show_fig | show_fig10) {
                filter(type != "b"),
              color = type,
              legendlabels = c("Difference", "Beijing", "Tianjin"),
-             xlab = "d",
+             xlab = TeX("\\textit{d}"),
              ylab = "Transport Cost (%)",
              ytype = "continuous",
              ybreaks = seq(-50, 100, 10),
