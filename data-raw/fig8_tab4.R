@@ -79,6 +79,7 @@ validT <- plot_tableT$bandwidth[plot_tableT$mean < upper & plot_tableT$mean > lo
 # replicate table 4 - Beijing
 d_tableB <- plot_tableB %>%
 filter(bandwidth %in% c(validB,
+                        0,
                         4000, 5000, 6000, 7000, 8000, 9000, 10000,
                         15000, 20000, 25000, 30000, 35000, 40000, 45000,
                         50000, 70000, 90000))
@@ -88,8 +89,52 @@ knitr::kable(d_tableB, format = "latex", booktabs = T, linesep = "")
 # replicate table 4 - Tianjin
 d_tableT <- plot_tableT %>%
 filter(bandwidth %in% c(validT,
+                        0,
                         4000, 5000, 6000, 7000, 8000, 9000, 10000,
                         15000, 20000, 25000, 30000, 35000, 40000, 45000,
                         50000, 70000, 90000))
 knitr::kable(d_tableT, format = "latex", booktabs = T, linesep = "")
 
+# average of absolute difference, with 2d
+
+max_bw <- max(bandwidth_seq)
+half_max_bw <- which(bandwidth_seq == max_bw / 2)
+diff_2d <- matrix(NA_real_, nrow = half_max_bw, ncol = 6)
+for (i in seq_len(half_max_bw)) {
+  bw <- bandwidth_seq[i]
+  B_2d <- placebo_resultsB[, which(bandwidth_seq == 2 * bw)]
+  T_d <- placebo_resultsT[, which(bandwidth_seq == bw)]
+  diff <- abs(B_2d - T_d)
+  diff_2d[i, ] <- c(bw,
+                    mean(diff) * 100,
+                    sd(diff) * 100,
+                    quantile(diff, prob = probs) * 100)
+}
+
+knitr::kable(diff_2d[which(bandwidth_seq %in%
+                           c(validB,
+                             0,
+                             4000, 5000, 6000, 7000, 8000, 9000, 10000,
+                             15000, 20000, 25000, 30000, 35000, 40000, 45000,
+                             50000)), ],
+             format = "latex", booktabs = T, linesep = "")
+
+# average of absolute difference, with d
+
+diff_d <- matrix(NA_real_, nrow = length(bandwidth_seq), ncol = 6)
+for (i in seq_along(bandwidth_seq)) {
+  bw <- bandwidth_seq[i]
+  B_d <- placebo_resultsB[, which(bandwidth_seq == bw)]
+  T_d <- placebo_resultsT[, which(bandwidth_seq == bw)]
+  diff <- abs(B_d - T_d)
+  diff_d[i, ] <- c(bw,
+                   mean(diff) * 100,
+                   sd(diff) * 100,
+                   quantile(diff, prob = probs) * 100)
+}
+knitr::kable(diff_d[which(bandwidth_seq %in%
+                          c(validB,
+                            0,
+                            4000, 5000, 6000, 7000, 8000, 9000, 10000,
+                            15000, 20000, 25000, 30000, 35000, 40000, 45000,
+                            50000)), ], format = "latex", booktabs = T, linesep = "")
