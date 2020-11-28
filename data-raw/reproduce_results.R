@@ -761,9 +761,9 @@ if (show_fig | show_fig8) {
   RHS <- T_sim - T_emp
   diff <- RHS - LHS
 
-  LHS_mean <- apply(LHS, 2, mean)
-  RHS_mean <- apply(RHS, 2, mean)
-  diff_mean <- apply(diff, 2, mean)
+  LHS_mean <- apply(LHS, 2, mean)*100
+  RHS_mean <- apply(RHS, 2, mean)*100
+  diff_mean <- apply(diff, 2, mean)*100
 
 
   sum(LHS_mean < RHS_mean)
@@ -776,7 +776,7 @@ if (show_fig | show_fig8) {
     geom_line(aes(y = value, color = name, linetype = name)) +
     bmp_plot(data = plot_table,
            color = name,
-           legendlabels = c("Difference", "LHS", "RHS"),
+           legendlabels = c("Overall difference", "Beijing difference", "Tianjin difference"),
            xlab = TeX("\\textit{d}"),
            ylab = "Difference in Transport Cost (%)",
            ytype = "continuous",
@@ -786,7 +786,7 @@ if (show_fig | show_fig8) {
            sizefont = (fontsize - 8),
            axissizefont = (fontsizeaxis - 5)) +
     scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                          labels = c("Difference", "LHS", "RHS"),
+                          labels = c("Overall difference", "Beijing difference", "Tianjin difference"),
                           name = "")
 
   if (save_fig | save_fig8){
@@ -801,7 +801,7 @@ if (show_fig | show_fig8) {
                 method = loess, se = F, size = 0.5) +
     bmp_plot(data = plot_table,
            color = name,
-           legendlabels = c("Difference", "LHS", "RHS"),
+           legendlabels = c("Overall difference", "Beijing difference", "Tianjin difference"),
            xlab = TeX("\\textit{d}"),
            ylab = "Difference in Transport Cost (%)",
            ytype = "continuous",
@@ -811,7 +811,7 @@ if (show_fig | show_fig8) {
            sizefont = (fontsize - 8),
            axissizefont = (fontsizeaxis - 5)) +
     scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                          labels = c("Difference", "LHS", "RHS"),
+                          labels = c("Overall difference", "Beijing difference", "Tianjin difference"),
                           name = "")
 
   if (save_fig | save_fig8){
@@ -821,15 +821,24 @@ if (show_fig | show_fig8) {
   }
 
   #~ for exploring: all four terms of (16)
-  B_sim_mean <- apply(B_sim, 2, mean)
-  B_emp_mean <- apply(B_emp, 2, mean)
-  T_sim_mean <- apply(T_sim, 2, mean)
-  T_emp_mean <- apply(T_emp, 2, mean)
-  plot_table <- data.frame(d = bandwidth_seq,
+  B_sim_mean <- apply(B_sim, 2, mean)*100
+  B_emp_mean <- apply(B_emp, 2, mean)*100
+  T_sim_mean <- apply(T_sim, 2, mean)*100
+  T_emp_mean <- apply(T_emp, 2, mean)*100
+  prep_table <- data.frame(d = bandwidth_seq,
                            B_sim = B_sim_mean,
                            B_emp = B_emp_mean,
                            T_sim = T_sim_mean,
-                           T_emp = T_emp_mean) %>%
+                           T_emp = T_emp_mean)
+  kable_table <- prep_table %>%
+    mutate(diff_B = B_sim - B_emp) %>%
+    mutate(diff_T = T_sim - T_emp) %>%
+    mutate(diff_emp = B_emp - T_emp) %>%
+    mutate(diff_sim = B_sim - T_sim) %>%
+    mutate(overall = diff_T - diff_B)
+  knitr::kable(kable_table, format = "latex", booktabs = T, linesep = "", digits = 4)
+
+  plot_table <- prep_table %>%
     pivot_longer(cols = c(B_emp, B_sim, T_emp, T_sim))
 
   ggplot(plot_table, aes(x = d)) +
@@ -846,7 +855,7 @@ if (show_fig | show_fig8) {
              xbreaks = seq(0, max_bw, 5000),
              sizefont = (fontsize - 8),
              axissizefont = (fontsizeaxis - 5)) +
-    scale_linetype_manual(values = c(linetype0, linetype1, linetype2, linetype3),
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype3, linetype2),
                           labels = c("Empirical Beijing", "Simulated Beijing",
                                      "Empirical Tianjin", "Simulated Tianjin"),
                           name = "")
