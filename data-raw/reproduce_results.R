@@ -733,8 +733,8 @@ if (show_fig | show_fig8) {
 
 
   max_bw <- 20000
-  bandwidth_seq <- seq(0, max_bw, 2500)
-  numsim <- 200
+  bandwidth_seq <- seq(0, max_bw, 1000)
+  numsim <- 500
   B_emp <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
   B_sim <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
   T_emp <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
@@ -790,7 +790,7 @@ if (show_fig | show_fig8) {
                           name = "")
 
   if (save_fig | save_fig8){
-    ggsave(paste("fig", fignum, suffix, "by2500_200sims", suffix, "OK.jpg", sep = ""), path = img_path,
+    ggsave(paste("fig", fignum, suffix, "by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width+2, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
@@ -815,7 +815,7 @@ if (show_fig | show_fig8) {
                           name = "")
 
   if (save_fig | save_fig8){
-    ggsave(paste("fig", fignum, suffix, "loess_by2500_200sims", suffix, "OK.jpg", sep = ""), path = img_path,
+    ggsave(paste("fig", fignum, suffix, "loess_by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width+2, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
@@ -852,7 +852,7 @@ if (show_fig | show_fig8) {
                           name = "")
 
   if (save_fig | save_fig8){
-    ggsave(paste("fig", fignum, suffix, "fourterms_by2500_200sims", suffix, "OK.jpg", sep = ""), path = img_path,
+    ggsave(paste("fig", fignum, suffix, "fourterms_by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
            width = default_width+2, height = default_height, units = "in")
     message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
   }
