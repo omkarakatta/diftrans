@@ -138,3 +138,106 @@ knitr::kable(diff_d[which(bandwidth_seq %in%
                             4000, 5000, 6000, 7000, 8000, 9000, 10000,
                             15000, 20000, 25000, 30000, 35000, 40000, 45000,
                             50000)), ], format = "latex", booktabs = T, linesep = "")
+
+
+
+################# Dec 25
+
+### Figure 6 -- post instead of pre ---------------------------
+
+
+  set.seed(11 + seedplus)
+  support <- prep_data(data = Beijing, prep = "support")
+
+  pre <- prep_data(Beijing, prep = "pmf",
+                   support = support,
+                   lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  post <- prep_data(Beijing, prep = "pmf",
+                    support = support,
+                    lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  bandwidth_seq <- seq(0, 100000, 1000)
+
+  real <- diftrans(pre, post, bandwidth_seq = bandwidth_seq, conservative = F)
+
+  numsims <- 500
+  placebo_results <- matrix(NA, nrow = numsims, ncol = length(bandwidth_seq))
+  for (i in seq_len(numsims)) {
+    print(paste("Simulation Number", i, "out of", numsims, sep = " "))
+    # draw n_B,2010 samples from Beijing, 2011
+    synth_post1 <- data.frame(MSRP = post$MSRP,
+                              count = rmultinom(1, sum(pre$count), post$count))
+    # draw n_B,2011 samples from Beijing, 2011
+    synth_post2 <- data.frame(MSRP = post$MSRP,
+                              count = rmultinom(1, sum(post$count), post$count))
+    placebo <- diftrans(synth_post1, synth_post2,
+                        bandwidth_seq = bandwidth_seq, conservative = F)
+    placebo_results[i, ] <- placebo$main
+  }
+
+  placebo_mean <- apply(placebo_results, 2, mean) * 100
+  placebo_sd <- apply(placebo_results, 2, sd) * 100
+  probs <- c(0.90, 0.95, 0.99)
+  placebo_quantiles <- apply(placebo_results, 2, quantile, prob = probs) * 100
+
+  plot_mat <- do.call(rbind, list(placebo_mean, placebo_sd, placebo_quantiles))
+  rownames(plot_mat) <- c("mean", "sd", paste("quantile", probs, sep = ""))
+  plot_table <- t(plot_mat) %>%
+    as.data.frame() %>%
+    mutate(bandwidth = bandwidth_seq,
+           real = real$main * 100) %>%
+    select(bandwidth, real, everything())
+
+  # close to mean placebo = 0.05%
+  lower <- 0.04
+  upper <- 0.06
+  valid <- plot_table$bandwidth[plot_table$mean < upper & plot_table$mean > lower]
+
+  # table 4
+  d_table <- plot_table %>%
+    filter(bandwidth %in% c(valid,
+                            4000, 5000, 6000, 7000, 8000, 9000, 10000,
+                            15000, 20000, 25000, 30000, 35000, 40000, 45000,
+                            50000, 70000, 90000))
+  knitr::kable(d_table, format = "latex", booktabs = T, linesep = "")
+
+  # plot real cost and mean placebo cost - fig6
+  fig6_plot <- ggplot(data = plot_table, aes(x = bandwidth)) +
+    geom_line(aes(y = real, color = "0", linetype = "0")) +
+    geom_line(aes(y = mean, color = "5", linetype = "5")) +
+    scale_color_manual(values = get_color_palette(2, grayscale),
+                       labels = c("real", "placebo"),
+                       name = "") +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
+                          labels = c("real", "placebo"),
+                          name = "") +
+    bmp_vline(xint = 25000) +
+    xlab(TeX("\\textit{d}")) +
+    ylab("Transport Cost (%)") +
+    theme_bmp(sizefont = (fontsize - 8),
+              axissizefont = (fontsizeaxis - 5)) +
+    scale_x_continuous(breaks = seq(0, 100000, 10000))
+
+  # simulation results only, no real cost (additional figure)
+  fig6_plot2 <- ggplot(data = plot_table, aes(x = bandwidth)) +
+    geom_line(aes(y = quantile0.99, color = "1", linetype = "1")) +
+    geom_line(aes(y = quantile0.95, color = "2", linetype = "2")) +
+    geom_line(aes(y = quantile0.9, color = "3", linetype = "3")) +
+    geom_line(aes(y = mean, color = "5", linetype = "5")) +
+    geom_line(aes(y = sd, color = "6", linetype = "6")) +
+    scale_color_manual(values = get_color_palette(5, grayscale),
+                       labels = c("99%ile", "95%ile", "90%ile", "mean", "sd"),
+                       name = "") +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2, linetype3, linetype4),
+                          labels = c("99%ile", "95%ile", "90%ile", "mean", "sd"),
+                          name = "") +
+    bmp_vline(xint = 25000) +
+    xlab(TeX("\\textit{d}")) +
+    ylab("Transport Cost (%)") +
+    theme_bmp(sizefont = (fontsize - 8),
+              axissizefont = (fontsizeaxis - 5),
+              legend.position = c(0.8, 0.7)) +
+    scale_y_continuous(breaks = seq(0, 1.6, 0.1)) +
+    scale_x_continuous(breaks = seq(0, 100000, 10000))
+
+ggsave("fig6_with_post.jpg", fig6_plot, path = img_path)
+ggsave("fig6_with_post_zoomed.jpg", fig6_plot2, path = img_path)
