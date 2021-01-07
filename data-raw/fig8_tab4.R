@@ -17,6 +17,7 @@ bandwidth_seq <- seq(0, 100000, 1000)
 
 realB <- diftrans(preB, postB, bandwidth_seq = bandwidth_seq, conservative = F)
 realT <- diftrans(preT, postT, bandwidth_seq = bandwidth_seq, conservative = F)
+realB_2d <- diftrans(preB, postB, bandwidth_seq = bandwidth_seq, conservative = T)
 
 numsims <- 500
 placebo_resultsB <- matrix(NA, nrow = numsims, ncol = length(bandwidth_seq))
@@ -139,7 +140,30 @@ knitr::kable(diff_d[which(bandwidth_seq %in%
                             15000, 20000, 25000, 30000, 35000, 40000, 45000,
                             50000)), ], format = "latex", booktabs = T, linesep = "")
 
+################## Jan 7
 
+valid_d <- c(0,
+             4000, 5000, 6000, 7000, 8000, 9000, 10000,
+             15000, 20000,
+             23000, 24000,
+             25000, 30000, 35000, 40000, 45000,
+             50000)
+filtered_B <- realB_2d[which(bandwidth_seq %in% valid_d),
+                      "main2d"] * 100
+filtered_T <- realT[which(bandwidth_seq %in% valid_d),
+                      "main"] * 100
+real <- data.frame(bandwidth = valid_d,
+                   real_Beijing_2d = filtered_B,
+                   real_Tianjin_d = filtered_T) %>%
+  mutate(diff = real_Beijing_2d - real_Tianjin_d) %>%
+  mutate(abs_diff = abs(diff))
+
+knitr::kable(real,
+             format = "latex", booktabs = T, linesep = "")
+
+#~ temp <- diftrans(pre_main = preB, post_main = postB,
+#~          pre_control = preT, post_control = postT, bandwidth_seq = valid_d,
+#~          conservative = T)
 
 ################# Dec 25
 
