@@ -987,14 +987,14 @@ if (show_fig | show_fig10) {
   mostinform2 <- cons_dit$optimal_bandwidth
 
   fig10_plot <- ggplot(data = bandwidth_selection %>%
-                         filter(type != "b"), # control d-d or 2d-d
+                         filter(type != "a"), # control d-d or 2d-d
                        aes(x = bandwidth,
                            linetype = type)) +
     bmp_vline(xint = mostinform) +
     bmp_vline(xint = mostinform2) +
     geom_line(aes(y = diffprop*100, color = type)) +
     bmp_plot(data = bandwidth_selection %>%
-               filter(type != "b"),
+               filter(type != "a"),
              color = type,
              legendlabels = c("Difference", "Beijing", "Tianjin"),
              xlab = TeX("\\textit{d}"),
