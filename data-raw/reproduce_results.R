@@ -712,159 +712,139 @@ if (show_fig | show_fig7) {
 fignum <- "8"
 if (show_fig | show_fig8) {
 
-  set.seed(9 + seedplus)
-  BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
-  supportB <- prep_data(BTS %>% filter(city == "Beijing"),
-                        prep = "support")
-  supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
-                        prep = "support")
-  B_pre <- prep_data(Beijing, prep = "pmf",
-                     support = supportB,
-                     lowerdate = "2010-01-01", upperdate = "2011-01-01")
-  B_post <- prep_data(Beijing, prep = "pmf",
-                     support = supportB,
-                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
-  T_pre <- prep_data(Tianjin, prep = "pmf",
-                     support = supportT,
-                     lowerdate = "2010-01-01", upperdate = "2011-01-01")
-  T_post <- prep_data(Tianjin, prep = "pmf",
-                     support = supportT,
-                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  set.seed(11 + seedplus)
+  support <- prep_data(data = Beijing, prep = "support")
 
+  preB <- prep_data(Beijing, prep = "pmf",
+                 support = support,
+                 lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  postB <- prep_data(Beijing, prep = "pmf",
+                  support = support,
+                  lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  preT <- prep_data(Tianjin, prep = "pmf",
+                 support = support,
+                 lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  postT <- prep_data(Tianjin, prep = "pmf",
+                  support = support,
+                  lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  bandwidth_seq <- seq(0, 100000, 1000)
 
-  max_bw <- 20000
-  bandwidth_seq <- seq(0, max_bw, 1000)
-  numsim <- 500
-  B_emp <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
-  B_sim <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
-  T_emp <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
-  T_sim <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  realB <- diftrans(preB, postB, bandwidth_seq = bandwidth_seq, conservative = F)
+  realT <- diftrans(preT, postT, bandwidth_seq = bandwidth_seq, conservative = F)
+  realB_2d <- diftrans(preB, postB, bandwidth_seq = bandwidth_seq, conservative = T)
 
-  for (i in seq_len(numsim)){
-    print(paste("Simulation Number: ", i, " out of ", numsim, sep = ""))
-    B_pre_tilde <- data.frame(MSRP = B_pre$MSRP, 
-                              count = rmultinom(1, sum(B_pre$count), B_pre$count))
-    B_post_tilde <- data.frame(MSRP = B_post$MSRP, 
-                              count = rmultinom(1, sum(B_post$count), B_post$count))
-    T_pre_tilde <- data.frame(MSRP = T_pre$MSRP, 
-                              count = rmultinom(1, sum(T_pre$count), T_pre$count))
-    T_post_tilde <- data.frame(MSRP = T_post$MSRP, 
-                              count = rmultinom(1, sum(T_post$count), T_post$count))
+  numsims <- 500
+  placebo_resultsB <- matrix(NA, nrow = numsims, ncol = length(bandwidth_seq))
+  placebo_resultsT <- matrix(NA, nrow = numsims, ncol = length(bandwidth_seq))
+  for (i in seq_len(numsims)) {
+    print(paste("Simulation Number", i, "out of", numsims, sep = " "))
+    # draw n_B,2010 samples from Beijing, 2010
+    synth_pre1B <- data.frame(MSRP = preB$MSRP,
+                               count = rmultinom(1, sum(preB$count), preB$count))
+    # draw n_B,2011 samples from Beijing, 2010
+    synth_pre2B <- data.frame(MSRP = preB$MSRP,
+                               count = rmultinom(1, sum(postB$count), preB$count))
+    placeboB <- diftrans(synth_pre1B, synth_pre2B,
+                         bandwidth_seq = bandwidth_seq, conservative = F)
+    placebo_resultsB[i, ] <- placeboB$main
 
-    B_sim[i, ] <- diftrans(B_pre_tilde, B_post_tilde, bandwidth = bandwidth_seq, conservative = T)$main2d
-    B_emp[i, ] <- diftrans(B_pre, B_post, bandwidth = bandwidth_seq, conservative = T)$main2d
-    T_sim[i, ] <- diftrans(T_pre_tilde, T_post_tilde, bandwidth = bandwidth_seq, conservative = F)$main
-    T_emp[i, ] <- diftrans(T_pre, T_post, bandwidth = bandwidth_seq, conservative = F)$main
+    # draw n_T,2010 samples from Tianjin, 2010
+    synth_pre1T <- data.frame(MSRP = preT$MSRP,
+                               count = rmultinom(1, sum(preT$count), preT$count))
+    # draw n_T,2011 samples from Tianjin, 2010
+    synth_pre2T <- data.frame(MSRP = preT$MSRP,
+                               count = rmultinom(1, sum(postT$count), preT$count))
+    placeboT <- diftrans(synth_pre1T, synth_pre2T,
+                         bandwidth_seq = bandwidth_seq, conservative = F)
+    placebo_resultsT[i, ] <- placeboT$main
   }
 
-  LHS <- B_sim - B_emp
-  RHS <- T_sim - T_emp
-  diff <- RHS - LHS
+  placebo_meanB <- apply(placebo_resultsB, 2, mean) * 100
+  placebo_sdB <- apply(placebo_resultsB, 2, sd) * 100
+  probs <- c(0.90, 0.95, 0.99)
+  placebo_quantilesB <- apply(placebo_resultsB, 2, quantile, prob = probs) * 100
 
-  LHS_mean <- apply(LHS, 2, mean)*100
-  RHS_mean <- apply(RHS, 2, mean)*100
-  diff_mean <- apply(diff, 2, mean)*100
+  placebo_meanT <- apply(placebo_resultsT, 2, mean) * 100
+  placebo_sdT <- apply(placebo_resultsT, 2, sd) * 100
+  probs <- c(0.90, 0.95, 0.99)
+  placebo_quantilesT <- apply(placebo_resultsT, 2, quantile, prob = probs) * 100
+
+  plot_matB <- do.call(rbind, list(placebo_meanB, placebo_sdB, placebo_quantilesB))
+  rownames(plot_matB) <- c("mean", "sd", paste("quantile", probs, sep = ""))
+  plot_tableB <- t(plot_matB) %>%
+    as.data.frame() %>%
+    mutate(bandwidth = bandwidth_seq,
+           real = realB$main * 100) %>%
+    select(bandwidth, real, everything())
+
+  plot_matT <- do.call(rbind, list(placebo_meanT, placebo_sdT, placebo_quantilesT))
+  rownames(plot_matT) <- c("mean", "sd", paste("quantile", probs, sep = ""))
+  plot_tableT <- t(plot_matT) %>%
+    as.data.frame() %>%
+    mutate(bandwidth = bandwidth_seq,
+           real = realT$main * 100) %>%
+    select(bandwidth, real, everything())
 
 
-  sum(LHS_mean < RHS_mean)
-  plot_table <- data.frame(d = bandwidth_seq, LHS = LHS_mean, RHS = RHS_mean, diff = diff_mean) %>%
-    pivot_longer(cols = c(LHS, RHS, diff))
-  bandwidth_seq[diff_mean >= 0]
+  # close to mean placebo = 0.05%
+  lower <- 0.04
+  upper <- 0.06
+  validB <- plot_tableB$bandwidth[plot_tableB$mean < upper & plot_tableB$mean > lower]
+  validT <- plot_tableT$bandwidth[plot_tableT$mean < upper & plot_tableT$mean > lower]
 
-  #~ no smoothing, LHS vs RHS vs RHS-LHS
-  ggplot(plot_table, aes(x = d)) +
-    geom_line(aes(y = value, color = name, linetype = name)) +
-    bmp_plot(data = plot_table,
-           color = name,
-           legendlabels = c("Overall difference", "Beijing difference", "Tianjin difference"),
-           xlab = TeX("\\textit{d}"),
-           ylab = "Difference in Transport Cost (%)",
-           ytype = "continuous",
-           # ybreaks = seq(-50, 100, 10),
-           xtype = "continuous",
-           xbreaks = seq(0, max_bw, 5000),
-           sizefont = (fontsize - 8),
-           axissizefont = (fontsizeaxis - 5)) +
-    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                          labels = c("Overall difference", "Beijing difference", "Tianjin difference"),
-                          name = "")
+#~   # replicate table 4 -- Beijing
+#~   d_tableB <- plot_tableB %>%
+#~   filter(bandwidth %in% c(validB,
+#~                           0,
+#~                           4000, 5000, 6000, 7000, 8000, 9000, 10000,
+#~                           15000, 20000, 25000, 30000, 35000, 40000, 45000,
+#~                           50000, 70000, 90000))
+#~   knitr::kable(d_tableB, format = "latex", booktabs = T, linesep = "")
+#~ 
+#~ 
+#~   # replicate table 4 -- Tianjin
+#~   d_tableT <- plot_tableT %>%
+#~   filter(bandwidth %in% c(validT,
+#~                           0,
+#~                           4000, 5000, 6000, 7000, 8000, 9000, 10000,
+#~                           15000, 20000, 25000, 30000, 35000, 40000, 45000,
+#~                           50000, 70000, 90000))
+#~   knitr::kable(d_tableT, format = "latex", booktabs = T, linesep = "")
 
-  if (save_fig | save_fig8){
-    ggsave(paste("fig", fignum, suffix, "by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
-           width = default_width+2, height = default_height, units = "in")
-    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+
+  # average of absolute difference of placebos, with 2d --- table 5
+  max_bw <- max(bandwidth_seq)
+  half_max_bw <- which(bandwidth_seq == max_bw / 2)
+  diff_2d <- matrix(NA_real_, nrow = half_max_bw, ncol = 6)
+  for (i in seq_len(half_max_bw)) {
+    bw <- bandwidth_seq[i]
+    B_2d <- placebo_resultsB[, which(bandwidth_seq == 2 * bw)]
+    T_d <- placebo_resultsT[, which(bandwidth_seq == bw)]
+    diff <- abs(B_2d - T_d)
+    diff_2d[i, ] <- c(bw,
+                      mean(diff) * 100,
+                      sd(diff) * 100,
+                      quantile(diff, prob = probs) * 100)
   }
 
-  #~ with smoothing, LHS vs RHS vs RHS-LHS
-  ggplot(plot_table, aes(x = d)) +
-    geom_smooth(aes(y = value, color = name, linetype = name),
-                method = loess, se = F, size = 0.5) +
-    bmp_plot(data = plot_table,
-           color = name,
-           legendlabels = c("Overall difference", "Beijing difference", "Tianjin difference"),
-           xlab = TeX("\\textit{d}"),
-           ylab = "Difference in Transport Cost (%)",
-           ytype = "continuous",
-           # ybreaks = seq(-50, 100, 10),
-           xtype = "continuous",
-           xbreaks = seq(0, max_bw, 5000),
-           sizefont = (fontsize - 8),
-           axissizefont = (fontsizeaxis - 5)) +
-    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
-                          labels = c("Overall difference", "Beijing difference", "Tianjin difference"),
-                          name = "")
+  knitr::kable(diff_2d[which(bandwidth_seq %in%
+                             c(validB,
+                               0,
+                               4000, 5000, 6000, 7000, 8000, 9000, 10000,
+                               15000, 20000, 25000, 30000, 35000, 40000, 45000,
+                               50000)), ],
+               format = "latex", booktabs = T, linesep = "")
 
-  if (save_fig | save_fig8){
-    ggsave(paste("fig", fignum, suffix, "loess_by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
-           width = default_width+2, height = default_height, units = "in")
-    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-  }
-
-  #~ for exploring: all four terms of (16)
-  B_sim_mean <- apply(B_sim, 2, mean)*100
-  B_emp_mean <- apply(B_emp, 2, mean)*100
-  T_sim_mean <- apply(T_sim, 2, mean)*100
-  T_emp_mean <- apply(T_emp, 2, mean)*100
-  prep_table <- data.frame(d = bandwidth_seq,
-                           B_sim = B_sim_mean,
-                           B_emp = B_emp_mean,
-                           T_sim = T_sim_mean,
-                           T_emp = T_emp_mean)
-  kable_table <- prep_table %>%
-    mutate(diff_B = B_sim - B_emp) %>%
-    mutate(diff_T = T_sim - T_emp) %>%
-    mutate(diff_emp = B_emp - T_emp) %>%
-    mutate(diff_sim = B_sim - T_sim) %>%
-    mutate(overall = diff_T - diff_B)
-  knitr::kable(kable_table, format = "latex", booktabs = T, linesep = "", digits = 4)
-
-  plot_table <- prep_table %>%
-    pivot_longer(cols = c(B_emp, B_sim, T_emp, T_sim))
-
-  ggplot(plot_table, aes(x = d)) +
-    geom_line(aes(y = value, color = name, linetype = name)) +
-    bmp_plot(data = plot_table,
-             color = name,
-             legendlabels = c("Empirical Beijing", "Simulated Beijing",
-                              "Empirical Tianjin", "Simulated Tianjin"),
-             xlab = TeX("\\textit{d}"),
-             ylab = "Difference in Transport Cost (%)",
-             ytype = "continuous",
-             # ybreaks = seq(-50, 100, 10),
-             xtype = "continuous",
-             xbreaks = seq(0, max_bw, 5000),
-             sizefont = (fontsize - 8),
-             axissizefont = (fontsizeaxis - 5)) +
-    scale_linetype_manual(values = c(linetype0, linetype1, linetype3, linetype2),
-                          labels = c("Empirical Beijing", "Simulated Beijing",
-                                     "Empirical Tianjin", "Simulated Tianjin"),
-                          name = "")
-
-  if (save_fig | save_fig8){
-    ggsave(paste("fig", fignum, suffix, "fourterms_by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
-           width = default_width+2, height = default_height, units = "in")
-    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
-  }
+  # empirical costs with 2d --- table 5
+  valid_d <- c(0,
+               4000, 5000, 6000, 7000, 8000, 9000, 10000,
+               15000, 20000,
+               23000, 24000,
+               25000, 30000, 35000, 40000, 45000,
+               50000)
+  real_costs <- diftrans(pre_main = preB, post_main = postB,
+                         pre_control = preT, post_control = postT, bandwidth_seq = valid_d,
+                         conservative = T)
 
 }
 

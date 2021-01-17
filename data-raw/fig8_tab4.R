@@ -265,3 +265,161 @@ knitr::kable(real,
 
 ggsave("fig6_with_post.jpg", fig6_plot, path = img_path)
 ggsave("fig6_with_post_zoomed.jpg", fig6_plot2, path = img_path)
+
+
+### Using what was previously inequality (16)
+
+
+  set.seed(9 + seedplus)
+  BTS <- do.call("rbind", list(Beijing, Tianjin, Shijiazhuang))
+  supportB <- prep_data(BTS %>% filter(city == "Beijing"),
+                        prep = "support")
+  supportT <- prep_data(BTS %>% filter(city == "Tianjin"),
+                        prep = "support")
+  B_pre <- prep_data(Beijing, prep = "pmf",
+                     support = supportB,
+                     lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  B_post <- prep_data(Beijing, prep = "pmf",
+                     support = supportB,
+                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
+  T_pre <- prep_data(Tianjin, prep = "pmf",
+                     support = supportT,
+                     lowerdate = "2010-01-01", upperdate = "2011-01-01")
+  T_post <- prep_data(Tianjin, prep = "pmf",
+                     support = supportT,
+                     lowerdate = "2011-01-01", upperdate = "2012-01-01")
+
+
+  max_bw <- 20000
+  bandwidth_seq <- seq(0, max_bw, 1000)
+  numsim <- 500
+  B_emp <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  B_sim <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  T_emp <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+  T_sim <- matrix(NA_real_, nrow = numsim, ncol = length(bandwidth_seq))
+
+  for (i in seq_len(numsim)){
+    print(paste("Simulation Number: ", i, " out of ", numsim, sep = ""))
+    B_pre_tilde <- data.frame(MSRP = B_pre$MSRP, 
+                              count = rmultinom(1, sum(B_pre$count), B_pre$count))
+    B_post_tilde <- data.frame(MSRP = B_post$MSRP, 
+                              count = rmultinom(1, sum(B_post$count), B_post$count))
+    T_pre_tilde <- data.frame(MSRP = T_pre$MSRP, 
+                              count = rmultinom(1, sum(T_pre$count), T_pre$count))
+    T_post_tilde <- data.frame(MSRP = T_post$MSRP, 
+                              count = rmultinom(1, sum(T_post$count), T_post$count))
+
+    B_sim[i, ] <- diftrans(B_pre_tilde, B_post_tilde, bandwidth = bandwidth_seq, conservative = T)$main2d
+    B_emp[i, ] <- diftrans(B_pre, B_post, bandwidth = bandwidth_seq, conservative = T)$main2d
+    T_sim[i, ] <- diftrans(T_pre_tilde, T_post_tilde, bandwidth = bandwidth_seq, conservative = F)$main
+    T_emp[i, ] <- diftrans(T_pre, T_post, bandwidth = bandwidth_seq, conservative = F)$main
+  }
+
+  LHS <- B_sim - B_emp
+  RHS <- T_sim - T_emp
+  diff <- RHS - LHS
+
+  LHS_mean <- apply(LHS, 2, mean)*100
+  RHS_mean <- apply(RHS, 2, mean)*100
+  diff_mean <- apply(diff, 2, mean)*100
+
+
+  sum(LHS_mean < RHS_mean)
+  plot_table <- data.frame(d = bandwidth_seq, LHS = LHS_mean, RHS = RHS_mean, diff = diff_mean) %>%
+    pivot_longer(cols = c(LHS, RHS, diff))
+  bandwidth_seq[diff_mean >= 0]
+
+  #~ no smoothing, LHS vs RHS vs RHS-LHS
+  ggplot(plot_table, aes(x = d)) +
+    geom_line(aes(y = value, color = name, linetype = name)) +
+    bmp_plot(data = plot_table,
+           color = name,
+           legendlabels = c("Overall difference", "Beijing difference", "Tianjin difference"),
+           xlab = TeX("\\textit{d}"),
+           ylab = "Difference in Transport Cost (%)",
+           ytype = "continuous",
+           # ybreaks = seq(-50, 100, 10),
+           xtype = "continuous",
+           xbreaks = seq(0, max_bw, 5000),
+           sizefont = (fontsize - 8),
+           axissizefont = (fontsizeaxis - 5)) +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
+                          labels = c("Overall difference", "Beijing difference", "Tianjin difference"),
+                          name = "")
+
+  if (save_fig | save_fig8){
+    ggsave(paste("fig", fignum, suffix, "by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width+2, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+
+  #~ with smoothing, LHS vs RHS vs RHS-LHS
+  ggplot(plot_table, aes(x = d)) +
+    geom_smooth(aes(y = value, color = name, linetype = name),
+                method = loess, se = F, size = 0.5) +
+    bmp_plot(data = plot_table,
+           color = name,
+           legendlabels = c("Overall difference", "Beijing difference", "Tianjin difference"),
+           xlab = TeX("\\textit{d}"),
+           ylab = "Difference in Transport Cost (%)",
+           ytype = "continuous",
+           # ybreaks = seq(-50, 100, 10),
+           xtype = "continuous",
+           xbreaks = seq(0, max_bw, 5000),
+           sizefont = (fontsize - 8),
+           axissizefont = (fontsizeaxis - 5)) +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype2),
+                          labels = c("Overall difference", "Beijing difference", "Tianjin difference"),
+                          name = "")
+
+  if (save_fig | save_fig8){
+    ggsave(paste("fig", fignum, suffix, "loess_by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width+2, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
+
+  #~ for exploring: all four terms of (16)
+  B_sim_mean <- apply(B_sim, 2, mean)*100
+  B_emp_mean <- apply(B_emp, 2, mean)*100
+  T_sim_mean <- apply(T_sim, 2, mean)*100
+  T_emp_mean <- apply(T_emp, 2, mean)*100
+  prep_table <- data.frame(d = bandwidth_seq,
+                           B_sim = B_sim_mean,
+                           B_emp = B_emp_mean,
+                           T_sim = T_sim_mean,
+                           T_emp = T_emp_mean)
+  kable_table <- prep_table %>%
+    mutate(diff_B = B_sim - B_emp) %>%
+    mutate(diff_T = T_sim - T_emp) %>%
+    mutate(diff_emp = B_emp - T_emp) %>%
+    mutate(diff_sim = B_sim - T_sim) %>%
+    mutate(overall = diff_T - diff_B)
+  knitr::kable(kable_table, format = "latex", booktabs = T, linesep = "", digits = 4)
+
+  plot_table <- prep_table %>%
+    pivot_longer(cols = c(B_emp, B_sim, T_emp, T_sim))
+
+  ggplot(plot_table, aes(x = d)) +
+    geom_line(aes(y = value, color = name, linetype = name)) +
+    bmp_plot(data = plot_table,
+             color = name,
+             legendlabels = c("Empirical Beijing", "Simulated Beijing",
+                              "Empirical Tianjin", "Simulated Tianjin"),
+             xlab = TeX("\\textit{d}"),
+             ylab = "Difference in Transport Cost (%)",
+             ytype = "continuous",
+             # ybreaks = seq(-50, 100, 10),
+             xtype = "continuous",
+             xbreaks = seq(0, max_bw, 5000),
+             sizefont = (fontsize - 8),
+             axissizefont = (fontsizeaxis - 5)) +
+    scale_linetype_manual(values = c(linetype0, linetype1, linetype3, linetype2),
+                          labels = c("Empirical Beijing", "Simulated Beijing",
+                                     "Empirical Tianjin", "Simulated Tianjin"),
+                          name = "")
+
+  if (save_fig | save_fig8){
+    ggsave(paste("fig", fignum, suffix, "fourterms_by1000_500sims", suffix, "OK.jpg", sep = ""), path = img_path,
+           width = default_width+2, height = default_height, units = "in")
+    message(paste("fig", fignum, " is saved in ", img_path, " as fig", fignum, suffix, "OK.jpg", sep = ""))
+  }
