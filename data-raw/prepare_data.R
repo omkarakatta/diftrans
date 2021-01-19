@@ -44,9 +44,9 @@ filter_date <- function(data, datevar, lowerdate, upperdate, format = "%Y-%m-%d"
 #'
 #' @param data a tibble with counts (\code{count}) of the variable of interest (\code{var})
 #' @param prep specifies type of preparation: "support", "counts", "pmf", "dist"
-#' @param var variable of interest; default is \code{MSRP} (see Daljord et al. (2020))
+#' @param var variable of interest; default is \code{MSRP} (see Daljord et al. (2021))
 #' @param support optionally define support of \code{var}
-#' @param count number of occurrences of \code{var}; default is \code{sales} (see Daljord et al. (2020))
+#' @param count number of occurrences of \code{var}; default is \code{sales} (see Daljord et al. (2021))
 #' @param datevar variable of class "Date"
 #' @param lowerdate an inclusive lower bound on \code{datevar} given as a string; default is -Inf
 #' @param upperdate an exclusive upper bound on \code{datevar} given as a string; default is +Inf

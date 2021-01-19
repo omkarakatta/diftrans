@@ -15,7 +15,7 @@
 #'   \item{sales}{number of car models sold in that particular year}
 #' }
 #'
-#' @source Daljord et al. (2020), The Black Market for Beijing License Plates
+#' @source Daljord et al. (2021), The Black Market for Beijing License Plates
 #'
 "Beijing_abridged"
 
@@ -36,7 +36,7 @@
 #'   \item{sales}{number of car models sold in that particular year}
 #' }
 #'
-#' @source Daljord et al. (2020), The Black Market for Tianjin License Plates
+#' @source Daljord et al. (2021), The Black Market for Tianjin License Plates
 #'
 "Tianjin_abridged"
 
@@ -57,6 +57,6 @@
 #'   \item{sales}{number of car models sold in that particular year}
 #' }
 #'
-#' @source Daljord et al. (2020), The Black Market for Tianjin License Plates
+#' @source Daljord et al. (2021), The Black Market for Tianjin License Plates
 #'
 "Shijiazhuang_abridged"

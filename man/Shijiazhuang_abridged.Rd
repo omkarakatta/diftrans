@@ -15,7 +15,7 @@ a tibble with 194468 rows and 5 variables
 }
 }
 \source{
-Daljord et al. (2020), The Black Market for Tianjin License Plates
+Daljord et al. (2021), The Black Market for Tianjin License Plates
 }
 \usage{
 Shijiazhuang_abridged

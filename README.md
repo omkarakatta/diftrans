@@ -21,7 +21,7 @@ Introduction
 ------------
 
 The `diftrans` package applies the novel methods described in Daljord,
-Pouliot, Hu, and Xiao (2020) to compute the transport costs between two
+Pouliot, Hu, and Xiao (2021) to compute the transport costs between two
 univariate distributions and the differences-in-transports estimator.
 
 Appealing to optimal transport theory, the `diftrans` package builds off
@@ -30,7 +30,7 @@ package](https://cran.r-project.org/web/packages/transport/index.html)
 to compute the change between the distributions of a univariate variable
 of interest. Extending this application, the `diftrans` package allows
 users to compute the *before-and-after estimator* (Daljord et al.,
-2020), which controls for sampling uncertainty by trivializing small
+2021), which controls for sampling uncertainty by trivializing small
 changes in the distributions.
 
 The `diftrans` package also computes the *differences-in-transports
@@ -77,7 +77,7 @@ The workhorse function in the `diftrans` package is also called
 
 -   compute the transport cost between two univariate distributions, and
 -   compute the differences-in-transports estimator (see Daljord et
-    al. (2020)).
+    al. (2021)).
 
 ### Setup
 
@@ -206,7 +206,7 @@ some control group that did not receive the treatment but was also
 subjected to the same unobserved trends.
 
 The novel differences-in-transports estimator described in Daljord et
-al. (2020) quantifies the change in distribution due to some treatment
+al. (2021) quantifies the change in distribution due to some treatment
 relative to the change in distribution of some control group.
 
 First, we need to set up the distributions of our variable for our
@@ -305,7 +305,7 @@ variability is enough to cause differences between distributions. To
 account for this discrepancy, we can increase the bandwidth to ignore
 transfers of mass between nearby values of the support.
 
-While Daljord et al. (2020) offer a disciplined way to determine what
+While Daljord et al. (2021) offer a disciplined way to determine what
 the appropriate bandwidths are, for simplicity, we will suppose that
 there will not be any sampling variation with a bandwidth greater than
 1.
@@ -405,7 +405,7 @@ differences-in-transports estimator by default.
 
 <b id="f1">1</b> There is more nuance to computing the
 differences-in-transports estimator than is presented in this expository
-document. See Daljord et al. (2020) for a more complete treatment on how
+document. See Daljord et al. (2021) for a more complete treatment on how
 to compute the differences-in-transports estimator. [↩](#a1)
 
 <!-- https://stackoverflow.com/a/32119820 -->

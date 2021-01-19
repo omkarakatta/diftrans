@@ -25,7 +25,7 @@ a tibble with 217155 rows and 16 variables
 }
 }
 \source{
-This data set mimics the properties of the data set used in Daljord et al. (2020).
+This data set mimics the properties of the data set used in Daljord et al. (2021).
 }
 \usage{
 Beijing_sample

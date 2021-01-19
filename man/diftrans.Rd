@@ -39,7 +39,7 @@ differences-in-transports estimator}
 
 \item{var}{the title of the first column of \code{pre_main}, \code{post_main},
 \code{pre_control}, and \code{post_control}; default is \code{MSRP}
-(see Daljord et al. (2020))}
+(see Daljord et al. (2021))}
 
 \item{bandwidth_seq}{a vector of bandwidth values to try; default is \code{seq(0, 40000, 1000)}}
 

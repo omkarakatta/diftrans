@@ -2,7 +2,7 @@
 ###
 ### Title: plotting.R
 ###
-### Description: Functions used to plot figures in Daljord et al. (2020)
+### Description: Functions used to plot figures in Daljord et al. (2021)
 ###
 ### Author: Omkar A. Katta
 ###
