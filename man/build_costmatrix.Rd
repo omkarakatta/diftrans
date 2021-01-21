@@ -7,8 +7,8 @@
 build_costmatrix(support, bandwidth = 0)
 }
 \arguments{
-\item{support}{A vector of the common support of source
-and target distributions}
+\item{support}{A vector of the common support of pre-
+and post-distributions}
 
 \item{bandwidth}{A non-negative number to ignore small transfers;
 defaults to 0}
@@ -17,14 +17,15 @@ defaults to 0}
 a symmetric, square matrix of dimension \code{length(support)}
 }
 \description{
-Create cost matrix with common \code{support} for both source and target
-distributions.
+Create cost matrix with common \code{support} for both pre- and
+post-distributions.
 }
 \details{
-The entries of the cost matrix are given by:
-\deqn{c_d(x_1, x_0) = 1( | x_1 - x_0 | > d ),}
-where \eqn{x_1} and \eqn{x_0} are entries in \code{support}, \eqn{1(...)}
-is the indicator function, and \eqn{d} is \code{bandwidth}.
+The \eqn{(i, j)} entries of the cost matrix are given by:
+\deqn{c_d(x_i, x_j) = 1( | x_i - x_j | > d ),}
+where \eqn{x_i} and \eqn{x_j} are the i-th and j-th entries in
+\code{support}, \eqn{1(...)} is the indicator function, and
+\eqn{d} is \code{bandwidth}.
 
 Note that this function has no internal checks.
 The user should be careful to ensure that:
@@ -33,10 +34,17 @@ The user should be careful to ensure that:
 \item \code{support} contains unique values.
 }
 
-Instead of using the common support of our source and target
-distributions, \code{build_costmatrix2} uses the support of
-the source distribution and the support of the target
-distribution separately.
+Instead of using the common support of our pre- and
+post-distributions, \code{build_costmatrix2} uses the support of
+the pre-distribution and the support of the
+post-distribution separately.
+
+Since this function uses the common support, the diagonals
+of the cost matrix will refer to the cost of no movement.
+For any choice of the \code{bandwidth}, the diagonals
+will therefore be zero.
+Another consequence of using the common support is that
+cost matrix will be symmetric and square.
 }
 \examples{
 build_costmatrix(c(0, 1, 2), 1)

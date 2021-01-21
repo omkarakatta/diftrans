@@ -14,13 +14,14 @@
 
 #' Create Cost Matrix
 #'
-#' Create cost matrix with common \code{support} for both source and target
-#' distributions.
+#' Create cost matrix with common \code{support} for both pre- and
+#' post-distributions.
 #'
-#' The entries of the cost matrix are given by:
-#' \deqn{c_d(x_1, x_0) = 1( | x_1 - x_0 | > d ),}
-#' where \eqn{x_1} and \eqn{x_0} are entries in \code{support}, \eqn{1(...)}
-#' is the indicator function, and \eqn{d} is \code{bandwidth}.
+#' The \eqn{(i, j)} entries of the cost matrix are given by:
+#' \deqn{c_d(x_i, x_j) = 1( | x_i - x_j | > d ),}
+#' where \eqn{x_i} and \eqn{x_j} are the i-th and j-th entries in
+#' \code{support}, \eqn{1(...)} is the indicator function, and
+#' \eqn{d} is \code{bandwidth}.
 #'
 #' Note that this function has no internal checks.
 #' The user should be careful to ensure that:
@@ -29,13 +30,20 @@
 #'  \item \code{support} contains unique values.
 #'}
 #'
-#' Instead of using the common support of our source and target
-#' distributions, \code{build_costmatrix2} uses the support of
-#' the source distribution and the support of the target
-#' distribution separately.
+#' Instead of using the common support of our pre- and 
+#' post-distributions, \code{build_costmatrix2} uses the support of
+#' the pre-distribution and the support of the
+#' post-distribution separately.
 #'
-#' @param support A vector of the common support of source
-#'   and target distributions
+#' Since this function uses the common support, the diagonals
+#' of the cost matrix will refer to the cost of no movement.
+#' For any choice of the \code{bandwidth}, the diagonals
+#' will therefore be zero.
+#' Another consequence of using the common support is that
+#' cost matrix will be symmetric and square.
+#'
+#' @param support A vector of the common support of pre-
+#'   and post-distributions
 #' @param bandwidth A non-negative number to ignore small transfers;
 #'   defaults to 0
 #' @return a symmetric, square matrix of dimension \code{length(support)}
@@ -54,10 +62,48 @@ build_costmatrix <- function(support, bandwidth = 0) {
   costmatrix
 }
 
-build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0){
-  # create cost matrix given the minimal support of both the pre-data and post-data
-  costmatrix <- matrix(NA_real_, nrow = length(support_pre), ncol = length(support_post))
-  for (i in seq_along(support_pre)){
+#' Create Cost Matrix with Minimal Supports
+#'
+#' Create cost matrix with \code{support_pre} for pre-distribution and
+#' \code{support_post} for post-distribution.
+#'
+#' The \eqn{(i, j)} entries of the cost matrix are given by:
+#' \deqn{c_d(x_i, y_j) = 1( | x_i - y_j | > d ),}
+#' where \eqn{x_i} is the ith entry of \code{support_pre},
+#' \eqn{y_j} is the jth entry of \code{support_post},
+#' \eqn{1(...)} is the indicator function, and
+#' \eqn{d} is \code{bandwidth}.
+#'
+#' Note that this function has no internal checks.
+#' The user should be careful to ensure that:
+#' \enumerate{
+#'  \item \code{bandwidth} is non-negative.
+#'  \item \code{support_pre} contains unique values.
+#'  \item \code{support_post} contains unique values.
+#'}
+#'
+#' Instead of using the common support of our pre- and
+#' post-distributions as in \code{build_costmatrix}, this function
+#' uses the support of the pre- and post-distributions separately.
+#' Resultantly, this function need not return a square, symmetric
+#' matrix whose diagonals are zero.
+#'
+#' @param support_pre A vector of the support of the pre-distribution
+#' @param support_post A vector of the support of the post-distribution
+#' @param bandwidth A non-negative number to ignore small transfers;
+#'   defaults to 0
+#' @return a matrix of dimension \code{length(support_pre)} by
+#'   '\code{length(support_post)}
+#'
+#' @examples
+#' build_costmatrix2(c(0, 1, 2), c(1, 2, 3), 1)
+#'
+#' @seealso \code{\link{build_costmatrix}}
+build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
+  costmatrix <- matrix(NA_real_,
+                       nrow = length(support_pre),
+                       ncol = length(support_post))
+  for (i in seq_along(support_pre)) {
     dist <- abs(support_pre[i] - support_post)
     dist <- ifelse(dist > bandwidth, 1, 0)
     costmatrix[i, ] <- dist
