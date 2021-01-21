@@ -3,5 +3,5 @@
 export("%>%")
 export(diftrans)
 importFrom(magrittr,"%>%")
-importFrom(rlang,enquo)
+importFrom(rlang,ensym)
 importFrom(transport,transport)

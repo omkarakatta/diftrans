@@ -23,10 +23,10 @@ post_treated <- data.frame(x = support,
   tidyr::replace_na(list(count = 0))
 
 tc <- diftrans(pre_main = pre_treated, post_main = post_treated,
-                  estimator = "tc", var = x,
+                  estimator = "tc", var = x, count = count,
                   bandwidth = 0)
 
-tc
+#~ tc
 
 test_that("diftrans works", {
   expect_equal(tc$main, 1)

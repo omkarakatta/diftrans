@@ -10,6 +10,7 @@ diftrans(
   pre_control = NULL,
   post_control = NULL,
   var = MSRP,
+  count = count,
   bandwidth_seq = seq(0, 40000, 1000),
   estimator = ifelse(!is.null(pre_control) & !is.null(post_control), "dit", "tc"),
   conservative = F,
@@ -39,6 +40,10 @@ differences-in-transports estimator}
 
 \item{var}{the title of the first column of \code{pre_main}, \code{post_main},
 \code{pre_control}, and \code{post_control}; default is \code{MSRP}
+(see Daljord et al. (2021))}
+
+\item{count}{the title of the second column of \code{pre_main}, \code{post_main},
+\code{pre_control}, and \code{post_control}; default is \code{count}
 (see Daljord et al. (2021))}
 
 \item{bandwidth_seq}{a vector of bandwidth values to try; default is \code{seq(0, 40000, 1000)}}

@@ -45,7 +45,9 @@ Resultantly, this function need not return a square, symmetric
 matrix whose diagonals are zero.
 }
 \examples{
+\dontrun{
 build_costmatrix2(c(0, 1, 2), c(1, 2, 3), 1)
+}
 
 }
 \seealso{

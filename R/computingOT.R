@@ -49,7 +49,9 @@
 #' @return a symmetric, square matrix of dimension \code{length(support)}
 #'
 #' @examples
+#' \dontrun{
 #' build_costmatrix(c(0, 1, 2), 1)
+#'}
 #'
 #' @seealso \code{\link{build_costmatrix2}}
 build_costmatrix <- function(support, bandwidth = 0) {
@@ -96,7 +98,9 @@ build_costmatrix <- function(support, bandwidth = 0) {
 #'   '\code{length(support_post)}
 #'
 #' @examples
+#' \dontrun{
 #' build_costmatrix2(c(0, 1, 2), c(1, 2, 3), 1)
+#' }
 #'
 #' @seealso \code{\link{build_costmatrix}}
 build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
@@ -113,38 +117,53 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 
 ### Compute Transport Cost ---------------------------
 
+#~ given pre-data and post-data, compute optimal transport cost given bandwidth
+#~ the pre- and post-distribution arguments will be validated to be in the right form, but will not be converted to be in the right form.
+#~ correct form is: value and counts;
 #' @importFrom transport transport
-get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSRP, costmat = NULL, costmat_ref = NULL){
-  # given pre-data and post-data, compute optimal transport cost given bandwidth
-  pre <- pre_df$count
-  post <- post_df$count
-  pre_support <- pre_df %>% dplyr::select({{var}}) %>% unlist()
-  post_support <- post_df %>% dplyr::select({{var}}) %>% unlist()
-  names(pre_support) <- c()
-  names(post_support) <- c()
+#' @importFrom rlang ensym
+get_OTcost <- function(pre_df,
+                       post_df,
+                       bandwidth = 0,
+                       var = MSRP,
+                       count = count,
+                       costmat = NULL,
+                       costmat_ref = NULL) {
 
-  if (!identical(pre_support, post_support)){
-    stop("`pre_df` and `post_df` need to have the same support")
+
+  #~ obtain supports
+  pre_support <- pre_df[[rlang::ensym(var)]]
+  post_support <- post_df[[rlang::ensym(var)]]
+
+  #~ ensure the supports are unique and the same in pre- and post-distributions
+  if (length(pre_support)
+      !=
+      length(unique(pre_support[!is.na(pre_support)]))) {
+    stop("`pre_df` should not have repeated/invalid values in `var` column.")
+  }
+  if (length(post_support)
+      !=
+      length(unique(post_support[!is.na(post_support)]))) {
+    stop("`post_df` should not have repeated/invalid values in `var` column.")
+  }
+  if (!identical(pre_support, post_support)) {
+    stop("`pre_df` and `post_df` need to have the same `var` column.")
   }
 
-  if (is.null(support)){
-    support <- pre_df %>% dplyr::select({{var}}) %>% unlist()
-    names(support) <- c()
-  }
+  support <- pre_support
 
-  if (!identical(support, pre_support)){
-    stop("`support` is different from `pre_support` and `post_support`")
-  }
-  if (!identical(support, post_support)){
-    stop("`support` is different from `pre_support` and `post_support`")
-  }
+  #~ obtain counts
+  pre <- pre_df[[rlang::ensym(count)]]
+  post <- post_df[[rlang::ensym(count)]]
 
+  #~ obtain cost matrix with common support
   if (is.null(costmat)) {
     costm <- build_costmatrix(support, bandwidth)
   } else {
     costm <- costmat
   }
 
+  #~ compute and normalize cost
   OT <- transport(
     as.numeric(sum(post) / sum(pre) * pre),
     as.numeric(post),
@@ -152,7 +171,7 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
   )
 
   if (is.null(costmat_ref)) {
-    # construct minimal support and determine cost
+    #~ construct minimal support for pre-distribution
     support_pre <- pre_df %>%
       dplyr::filter(count != 0) %>%
       dplyr::select({{var}}) %>%
@@ -160,7 +179,7 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
       dplyr::arrange({{var}}) %>%
       dplyr::filter(!is.na({{var}})) %>%
       unlist()
-
+    #~ construct minimal support for post-distribution
     support_post <- post_df %>%
       dplyr::filter(count != 0) %>%
       dplyr::select({{var}}) %>%
@@ -168,9 +187,8 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
       dplyr::arrange({{var}}) %>%
       dplyr::filter(!is.na({{var}})) %>%
       unlist()
-
+    #~ construct minimal cost matrix
     costm_ref <- build_costmatrix2(support_pre, support_post, bandwidth)
-
   } else {
     costm_ref <- costmat_ref
   }
@@ -183,7 +201,9 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 
   tot_cost <- sum(temp$cost)
   prop_cost <- tot_cost / sum(post)
-  list("num_bribe" = tot_cost, "prop_bribe" = prop_cost, "bandwidth" = bandwidth)
+  list("num_bribe" = tot_cost,
+       "prop_bribe" = prop_cost,
+       "bandwidth" = bandwidth)
 }
 
 ### Compute Results ---------------------------
@@ -221,6 +241,9 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 #'     differences-in-transports estimator
 #' @param var the title of the first column of \code{pre_main}, \code{post_main},
 #'     \code{pre_control}, and \code{post_control}; default is \code{MSRP}
+#'     (see Daljord et al. (2021))
+#' @param count the title of the second column of \code{pre_main}, \code{post_main},
+#'     \code{pre_control}, and \code{post_control}; default is \code{count}
 #'     (see Daljord et al. (2021))
 #' @param bandwidth_seq a vector of bandwidth values to try; default is \code{seq(0, 40000, 1000)}
 #' @param estimator a string that takes on the value of "dit" for
@@ -263,7 +286,7 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 #' is the bandwidth associated with the estimator.
 #'
 #' @export
-#' @importFrom rlang enquo
+#' @importFrom rlang ensym
 #' @examples
 #' # Find conservative transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 0
 #' # # step 1: find support
@@ -338,6 +361,7 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 diftrans <- function(pre_main = NULL, post_main = NULL,
                      pre_control = NULL, post_control = NULL,
                      var = MSRP,
+                     count = count,
                      bandwidth_seq = seq(0, 40000, 1000),
                      estimator = ifelse(!is.null(pre_control) & !is.null(post_control), "dit", "tc"),
                      conservative = F,
@@ -346,7 +370,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                      save_dit = F,
                      costm_main = NULL, costm_ref_main = NULL,
                      costm_control = NULL, costm_ref_control = NULL){
-  var <- rlang::enquo(var)
+
   # error checking
   if (is.null(pre_main) | is.null(post_main)){
     message("`pre_main` and/or `post_main` is mising.")
@@ -389,9 +413,27 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     if (!suppress_progress_bar) utils::setTxtProgressBar(pb, i)
 
     bandwidth <- bandwidth_seq[i]
-    main_cost <- get_OTcost(pre_main, post_main, bandwidth = bandwidth, var = !!var, costmat = costm_main, costmat_ref = costm_ref_main)
-    if (conservative) maincons_cost <- get_OTcost(pre_main, post_main, bandwidth = 2*bandwidth, var = !!var, costmat = costm_main, costmat_ref = costm_ref_main)
-    if (est == "dit") control_cost <- get_OTcost(pre_control, post_control, bandwidth = bandwidth, var = !!var, costmat = costm_control, costmat_ref = costm_ref_control)
+    main_cost <- get_OTcost(pre_main,
+                            post_main,
+                            bandwidth = bandwidth,
+                            var = !!rlang::ensym(var),
+                            count = !!rlang::ensym(count),
+                            costmat = costm_main,
+                            costmat_ref = costm_ref_main)
+    if (conservative) maincons_cost <- get_OTcost(pre_main,
+                                                  post_main,
+                                                  bandwidth = 2*bandwidth,
+                                                  var = !!rlang::ensym(var),
+                                                  count = !!rlang::ensym(count),
+                                                  costmat = costm_main,
+                                                  costmat_ref = costm_ref_main)
+    if (est == "dit") control_cost <- get_OTcost(pre_control,
+                                                 post_control,
+                                                 bandwidth = bandwidth,
+                                                 var = !!rlang::ensym(var),
+                                                 count = !!rlang::ensym(count),
+                                                 costmat = costm_control,
+                                                 costmat_ref = costm_ref_control)
 
     main_prop[i] <- main_cost$prop_bribe
     if (conservative) maincons_prop[i] <- maincons_cost$prop_bribe

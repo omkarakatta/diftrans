@@ -47,7 +47,9 @@ Another consequence of using the common support is that
 cost matrix will be symmetric and square.
 }
 \examples{
+\dontrun{
 build_costmatrix(c(0, 1, 2), 1)
+}
 
 }
 \seealso{
