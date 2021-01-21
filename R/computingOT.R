@@ -120,8 +120,67 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 #~ given pre-data and post-data, compute optimal transport cost given bandwidth
 #~ the pre- and post-distribution arguments will be validated to be in the right form, but will not be converted to be in the right form.
 #~ correct form is: value and counts;
+
+#' Compute Optimal Transport Cost
+#'
+#' Compute the percentage of mass that has moved more than
+#' \code{bandwidth} units away on the support of two discrete
+#' distributions, \code{pre_df} and \code{post_df}.
+#'
+#' The pre- and post-distributions given by \code{pre_df}
+#' and \code{post_df} need to be \code{data.frame} objects of
+#' two columns. The first column whose title should be given by
+#' \code{var} contains the common support of the two distributions.
+#' In other words, the values in \code{var} in each \code{pre_df}
+#' and \code{post_df} need to be unique and the same across the two
+#' distributions.
+#' The second column named \code{count} provides the mass on the
+#' respective value of the support.
+#' If the sum of \code{count} in each \code{pre_df} and \code{post_df},
+#' then \code{pre_df} and \code{post_df} are probability mass functions.
+#' 
+#' The \code{bandwidth} argument should be a non-negative number.
+#' If mass is transferred less than \code{bandwidth}, we ignore these transfers.
+#' Otherwise, we place equal weight on the transfers.
+#' Resultantly, the output of this function is the percentage of mass
+#' that has been tranferred more than \code{bandwidth} units between
+#' \code{pre_df} and \code{post_df}.
+#'
+#' Instead of the default cost function that uses \code{bandwidth}, 
+#' \code{costmat}, and \code{costmat_ref} can be used to specify the
+#' cost matrix of choice.
+#' The first matrix is fed into \code{\link[transport]{transport}} function from
+#' the \code{transport} package and may use the common support of
+#' \code{pre_df} and \code{post_df}.
+#' The second matrix \code{costmat_ref} is used to interpret the output
+#' of the \code{\link[transport]{transport}} function. It uses the
+#' the minimal support of \code{pre_df} along the rows and the
+#' minimal support of \code{post_df} along the columns.
+#'
+#' @param pre_df A two-column \code{data.frame} describing the pre-distribution;
+#' @param post_df A two-column \code{data.frame} describing the
+#'   post-distribution;
+#' @param bandwidth A non-negative number to ignore small transfers;
+#'   defaults to 0
+#' @param var The title of the column of support values in \code{pre_df}
+#'   and \code{post_df}; defaults to \code{MSRP}
+#' @param count The title of the column of masses in \code{pre_df}
+#'   and \code{post_df}; defaults to \code{count}
+#' @param costmat The cost matrix to be fed to \code{\link[transport]{transport}}
+#' @param costmat_ref The cost matrix that interprets output of
+#'   code{\link[transport]{transport}}
+#'
+#' @return A list of the total mass transferred (\code{tot_cost}),
+#'   the proportion of mass transferred (\code{prop_cost}), and the
+#'   \code{bandwidth}
+#'
 #' @importFrom transport transport
 #' @importFrom rlang ensym
+#'
+#' @examples
+#' 
+#'
+#'
 get_OTcost <- function(pre_df,
                        post_df,
                        bandwidth = 0,
@@ -164,16 +223,17 @@ get_OTcost <- function(pre_df,
   }
 
   #~ compute and normalize cost
-  OT <- transport(
-    as.numeric(sum(post) / sum(pre) * pre),
-    as.numeric(post),
-    costm
-  )
+  a <- as.numeric(sum(post) / sum(pre) * pre)
+  b <- as.numeric(post)
+  print(a)
+  print(b)
+  print(costm)
+  OT <- transport(a, b, costm)
 
   if (is.null(costmat_ref)) {
     #~ construct minimal support for pre-distribution
     support_pre <- pre_df %>%
-      dplyr::filter(count != 0) %>%
+      dplyr::filter({{count}} != 0) %>%
       dplyr::select({{var}}) %>%
       dplyr::distinct({{var}}) %>%
       dplyr::arrange({{var}}) %>%
@@ -181,7 +241,7 @@ get_OTcost <- function(pre_df,
       unlist()
     #~ construct minimal support for post-distribution
     support_post <- post_df %>%
-      dplyr::filter(count != 0) %>%
+      dplyr::filter({{count}} != 0) %>%
       dplyr::select({{var}}) %>%
       dplyr::distinct({{var}}) %>%
       dplyr::arrange({{var}}) %>%
@@ -201,8 +261,8 @@ get_OTcost <- function(pre_df,
 
   tot_cost <- sum(temp$cost)
   prop_cost <- tot_cost / sum(post)
-  list("num_bribe" = tot_cost,
-       "prop_bribe" = prop_cost,
+  list("tot_cost" = tot_cost,
+       "prop_cost" = prop_cost,
        "bandwidth" = bandwidth)
 }
 
@@ -435,9 +495,9 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                                                  costmat = costm_control,
                                                  costmat_ref = costm_ref_control)
 
-    main_prop[i] <- main_cost$prop_bribe
-    if (conservative) maincons_prop[i] <- maincons_cost$prop_bribe
-    if (est == "dit") control_prop[i] <- control_cost$prop_bribe
+    main_prop[i] <- main_cost$prop_cost
+    if (conservative) maincons_prop[i] <- maincons_cost$prop_cost
+    if (est == "dit") control_prop[i] <- control_cost$prop_cost
   }
 
   if (!suppress_progress_bar) cat("\n")
