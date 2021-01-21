@@ -21,7 +21,7 @@ answer <- matrix(c(0, 0, 0, 1, 1, 1,
                    0, 0, 0, 0, 1, 1,
                    0, 0, 0, 0, 0, 1,
                    1, 0, 0, 0, 0, 0,
-                   1, 1, 0, 0 ,0, 0,
+                   1, 1, 0, 0, 0, 0,
                    1, 1, 1, 0, 0, 0),
                  byrow = T, nrow = length(support), ncol = length(support))
 test_that("bandwidth \neq 0 is okay.", {

@@ -12,10 +12,41 @@
 
 ### Cost Matrix ---------------------------
 
-build_costmatrix <- function(support, bandwidth = 0){
-  # create cost matrix using the common support provided
+#' Create Cost Matrix
+#'
+#' Create cost matrix with common \code{support} for both source and target
+#' distributions.
+#'
+#' The entries of the cost matrix are given by:
+#' \deqn{c_d(x_1, x_0) = 1( | x_1 - x_0 | > d ),}
+#' where \eqn{x_1} and \eqn{x_0} are entries in \code{support}, \eqn{1(...)}
+#' is the indicator function, and \eqn{d} is \code{bandwidth}.
+#'
+#' Note that this function has no internal checks.
+#' The user should be careful to ensure that:
+#' \enumerate{
+#'  \item \code{bandwidth} is non-negative.
+#'  \item \code{support} contains unique values.
+#'}
+#'
+#' Instead of using the common support of our source and target
+#' distributions, \code{build_costmatrix2} uses the support of
+#' the source distribution and the support of the target
+#' distribution separately.
+#'
+#' @param support A vector of the common support of source
+#'   and target distributions
+#' @param bandwidth A non-negative number to ignore small transfers;
+#'   defaults to 0
+#' @return a symmetric, square matrix of dimension \code{length(support)}
+#'
+#' @examples
+#' build_costmatrix(c(0, 1, 2), 1)
+#'
+#' @seealso \code{\link{build_costmatrix2}}
+build_costmatrix <- function(support, bandwidth = 0) {
   costmatrix <- matrix(NA_real_, nrow = length(support), ncol = length(support))
-  for (i in seq_along(support)){
+  for (i in seq_along(support)) {
     dist <- abs(support[i] - support)
     dist <- ifelse(dist > bandwidth, 1, 0)
     costmatrix[i, ] <- dist
