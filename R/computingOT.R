@@ -117,10 +117,6 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 
 ### Compute Transport Cost ---------------------------
 
-#~ given pre-data and post-data, compute optimal transport cost given bandwidth
-#~ the pre- and post-distribution arguments will be validated to be in the right form, but will not be converted to be in the right form.
-#~ correct form is: value and counts;
-
 #' Compute Optimal Transport Cost
 #'
 #' Compute the percentage of mass that has moved more than
@@ -138,7 +134,7 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 #' respective value of the support.
 #' If the sum of \code{count} in each \code{pre_df} and \code{post_df},
 #' then \code{pre_df} and \code{post_df} are probability mass functions.
-#' 
+#'
 #' The \code{bandwidth} argument should be a non-negative number.
 #' If mass is transferred less than \code{bandwidth}, we ignore these transfers.
 #' Otherwise, we place equal weight on the transfers.
@@ -146,7 +142,7 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 #' that has been tranferred more than \code{bandwidth} units between
 #' \code{pre_df} and \code{post_df}.
 #'
-#' Instead of the default cost function that uses \code{bandwidth}, 
+#' Instead of the default cost function that uses \code{bandwidth},
 #' \code{costmat}, and \code{costmat_ref} can be used to specify the
 #' cost matrix of choice.
 #' The first matrix is fed into \code{\link[transport]{transport}} function from
@@ -157,6 +153,12 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 #' the minimal support of \code{pre_df} along the rows and the
 #' minimal support of \code{post_df} along the columns.
 #'
+#' This function does minimal error-checking, but good practices include:
+#' \enumerate{
+#'   \item non-degenerate pre- and post-distributions
+#'   \item non-negative values for \code{bandwidth}
+#' }
+#'
 #' @param pre_df A two-column \code{data.frame} describing the pre-distribution;
 #' @param post_df A two-column \code{data.frame} describing the
 #'   post-distribution;
@@ -166,8 +168,9 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 #'   and \code{post_df}; defaults to \code{MSRP}
 #' @param count The title of the column of masses in \code{pre_df}
 #'   and \code{post_df}; defaults to \code{count}
-#' @param costmat The cost matrix to be fed to \code{\link[transport]{transport}}
-#' @param costmat_ref The cost matrix that interprets output of
+#' @param costmat The cost matrix to be fed to
+#'   \code{\link[transport]{transport}}
+#' @param costmat_ref The cost matrix that is used to reference output of
 #'   code{\link[transport]{transport}}
 #'
 #' @return A list of the total mass transferred (\code{tot_cost}),
@@ -178,8 +181,20 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 #' @importFrom rlang ensym
 #'
 #' @examples
-#' 
-#'
+#' \dontrun{
+#' support <- c(1, 2, 10)
+#' #~ Example 1: complete overlap => 0% transport cost for any bandwidth
+#' overlap_before <- data.frame(x = support, mass = c(6, 2, 0))
+#' overlap_after <- data.frame(x = support, mass = c(3, 1, 0))
+#' get_OTcost(overlap_before, overlap_after,
+#'            var = x, count = mass)
+#' get_OTcost(overlap_before, overlap_after,
+#'            var = x, count = mass, bandwidth = 2)
+#' #~ Example 2: illustrative example in Daljord et al. (2021)
+#' mix_before <- data.frame(x = support, mass = c(6, 2, 0))
+#' mix_after <- data.frame(x = support, mass = c(1, 3, 0))
+#' get_OTcost(mix_before, mix_after, var = x, count = mass)
+#' }
 #'
 get_OTcost <- function(pre_df,
                        post_df,
@@ -188,7 +203,6 @@ get_OTcost <- function(pre_df,
                        count = count,
                        costmat = NULL,
                        costmat_ref = NULL) {
-
 
   #~ obtain supports
   pre_support <- pre_df[[rlang::ensym(var)]]
@@ -225,10 +239,7 @@ get_OTcost <- function(pre_df,
   #~ compute and normalize cost
   a <- as.numeric(sum(post) / sum(pre) * pre)
   b <- as.numeric(post)
-  print(a)
-  print(b)
-  print(costm)
-  OT <- transport(a, b, costm)
+  OT <- transport::transport(a, b, costm)
 
   if (is.null(costmat_ref)) {
     #~ construct minimal support for pre-distribution
@@ -280,14 +291,17 @@ get_OTcost <- function(pre_df,
 #' That is, they are a tibble with two columns:
 #' \itemize{
 #'   \item column 1 contains the full support of \code{var}, and
-#'   \item column 2, which should be titled "count", contains the corresponding
-#'   mass of each value in the support.
+#'   \item column 2 contains the corresponding mass of each value
+#'          in the support.
 #' }
-#' Since column 1 contains the full support of \code{var} and all these distributions
-#' are of \code{var}, column 1 must be the same for all distributions.
+#' Since column 1 contains the full support of \code{var} and all these
+#' distributions are of \code{var}, column 1 must be the same for all
+#' distributions.
 #'
-#' The cost matrices specified by \code{costm} should use a common support of the respective distributions.
-#' However, \code{costm_ref} matrices should use the minimal support of the respective pre and post distributions.
+#' The cost matrices specified by \code{costm} should use a common support of
+#' the respective distributions.
+#' However, \code{costm_ref} matrices should use the minimal support of the
+#' respective pre and post distributions.
 #'
 #' @param pre_main probability mass function (see "Details") for \code{var} of the
 #'     treated group before treatment occurs

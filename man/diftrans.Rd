@@ -108,14 +108,17 @@ The \code{pre_main}, \code{post_main}, \code{pre_control}, and
 That is, they are a tibble with two columns:
 \itemize{
 \item column 1 contains the full support of \code{var}, and
-\item column 2, which should be titled "count", contains the corresponding
-mass of each value in the support.
+\item column 2 contains the corresponding mass of each value
+in the support.
 }
-Since column 1 contains the full support of \code{var} and all these distributions
-are of \code{var}, column 1 must be the same for all distributions.
+Since column 1 contains the full support of \code{var} and all these
+distributions are of \code{var}, column 1 must be the same for all
+distributions.
 
-The cost matrices specified by \code{costm} should use a common support of the respective distributions.
-However, \code{costm_ref} matrices should use the minimal support of the respective pre and post distributions.
+The cost matrices specified by \code{costm} should use a common support of
+the respective distributions.
+However, \code{costm_ref} matrices should use the minimal support of the
+respective pre and post distributions.
 }
 \examples{
 # Find conservative transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 0

@@ -100,6 +100,45 @@ test_that("manually specifying cost works", {
                get_OTcost(pre, post, bandwidth = 0))
 })
 
+support <- c(1, 2, 3, 10)
+disjoint_before <- data.frame(x = support, mass = c(8, 2, 0, 0))
+disjoint_after <- data.frame(x = support, mass = c(0, 0, 7, 3))
+disjoint_0 <- get_OTcost(disjoint_before, disjoint_after,
+                         var = x, count = mass)
+disjoint_10 <- get_OTcost(disjoint_before, disjoint_after,
+                          var = x, count = mass,
+                          bandwidth = 10)
 
+test_that("two non-overlapping distributions", {
+  expect_equal(disjoint_0$prop_cost, 1)
+  expect_equal(disjoint_10$prop_cost, 0)
+})
+
+
+support <- c(1, 2, 10)
+overlap_before <- data.frame(x = support, mass = c(6, 2, 0))
+overlap_after <- data.frame(x = support, mass = c(3, 1, 0))
+overlap_0 <- get_OTcost(overlap_before, overlap_after,
+                        var = x, count = mass)
+overlap_2 <- get_OTcost(overlap_before, overlap_after,
+                        var = x, count = mass,
+                        bandwidth = 2)
+test_that("two completely overlapping distributions", {
+  expect_equal(overlap_0$prop_cost, 0)
+  expect_equal(overlap_2$prop_cost, 0)
+})
+
+
+mix_before <- data.frame(x = support, mass = c(6, 2, 0))
+mix_after <- data.frame(x = support, mass = c(1, 3, 0))
+mix_0 <- get_OTcost(mix_before, mix_after,
+                    var = x, count = mass)
+mix_1 <- get_OTcost(mix_before, mix_after,
+                    var = x, count = mass,
+                    bandwidth = 1)
+test_that("two partially overlapping distributions", {
+  expect_equal(mix_0$prop_cost, 0.5)
+  expect_equal(mix_1$prop_cost, 0)
+})
 
 
