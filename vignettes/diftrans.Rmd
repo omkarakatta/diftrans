@@ -249,7 +249,7 @@ dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                    pre_control = pre_control, post_control = post_control,
                    estimator = "dit", var = x,
                    bandwidth_seq = seq(0, 10, 1),
-                   save_dit = TRUE)
+                   save_result = TRUE)
 dit$out
 dit$dit
 dit$optimal_bandwidth
@@ -257,7 +257,7 @@ dit$optimal_bandwidth
 
 Another difference between computing the transport cost and the differences-in-differences
 estimator is that the differences-in-transports estimator is printed as a message. 
-To save this result in `dit`, we use `save_dit = TRUE`.
+To save this result in `dit`, we use `save_result` = TRUE`.
 
 Thus, **the differences-in-transports estimator is `r scales::percent(dit$dit)` at an optimal bandwidth of `r dit$optimal_bandwidth`**. 
 There is more nuance to computing the differences-in-transports estimator than 
@@ -288,7 +288,7 @@ dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                    pre_control = pre_control, post_control = post_control,
                    estimator = "dit", var = x,
                    bandwidth_seq = seq(d_a, 10, 1), # smallest bandwidth will be d_a
-                   save_dit = TRUE)
+                   save_result = TRUE)
 dit$out
 dit$dit
 dit$optimal_bandwidth
@@ -309,7 +309,7 @@ dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                    pre_control = pre_control, post_control = post_control,
                    estimator = "dit", var = x,
                    bandwidth_seq = seq(d_a, 10, 1),
-                   save_dit = TRUE,
+                   save_result = TRUE,
                    conservative = TRUE)
 dit$out
 dit$dit

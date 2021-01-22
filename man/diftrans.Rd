@@ -13,10 +13,10 @@ diftrans(
   count = count,
   bandwidth_seq = seq(0, 40000, 1000),
   estimator = ifelse(!is.null(pre_control) & !is.null(post_control), "dit", "tc"),
-  conservative = F,
-  quietly = F,
-  suppress_progress_bar = F,
-  save_dit = F,
+  conservative = FALSE,
+  quietly = FALSE,
+  suppress_progress_bar = FALSE,
+  save_result = FALSE,
   costm_main = NULL,
   costm_ref_main = NULL,
   costm_control = NULL,
@@ -61,7 +61,7 @@ difference-in-transports estimator; default is \code{FALSE}}
 
 \item{suppress_progress_bar}{if \code{TRUE}, the progress bar will be suppressed; default is \code{FALSE}}
 
-\item{save_dit}{if \code{TRUE}, the differences-in-transports estimator as
+\item{save_result}{if \code{TRUE}, the estimator as
 well as the associated bandwidth will be returned}
 
 \item{costm_main}{if \code{NULL}, the cost matrix with common support will be such that if the transport
@@ -90,7 +90,7 @@ are specified
 \item \code{diff2d}: \code{main2d - control}
 }
 
-If \code{save_dit = TRUE}, then a list is returned, with the first element
+If \code{save_result = TRUE}, then a list is returned, with the first element
 (labeled \code{out}) being the data.frame described above.
 The second element (labeled \code{dit}) is the differences-in-transports
 estimator, and the third and final element (labeled \code{optimal_bandwidth})
@@ -188,7 +188,7 @@ post_Tianjin <- Tianjin_sample \%>\%
 # # step 3: compute results
 dit <- diftrans(pre_Beijing, post_Beijing, pre_Tianjin, post_Tianjin,
                    conservative = TRUE, bandwidth = seq(0, 40000, 1000),
-                   save_dit = TRUE)
+                   save_result = TRUE)
 dit$optimal_bandwidth
 dit$dit
 }

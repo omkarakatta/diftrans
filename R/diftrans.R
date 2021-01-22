@@ -63,7 +63,7 @@
 #'     difference-in-transports estimator; default is \code{FALSE}
 #' @param quietly if \code{TRUE}, some results and will be suppressed from printing; default is \code{FALSE}
 #' @param suppress_progress_bar if \code{TRUE}, the progress bar will be suppressed; default is \code{FALSE}
-#' @param save_dit if \code{TRUE}, the differences-in-transports estimator as
+#' @param save_result if \code{TRUE}, the estimator as
 #'     well as the associated bandwidth will be returned
 #' @param costm_main if \code{NULL}, the cost matrix with common support will be such that if the transport 
 #'     distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.
@@ -87,7 +87,7 @@
 #'   \item \code{diff2d}: \code{main2d - control}
 #' }
 #'
-#' If \code{save_dit = TRUE}, then a list is returned, with the first element
+#' If \code{save_result = TRUE}, then a list is returned, with the first element
 #' (labeled \code{out}) being the data.frame described above.
 #' The second element (labeled \code{dit}) is the differences-in-transports
 #' estimator, and the third and final element (labeled \code{optimal_bandwidth})
@@ -163,128 +163,461 @@
 #' # # step 3: compute results
 #' dit <- diftrans(pre_Beijing, post_Beijing, pre_Tianjin, post_Tianjin,
 #'                    conservative = TRUE, bandwidth = seq(0, 40000, 1000),
-#'                    save_dit = TRUE)
+#'                    save_result = TRUE)
 #' dit$optimal_bandwidth
 #' dit$dit
+#~ if sims_bandwidth_selection is 0, skip bandwidth selection procedure
+#~ sims_bandwidth_selection > 0 => choose appropriate d_star among bandwidth_seq!
 diftrans <- function(pre_main = NULL, post_main = NULL,
                      pre_control = NULL, post_control = NULL,
                      var = MSRP,
                      count = count,
                      bandwidth_seq = seq(0, 40000, 1000),
-                     estimator = ifelse(!is.null(pre_control) & !is.null(post_control), "dit", "tc"),
-                     conservative = F,
-                     quietly = F,
-                     suppress_progress_bar = F,
-                     save_dit = F,
+                     minimum_bandwidth = 0, #~ TODO: document this, particularly for post/pre-trends
+                     maximum_bandwidth = 0, #~ TODO: document this
+                     estimator = ifelse(!is.null(pre_control)
+                                        &
+                                        !is.null(post_control),
+                                        "dit",
+                                        "tc"),
+                     sims_bandwidth_selection = 0,
+                     precision = 0.0005,
+                     sensitivity_lag = 5,
+                     sensitivity_lead = 5,
+                     sensitivity_accept = 5,
+                     sims_subsampling = 0,
+                     subsample_pre_main_size = NULL,
+                     subsample_post_main_size = NULL,
+                     subsample_pre_control_size = NULL,
+                     subsample_post_control_size = NULL,
+                     seed = 1,
+                     conservative = FALSE,
+                     quietly = FALSE,
+                     suppress_progress_bar = FALSE,
+                     save_result = FALSE,
                      costm_main = NULL, costm_ref_main = NULL,
-                     costm_control = NULL, costm_ref_control = NULL){
+                     costm_control = NULL, costm_ref_control = NULL) {
 
-  # error checking
-  if (is.null(pre_main) | is.null(post_main)){
-    message("`pre_main` and/or `post_main` is mising.")
+  #~ error checking
+  if (is.null(pre_main) || is.null(post_main)) {
+    stop("`pre_main` and/or `post_main` is missing.")
   }
+  if (round(sims_bandwidth_selection) != sims_bandwidth_selection
+      || sims_bandwidth_selection < 0) {
+    stop("`sims_bandwidth_selection` needs to be a non-negative integer.")
+  }
+  if (round(sims_subsampling) != sims_subsampling
+      || sims_subsampling < 0) {
+    stop("`sims_subsampling` needs to be a non-negative integer.")
+  }
+  if (round(subsample_pre_main_size) != subsample_pre_main_size
+      || subsample_pre_main_size <= 0) {
+    stop("`subsample_pre_main_size` needs to be positive integer.")
+  }
+  if (round(subsample_post_main_size) != subsample_post_main_size
+      || subsample_post_main_size <= 0) {
+    stop("`subsample_post_main_size` needs to be positive integer.")
+  }
+  if (round(subsample_pre_control_size) != subsample_pre_control_size
+      || subsample_pre_control_size <= 0) {
+    stop("`subsample_pre_control_size` needs to be positive integer.")
+  }
+  if (round(subsample_post_control_size) != subsample_post_control_size
+      || subsample_post_control_size <= 0) {
+    stop("`subsample_post_control_size` needs to be positive integer.")
+  }
+  if (!is.numeric(seed)) {
+    stop("`seed` must be numeric.")
+  }
+  #~ TODO: bandwidths > 0 error check
+  #~ TODO: check what happens when no bandwidth is given but cost matrices are given
+  #~ TODO: send a warning that if conservative = T and est != "dit", then we ignore conservative = T; instead, request the user to use twice the bandwidth in bandwidth_seq; i.e., tell the users that conservative = T only applies when est != "dit"
+  #~ TODO: allow for placebo matrix to be an argument
+
+  # error checking / get estimator
   estimator <- tolower(estimator)
-  if (estimator == "tc"){
-    if (!is.null(pre_control) | !is.null(post_control)){
+  tc_messages <- c("tc", "ba", "before-and-after")
+  dit_messages <- c("dit", "differences-in-transports", "diff-in-transports")
+  if (estimator %in% tc_messages) {
+    if (!is.null(pre_control) || !is.null(post_control)) {
       message("`pre_control` and/or `post_control` will be ignored.")
     }
-    est_message <- "Computing Transport Costs..."
-    est <- "tc"
-    if (!suppress_progress_bar) message(est_message)
-  } else if (estimator == "dit" | estimator == "differences-in-transports"){
-    if (is.null(pre_control) | is.null(post_control)){
+    #~ est_message <- "Computing Transport Costs..."
+    est <- "ba"
+    conservative <- FALSE
+    #~ if (!suppress_progress_bar & !quietly) message(est_message)
+  } else if (estimator %in% dit_messages) {
+    if (is.null(pre_control) || is.null(post_control)) {
       message("`pre_control` and/or `post_control` is mising.")
     }
-    est_message <- "Computing Differences-in-Transports Estimator..."
+    #~ est_message <- "Computing Differences-in-Transports Estimator..."
     est <- "dit"
-    if (!suppress_progress_bar) message(est_message)
+    #~ if (!suppress_progress_bar & !quietly) message(est_message)
   } else {
-    stop("Invalid estimator. Choose 'tc' or 'dit' or double check inputs.")
+    stop("Invalid estimator. Double-check inputs.")
   }
 
-  if (conservative & !quietly){
-    message("Note: you are using `conservative = T`.")
+
+  #~ set seed for reproducibility
+  set.seed(seed)
+  #~ check support
+  check_main <- check_support(pre_main, pre_control, var = !!rlang::ensym(var))
+  if (check_main$status == 1) {
+    stop(check_main$message)
+  } else {
+    main_support <- check_main$support
   }
 
-  if (est != "dit" & save_dit){
-    warning("The differences-in-transports estimator is not being computed so `save_dit = TRUE` is being ignored.")
-  }
-
-  # initialization
-  main_prop <- rep(NA_real_, length(bandwidth_seq))
-  if (conservative) maincons_prop <- rep(NA_real_, length(bandwidth_seq))
-  if (est == "dit") control_prop <- rep(NA_real_, length(bandwidth_seq))
-
-  # computation
-  if (!suppress_progress_bar) pb <- utils::txtProgressBar(min = 0, max = length(bandwidth_seq), initial = 0)
-  for (i in seq_along(bandwidth_seq)){
-    if (!suppress_progress_bar) utils::setTxtProgressBar(pb, i)
-
-    bandwidth <- bandwidth_seq[i]
-    main_cost <- get_OTcost(pre_main,
-                            post_main,
-                            bandwidth = bandwidth,
-                            var = !!rlang::ensym(var),
-                            count = !!rlang::ensym(count),
-                            costmat = costm_main,
-                            costmat_ref = costm_ref_main)
-    if (conservative) maincons_cost <- get_OTcost(pre_main,
-                                                  post_main,
-                                                  bandwidth = 2*bandwidth,
-                                                  var = !!rlang::ensym(var),
-                                                  count = !!rlang::ensym(count),
-                                                  costmat = costm_main,
-                                                  costmat_ref = costm_ref_main)
-    if (est == "dit") control_cost <- get_OTcost(pre_control,
-                                                 post_control,
-                                                 bandwidth = bandwidth,
-                                                 var = !!rlang::ensym(var),
-                                                 count = !!rlang::ensym(count),
-                                                 costmat = costm_control,
-                                                 costmat_ref = costm_ref_control)
-
-    main_prop[i] <- main_cost$prop_cost
-    if (conservative) maincons_prop[i] <- maincons_cost$prop_cost
-    if (est == "dit") control_prop[i] <- control_cost$prop_cost
-  }
-
-  if (!suppress_progress_bar) cat("\n")
-
-  # compile results
-  if (est == "dit"){
-    diffprop <- main_prop - control_prop
-
-    if (conservative){
-      diffprop2d <- maincons_prop - control_prop
-      out <- data.frame(bandwidth = bandwidth_seq,
-                        main = main_prop,
-                        main2d = maincons_prop,
-                        control = control_prop,
-                        diff = diffprop,
-                        diff2d = diffprop2d)
-      whichmax <- which.max(diffprop2d)
-      dit <- diffprop2d[whichmax]
-      dstar <- bandwidth_seq[whichmax]
-      if (!quietly) message(paste("The conservative diff-in-transports estimator is ", dit, " at d = ", dstar, sep = ""))
+  if (est = "dit") {
+    check_control <- check_support(pre_control, pre_control, var = !!rlang::ensym(var))
+    if (check_control$status == 1) {
+      stop(check_control$message)
     } else {
-      out <- data.frame(bandwidth = bandwidth_seq,
-                        main = main_prop,
-                        control = control_prop,
-                        diff = diffprop)
-      whichmax <- which.max(diffprop)
-      dit <- diffprop[whichmax]
-      dstar <- bandwidth_seq[whichmax]
-      if (!quietly) message(paste("The non-conservative diff-in-transports estimator is ", dit, " at d = ", dstar, sep = ""))
+      control_support <- check_control$support
     }
-    if (save_dit) out <- list(out = out, dit = dit, optimal_bandwidth = dstar)
   }
 
-  if (est == "tc"){
-    out <- data.frame(bandwidth = bandwidth_seq,
-                      main = main_prop)
-    if (conservative) out <- cbind(out, main2d = maincons_prop)
-    if (!quietly) message(paste("The transport cost for the specified bandwidths have been computed."))
+  #~ select appropriate bandwidth -- d_star
+  if (sims_bandwidth_selection > 0) {
+
+    #~ get placebo distributions for main
+    pre_main_count <- pre_main[[rlang::ensym(count)]]
+    post_main_count <- post_main[[rlang::ensym(count)]]
+
+    pre_main_placebo <- rmultinom(n = sims_bandwidth_selection,
+                                  size = sum(pre_main_count),
+                                  prob = pre_main_count)
+    post_main_placebo <- rmultinom(n = sims_bandwidth_selection,
+                                   size = sum(post_main_count),
+                                   prob = pre_main_count)
+
+    if (est == "ba") {
+      placebo <- sapply(
+        seq_len(sims_bandwidth_selection),
+        function(sim) {
+          pre_count <- pre_main_placebo[seq_along(main_support), sim]
+          post_count <- post_main_placebo[seq_along(main_support), sim]
+          pre_placebo <- data.frame(x = main_support,
+                                    y = pre_count)
+          post_placebo <- data.frame(x = main_support,
+                                     y = post_count)
+          sapply(
+            seq_along(bandwidth_seq),
+            function(bw_index) {
+              bw <- bandwidth_seq[bw_index]
+              placebo_result <- get_OTcost(pre_placebo,
+                                           post_placebo,
+                                           bw,
+                                           var = x,
+                                           count = y,
+                                           costmat = costm_main,
+                                           costmat_ref = costm_ref_main)
+              placebo_result$prop_cost
+            }
+          )
+        }
+      )
+    }
+
+    if (est == "dit") {
+      #~ get placebo distributions for control
+      pre_control_count <- pre_control[[rlang::ensym(count)]]
+      post_control_count <- post_control[[rlang::ensym(count)]]
+
+      pre_control_placebo <- rmultinom(n = sims_bandwidth_selection,
+                                    size = sum(pre_control_count),
+                                    prob = pre_control_count)
+      post_control_placebo <- rmultinom(n = sims_bandwidth_selection,
+                                     size = sum(post_control_count),
+                                     prob = pre_control_count)
+
+      placebo <- sapply(
+        seq_len(sims_bandwidth_selection),
+        function(sim) {
+          pre_count <- pre_main_placebo[seq_along(main_support), sim]
+          post_count <- post_main_placebo[seq_along(main_support), sim]
+          pre_main_placebo <- data.frame(x = main_support,
+                                         y = pre_count)
+          post_main_placebo <- data.frame(x = main_support,
+                                          y = post_count)
+
+          pre_count <- pre_control_placebo[seq_along(control_support), sim]
+          post_count <- post_control_placebo[seq_along(control_support), sim]
+          pre_control_placebo <- data.frame(x = control_support,
+                                    y = pre_count)
+          post_control_placebo <- data.frame(x = control_support,
+                                     y = post_count)
+
+          sapply(
+            seq_along(bandwidth_seq),
+            function(bw_index) {
+              bw <- bandwidth_seq[bw_index]
+              main_bw <- ifelse(conservative, 2 * bw, bw)
+              control_bw <- bw
+              placebo_main <- get_OTcost(pre_main_placebo,
+                                         post_main_placebo,
+                                         main_bw,
+                                         var = x,
+                                         count = y,
+                                         costmat = costm_main,
+                                         costmat_ref = costm_ref_main)
+              placebo_control <- get_OTcost(pre_control_placebo,
+                                            post_control_placebo,
+                                            control_bw,
+                                            var = x,
+                                            count = y,
+                                            costmat = costm_control,
+                                            costmat_ref = costm_ref_control)
+              abs(placebo_main$prop_cost - placebo_control$prop_cost)
+            }
+          )
+        }
+      )
+    }
+    #~ dim(placebo): length(bandwidth_seq) x sims_bandwidth_selection
+    colnames(placebo) <- paste0("sim", seq_len(sims_bandwidth_selection))
+    placebo_cleaned <- cbind(bandwidth = bandwidth_seq, as.data.frame(placebo))
+    placebo_summary <- placebo_cleaned %>%
+      dplyr::rowwise(bandwidth) %>%
+      dplyr::summarize(mean = mean(c_across()),
+                       quantile0.90 = quantile(c_across(), prob = 0.90),
+                       quantile0.95 = quantile(c_across(), prob = 0.95),
+                       quantile0.99 = quantile(c_across(), prob = 0.99))
+
+    #~ TODO: send placebo_cleaned and placebo_summary to user
+    valid_d_index <- valid_bandwidths(placebo_summary$mean,
+                                      sensitivity_lag,
+                                      sensitivity_lead,
+                                      sensitivity_accept,
+                                      precision)
+    valid_d <- bandwidth_seq[valid_d_index &
+                             bandwidth_seq >= minimum_bandwidth &
+                             bandwidth_seq <= maximum_bandwidth]
+
+    if (est == "ba") {
+      d_star <- min(valid_d)
+    }
+    if (est == "bw") {
+      d_star <- valid_d
+    }
+
+    #~ TODO: send d_star to user; d_star = all the valid bandwidths
+  } else {
+    d_star <- bandwidth_seq
   }
 
-  return(invisible(out))
+  #~ evaluate optimal transport at all values in d_star
+  main_bw <- ifelse(conservative, 2 * d_star, d_star)
+  real_main <- sapply(
+    seq_along(main_bw),
+    function(bw_index) {
+      cost <- get_OTcost(pre_main,
+                         post_main,
+                         bandwidth = main_bw[bw_index],
+                         var = !!rlang::ensym(var),
+                         count = !!rlang::ensym(count),
+                         costmat = costm_main,
+                         costmat_ref = costm_ref_main)
+      cost$prop_cost
+    }
+  )
+
+  if (est == "dit") {
+    control_bw <- d_star
+    real_control <- sapply(
+      seq_along(control_bw),
+      function(bw_index) {
+        cost <- get_OTcost(pre_control,
+                           post_control,
+                           bandwidth = control_bw[bw_index],
+                           var = !!rlang::ensym(var),
+                           count = !!rlang::ensym(count),
+                           costmat = costm_main,
+                           costmat_ref = costm_ref_main)
+        cost$prop_cost
+      }
+    )
+    real_cost <- real_main - real_control
+
+    real <- data.frame(bandwidths = d_star,
+                       main = real_main,
+                       control = real_control,
+                       diff = real_cost)
+  }
+  if (est == "ba") {
+    real_cost <- real_main
+
+    real <- data.frame(bandwidth = d_star,
+                       main = real_main)
+  }
+
+  result_index <- which.max(real)
+  result <- real_cost[result_index]
+  d <- d_star[result_index]
+
+  #~ TODO: print: The (conservative) ba/dit estimate is result (in %) at bw d
+  #~ TODO: send result, d, and real to user
+
+  if (sims_subsampling > 0) {
+    pre_main_count <- pre_main[[rlang::ensym(count)]]
+    post_main_count <- post_main[[rlang::ensym(count)]]
+    pre_main_subsamples <- rmultinom(n = sims_bandwidth_selection,
+                                     size = subsample_main_pre_size,
+                                     prop = pre_main_count)
+    post_main_subsamples <- rmultinom(n = sims_bandwidth_selection,
+                                      size = subsample_main_post_size,
+                                      prop = post_main_count)
+    if (est == "ba") {
+      subsample <- sapply(
+        seq_len(sims_subsampling),
+        function(sim) {
+          pre_count <- pre_main_subsamples[seq_along(main_support), sim]
+          post_count <- post_main_subsamples[seq_along(main_support), sim]
+          pre_subsample <- data.frame(x = main_support,
+                                      y = pre_count)
+          post_subsample <- data.frame(x = main_support,
+                                       y = post_count)
+          subsample_result <- get_OTcost(pre_subsample,
+                                         post_subsample,
+                                         d,
+                                         var = x,
+                                         count = y,
+                                         costmat = costm_main,
+                                         costmat_ref = costm_ref_main)
+          subsample_result$prop_cost
+        }
+      )
+    }
+    if (est == "dit") {
+      pre_control_count <- pre_control[[rlang::ensym(count)]]
+      post_control_count <- post_control[[rlang::ensym(count)]]
+      pre_control_subsamples <- rmultinom(n = sims_bandwidth_selection,
+                                       size = subsample_control_pre_size,
+                                       prop = pre_control_count)
+      post_control_subsamples <- rmultinom(n = sims_bandwidth_selection,
+                                        size = subsample_control_post_size,
+                                        prop = post_control_count)
+      main_d <- ifelse(conservative, 2 * d, d)
+      control_d <- d
+      subsample <- sapply(
+        seq_len(sims_subsampling),
+        function(sim) {
+          pre_count <- pre_main_subsamples[seq_along(main_support), sim]
+          post_count <- post_main_subsamples[seq_along(main_support), sim]
+          pre_main_subsample <- data.frame(x = main_support,
+                                      y = pre_count)
+          post_main_subsample <- data.frame(x = main_support,
+                                       y = post_count)
+
+          pre_count <- pre_control_subsamples[seq_along(control_support), sim]
+          post_count <- post_control_subsamples[seq_along(control_support), sim]
+          pre_control_subsample <- data.frame(x = control_support,
+                                              y = pre_count)
+          post_control = subsample <- data.frame(x = control_support,
+                                                 y = post_count)
+
+          subsample_real <- get_OTcost(pre_main_subsample,
+                                       post_main_subsample,
+                                       main_d,
+                                       var = x,
+                                       count = y,
+                                       costmat = costm_main,
+                                       costmat_ref = costm_ref_main)
+
+          subsample_control <- get_OTcost(pre_control_subsample,
+                                          post_control_subsample,
+                                          control_d,
+                                          var = x,
+                                          count = y,
+                                          costmat = costm_control,
+                                          costmat_ref = costm_ref_control)
+
+          subsample_real$prop_cost - subsample_control$prop_cost
+        }
+      )
+    }
+  }
+
+  #~ TODO: send subsample to user
+
+
+#~   # initialization
+#~   main_prop <- rep(NA_real_, length(bandwidth_seq))
+#~   if (conservative) maincons_prop <- rep(NA_real_, length(bandwidth_seq))
+#~   if (est == "dit") control_prop <- rep(NA_real_, length(bandwidth_seq))
+#~ 
+#~   # computation
+#~   if (!suppress_progress_bar) {
+#~     pb <- utils::txtProgressBar(min = 0, max = length(bandwidth_seq), initial = 0)
+#~   }
+#~   for (i in seq_along(bandwidth_seq)) {
+#~     if (!suppress_progress_bar) utils::setTxtProgressBar(pb, i)
+#~ 
+#~     bandwidth <- bandwidth_seq[i]
+#~     main_cost <- get_OTcost(pre_main,
+#~                             post_main,
+#~                             bandwidth = bandwidth,
+#~                             var = !!rlang::ensym(var),
+#~                             count = !!rlang::ensym(count),
+#~                             costmat = costm_main,
+#~                             costmat_ref = costm_ref_main)
+#~     if (conservative) maincons_cost <- get_OTcost(pre_main,
+#~                                                   post_main,
+#~                                                   bandwidth = 2*bandwidth,
+#~                                                   var = !!rlang::ensym(var),
+#~                                                   count = !!rlang::ensym(count),
+#~                                                   costmat = costm_main,
+#~                                                   costmat_ref = costm_ref_main)
+#~     if (est == "dit") control_cost <- get_OTcost(pre_control,
+#~                                                  post_control,
+#~                                                  bandwidth = bandwidth,
+#~                                                  var = !!rlang::ensym(var),
+#~                                                  count = !!rlang::ensym(count),
+#~                                                  costmat = costm_control,
+#~                                                  costmat_ref = costm_ref_control)
+#~ 
+#~     main_prop[i] <- main_cost$prop_cost
+#~     if (conservative) maincons_prop[i] <- maincons_cost$prop_cost
+#~     if (est == "dit") control_prop[i] <- control_cost$prop_cost
+#~   }
+#~ 
+#~   cat("\n")
+#~ 
+#~   # compile results
+#~   if (est == "dit") {
+#~     diffprop <- main_prop - control_prop
+#~ 
+#~     if (conservative) {
+#~       diffprop2d <- maincons_prop - control_prop
+#~       out <- data.frame(bandwidth = bandwidth_seq,
+#~                         main = main_prop,
+#~                         main2d = maincons_prop,
+#~                         control = control_prop,
+#~                         diff = diffprop,
+#~                         diff2d = diffprop2d)
+#~       whichmax <- which.max(diffprop2d)
+#~       dit <- diffprop2d[whichmax]
+#~       dstar <- bandwidth_seq[whichmax]
+#~       if (!quietly) message(paste("The conservative diff-in-transports estimator is ", dit, " at d = ", dstar, sep = ""))
+#~     } else {
+#~       out <- data.frame(bandwidth = bandwidth_seq,
+#~                         main = main_prop,
+#~                         control = control_prop,
+#~                         diff = diffprop)
+#~       whichmax <- which.max(diffprop)
+#~       dit <- diffprop[whichmax]
+#~       dstar <- bandwidth_seq[whichmax]
+#~       if (!quietly) message(paste("The non-conservative diff-in-transports estimator is ", dit, " at d = ", dstar, sep = ""))
+#~     }
+#~     if (save_result) out <- list(out = out, dit = dit, optimal_bandwidth = dstar)
+#~   }
+#~ 
+#~   if (est == "tc"){
+#~     out <- data.frame(bandwidth = bandwidth_seq,
+#~                       main = main_prop)
+#~     if (conservative) out <- cbind(out, main2d = maincons_prop)
+#~     if (!quietly) message(paste("The transport cost for the specified bandwidths have been computed."))
+#~   }
+#~ 
+#~   return(invisible(out))
 }

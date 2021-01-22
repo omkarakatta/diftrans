@@ -88,3 +88,27 @@ check_support <- function(pre_df, post_df, var) {
   list(message = message, status = status, support = support)
 
 }
+
+### valid_bandwidths ---------------------------
+
+#~ This function will help us provide a notion of stability for our bandwidth selection.
+#~ It looks at the values before and after a particular bandwidth and tells us whether enough of these values are below our precision thresshold.
+#~ it returns a boolean vector that tells us which bandwidths are such that among the `lag` previous bandwidths and `lead` following bandwidths, at least `accept` of them have costs that are no more than `precision`.
+valid_bandwidths <- function(vec, lag, lead, accept, precision) {
+  lags <- sapply(
+    seq_len(lag),
+    function(lag_index) {
+      lag(vec, lag_index)
+    }
+  )
+  leads <- sapply(
+    seq_len(lead),
+    function(lead_index){
+      lead(vec, lead_index)
+    }
+  )
+  laglead <- cbind(vec, lags, leads)
+  no_more_than_precision <- laglead <= precision
+  sum_across <- apply(no_more_than_precision, 1, sum, na.rm = TRUE)
+  sum_across >= accept
+}
