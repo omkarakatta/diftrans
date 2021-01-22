@@ -41,7 +41,9 @@ Since both distributions are for the same variable, the column
 This function essentially verifies that this is the case.
 }
 \examples{
+\dontrun{
 pre_df <- data.frame(support = c(1, 2, 3), count = c(1, 2, 3))
 post_df <- data.frame(support = c(1, 2, 4), count = c(1, 2, 3))
 check_support(pre_df, post_df, support)
+}
 }

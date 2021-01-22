@@ -51,9 +51,11 @@
 #' @importFrom rlang ensym
 #'
 #' @examples
+#' \dontrun{
 #' pre_df <- data.frame(support = c(1, 2, 3), count = c(1, 2, 3))
 #' post_df <- data.frame(support = c(1, 2, 4), count = c(1, 2, 3))
 #' check_support(pre_df, post_df, support)
+#' }
 check_support <- function(pre_df, post_df, var) {
 
   #~ obtain supports
