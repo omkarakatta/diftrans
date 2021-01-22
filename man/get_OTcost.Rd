@@ -80,6 +80,11 @@ This function does minimal error-checking, but good practices include:
 \enumerate{
 \item non-degenerate pre- and post-distributions
 \item non-negative values for \code{bandwidth}
+\item if not NULL, \code{costmat} should be a square matrix
+whose dimension is the length of the common support
+\item if not NULL, \code{costmat_ref} should be a matrix
+whose dimension is the length of the support of \code{pre_df}
+by the length of the support of \code{post_df}
 }
 }
 \examples{

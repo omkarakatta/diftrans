@@ -157,6 +157,11 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 #' \enumerate{
 #'   \item non-degenerate pre- and post-distributions
 #'   \item non-negative values for \code{bandwidth}
+#'   \item if not NULL, \code{costmat} should be a square matrix
+#'      whose dimension is the length of the common support
+#'   \item if not NULL, \code{costmat_ref} should be a matrix
+#'      whose dimension is the length of the support of \code{pre_df}
+#'      by the length of the support of \code{post_df}
 #' }
 #'
 #' @param pre_df A two-column \code{data.frame} describing the pre-distribution;
@@ -204,26 +209,13 @@ get_OTcost <- function(pre_df,
                        costmat = NULL,
                        costmat_ref = NULL) {
 
-  #~ obtain supports
-  pre_support <- pre_df[[rlang::ensym(var)]]
-  post_support <- post_df[[rlang::ensym(var)]]
-
   #~ ensure the supports are unique and the same in pre- and post-distributions
-  if (length(pre_support)
-      !=
-      length(unique(pre_support[!is.na(pre_support)]))) {
-    stop("`pre_df` should not have repeated/invalid values in `var` column.")
+  check <- check_support(pre_df, post_df, var = !!rlang::ensym(var))
+  if (check$status == 1) {
+    stop(check$message)
+  } else {
+    support <- check$support
   }
-  if (length(post_support)
-      !=
-      length(unique(post_support[!is.na(post_support)]))) {
-    stop("`post_df` should not have repeated/invalid values in `var` column.")
-  }
-  if (!identical(pre_support, post_support)) {
-    stop("`pre_df` and `post_df` need to have the same `var` column.")
-  }
-
-  support <- pre_support
 
   #~ obtain counts
   pre <- pre_df[[rlang::ensym(count)]]

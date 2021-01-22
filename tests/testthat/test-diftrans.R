@@ -24,6 +24,7 @@ post_treated <- data.frame(x = support,
 
 tc <- diftrans(pre_main = pre_treated, post_main = post_treated,
                   estimator = "tc", var = x, count = count,
+                  suppress_progress_bar = TRUE,
                   bandwidth = 0)
 
 test_that("diftrans works", {
