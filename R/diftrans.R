@@ -406,7 +406,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     d_star <- bandwidth_seq
   }
 
-  #~ evaluate optimal transport at all values in d_star
+  #~ evaluate real/empirical optimal transport at all values in d_star
   main_bw <- ifelse(conservative, 2 * d_star, d_star)
   real_main <- sapply(
     seq_along(main_bw),
