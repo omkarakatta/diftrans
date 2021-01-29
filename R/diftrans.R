@@ -174,7 +174,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                      count = count,
                      bandwidth_seq = seq(0, 40000, 1000),
                      minimum_bandwidth = 0, #~ TODO: document this, particularly for post/pre-trends
-                     maximum_bandwidth = 0, #~ TODO: document this
+                     maximum_bandwidth = Inf, #~ TODO: document this
                      estimator = ifelse(!is.null(pre_control)
                                         &
                                         !is.null(post_control),
@@ -198,6 +198,9 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                      costm_main = NULL, costm_ref_main = NULL,
                      costm_control = NULL, costm_ref_control = NULL) {
 
+  #~ initialize output
+  out <- list()
+
   #~ error checking
   if (is.null(pre_main) || is.null(post_main)) {
     stop("`pre_main` and/or `post_main` is missing.")
@@ -210,29 +213,36 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
       || sims_subsampling < 0) {
     stop("`sims_subsampling` needs to be a non-negative integer.")
   }
-  if (round(subsample_pre_main_size) != subsample_pre_main_size
-      || subsample_pre_main_size <= 0) {
-    stop("`subsample_pre_main_size` needs to be positive integer.")
-  }
-  if (round(subsample_post_main_size) != subsample_post_main_size
-      || subsample_post_main_size <= 0) {
-    stop("`subsample_post_main_size` needs to be positive integer.")
-  }
-  if (round(subsample_pre_control_size) != subsample_pre_control_size
-      || subsample_pre_control_size <= 0) {
-    stop("`subsample_pre_control_size` needs to be positive integer.")
-  }
-  if (round(subsample_post_control_size) != subsample_post_control_size
-      || subsample_post_control_size <= 0) {
-    stop("`subsample_post_control_size` needs to be positive integer.")
+  if (sims_subsampling > 0) {
+    if (round(subsample_pre_main_size) != subsample_pre_main_size
+        || subsample_pre_main_size <= 0) {
+      stop("`subsample_pre_main_size` needs to be positive integer.")
+    }
+    if (round(subsample_post_main_size) != subsample_post_main_size
+        || subsample_post_main_size <= 0) {
+      stop("`subsample_post_main_size` needs to be positive integer.")
+    }
+    if (round(subsample_pre_control_size) != subsample_pre_control_size
+        || subsample_pre_control_size <= 0) {
+      stop("`subsample_pre_control_size` needs to be positive integer.")
+    }
+    if (round(subsample_post_control_size) != subsample_post_control_size
+        || subsample_post_control_size <= 0) {
+      stop("`subsample_post_control_size` needs to be positive integer.")
+    }
   }
   if (!is.numeric(seed)) {
     stop("`seed` must be numeric.")
   }
+
+
+  out$seed <- seed
+
   #~ TODO: bandwidths > 0 error check
   #~ TODO: check what happens when no bandwidth is given but cost matrices are given
   #~ TODO: send a warning that if conservative = T and est != "dit", then we ignore conservative = T; instead, request the user to use twice the bandwidth in bandwidth_seq; i.e., tell the users that conservative = T only applies when est != "dit"
   #~ TODO: allow for placebo matrix to be an argument
+
 
   # error checking / get estimator
   estimator <- tolower(estimator)
@@ -257,23 +267,28 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     stop("Invalid estimator. Double-check inputs.")
   }
 
+  out$estimator <- est
 
   #~ set seed for reproducibility
   set.seed(seed)
   #~ check support
-  check_main <- check_support(pre_main, pre_control, var = !!rlang::ensym(var))
+  check_main <- check_support(pre_main, post_main,
+                              var = !!rlang::ensym(var))
   if (check_main$status == 1) {
     stop(check_main$message)
   } else {
     main_support <- check_main$support
   }
+  out$main_support <- main_support
 
-  if (est = "dit") {
-    check_control <- check_support(pre_control, pre_control, var = !!rlang::ensym(var))
+  if (est == "dit") {
+    check_control <- check_support(pre_control, post_control,
+                                   var = !!rlang::ensym(var))
     if (check_control$status == 1) {
       stop(check_control$message)
     } else {
       control_support <- check_control$support
+      out$control_support <- control_support
     }
   }
 
@@ -385,6 +400,9 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                        quantile0.99 = quantile(c_across(), prob = 0.99))
 
     #~ TODO: send placebo_cleaned and placebo_summary to user
+    out$placebo <- placebo_cleaned
+    out$placebo_summary <- placebo_summary
+
     valid_d_index <- valid_bandwidths(placebo_summary$mean,
                                       sensitivity_lag,
                                       sensitivity_lead,
@@ -403,8 +421,12 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
 
     #~ TODO: send d_star to user; d_star = all the valid bandwidths
   } else {
-    d_star <- bandwidth_seq
+    valid_d <- bandwidth_seq[bandwidth_seq >= minimum_bandwidth &
+                             bandwidth_seq <= maximum_bandwidth]
+    d_star <- valid_d
   }
+
+  out$acceptable_bandwidths <- valid_d
 
   #~ evaluate real/empirical optimal transport at all values in d_star
   main_bw <- ifelse(conservative, 2 * d_star, d_star)
@@ -451,22 +473,51 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                        main = real_main)
   }
 
-  result_index <- which.max(real)
+  result_index <- which.max(real$main)
   result <- real_cost[result_index]
   d <- d_star[result_index]
+
+  out$d_star <- d
+  out$empirical_cost <- result
+  out$empirical_table <- real
 
   #~ TODO: print: The (conservative) ba/dit estimate is result (in %) at bw d
   #~ TODO: send result, d, and real to user
 
   if (sims_subsampling > 0) {
-    pre_main_count <- pre_main[[rlang::ensym(count)]]
-    post_main_count <- post_main[[rlang::ensym(count)]]
-    pre_main_subsamples <- rmultinom(n = sims_bandwidth_selection,
-                                     size = subsample_main_pre_size,
-                                     prop = pre_main_count)
-    post_main_subsamples <- rmultinom(n = sims_bandwidth_selection,
-                                      size = subsample_main_post_size,
-                                      prop = post_main_count)
+#~     pre_main_count <- pre_main[[rlang::ensym(count)]]
+#~     post_main_count <- post_main[[rlang::ensym(count)]]
+#~     pre_main_subsamples <- rmultinom(n = sims_bandwidth_selection,
+#~                                      size = subsample_main_pre_size,
+#~                                      prop = pre_main_count)
+#~     post_main_subsamples <- rmultinom(n = sims_bandwidth_selection,
+#~                                       size = subsample_main_post_size,
+#~                                       prop = post_main_count)
+    pre_main_dist <- pre_main %>%
+      tidyr::uncount({{count}}) %>%
+      .[[rlang::ensym(var)]]
+    post_main_dist <- post_main %>%
+      tidyr::uncount({{count}}) %>%
+      .[[rlang::ensym(var)]]
+    pre_main_subsamples <- sapply(
+      seq_len(sims_subsampling),
+      function(sim) {
+        organize_subsamples(pre_main_dist,
+                            subsample_pre_main_size,
+                            main_support)
+      }
+    )
+    post_main_subsamples <- sapply(
+      seq_len(sims_subsampling),
+      function(sim) {
+        organize_subsamples(post_main_dist,
+                            subsample_post_main_size,
+                            main_support)
+      }
+    )
+
+    stopifnot(ncol(pre_main_subsamples) == sims_subsampling) #~ check dimensions
+
     if (est == "ba") {
       subsample <- sapply(
         seq_len(sims_subsampling),
@@ -483,20 +534,36 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                                          var = x,
                                          count = y,
                                          costmat = costm_main,
-                                         costmat_ref = costm_ref_main)
+                                         costmat_ref = costm_ref_main,
+                                         scale_pre = "default",
+                                         scale_post = "default")
           subsample_result$prop_cost
         }
       )
     }
     if (est == "dit") {
-      pre_control_count <- pre_control[[rlang::ensym(count)]]
-      post_control_count <- post_control[[rlang::ensym(count)]]
-      pre_control_subsamples <- rmultinom(n = sims_bandwidth_selection,
-                                       size = subsample_control_pre_size,
-                                       prop = pre_control_count)
-      post_control_subsamples <- rmultinom(n = sims_bandwidth_selection,
-                                        size = subsample_control_post_size,
-                                        prop = post_control_count)
+      pre_control_dist <- pre_control %>%
+        tidyr::uncount({{count}}) %>%
+        .[[rlang::ensym(var)]]
+      post_control_dist <- post_control %>%
+        tidyr::uncount({{count}}) %>%
+        .[[rlang::ensym(var)]]
+      pre_control_subsamples <- sapply(
+        seq_len(sims_subsampling),
+        function(sim) {
+          organize_subsamples(pre_control_dist,
+                              subsample_pre_control_size,
+                              control_support)
+        }
+      )
+      post_control_subsamples <- sapply(
+        seq_len(sims_subsampling),
+        function(sim) {
+          organize_subsamples(post_control_dist,
+                              subsample_post_control_size,
+                              control_support)
+        }
+      )
       main_d <- ifelse(conservative, 2 * d, d)
       control_d <- d
       subsample <- sapply(
@@ -513,8 +580,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
           post_count <- post_control_subsamples[seq_along(control_support), sim]
           pre_control_subsample <- data.frame(x = control_support,
                                               y = pre_count)
-          post_control = subsample <- data.frame(x = control_support,
-                                                 y = post_count)
+          post_control_subsample <- data.frame(x = control_support,
+                                               y = post_count)
 
           subsample_real <- get_OTcost(pre_main_subsample,
                                        post_main_subsample,
@@ -522,7 +589,9 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                                        var = x,
                                        count = y,
                                        costmat = costm_main,
-                                       costmat_ref = costm_ref_main)
+                                       costmat_ref = costm_ref_main,
+                                       scale_pre = "default",
+                                       scale_post = "default")
 
           subsample_control <- get_OTcost(pre_control_subsample,
                                           post_control_subsample,
@@ -530,16 +599,20 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                                           var = x,
                                           count = y,
                                           costmat = costm_control,
-                                          costmat_ref = costm_ref_control)
+                                          costmat_ref = costm_ref_control,
+                                          scale_pre = "default",
+                                          scale_post = "default")
 
           subsample_real$prop_cost - subsample_control$prop_cost
         }
       )
     }
+    out$subsample <- subsample
   }
 
   #~ TODO: send subsample to user
 
+  return(out)
 
 #~   # initialization
 #~   main_prop <- rep(NA_real_, length(bandwidth_seq))

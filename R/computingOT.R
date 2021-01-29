@@ -177,6 +177,10 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 #'   \code{\link[transport]{transport}}
 #' @param costmat_ref The cost matrix that is used to reference output of
 #'   code{\link[transport]{transport}}
+#' @param scale_pre,scale_post The scaling factor of the counts to be used in
+#'   the \code{\link[transport]{transport}} function; defaults to "default",
+#'   which scales the counts in the pre-distribution to sum to the total of
+#'   the counts in the post-distribution
 #'
 #' @return A list of the total mass transferred (\code{tot_cost}),
 #'   the proportion of mass transferred (\code{prop_cost}), and the
@@ -207,7 +211,9 @@ get_OTcost <- function(pre_df,
                        var = MSRP,
                        count = count,
                        costmat = NULL,
-                       costmat_ref = NULL) {
+                       costmat_ref = NULL,
+                       scale_pre = "default",
+                       scale_post = "default") {
 
   #~ ensure the supports are unique and the same in pre- and post-distributions
   check <- check_support(pre_df, post_df, var = !!rlang::ensym(var))
@@ -229,8 +235,17 @@ get_OTcost <- function(pre_df,
   }
 
   #~ compute and normalize cost
-  a <- as.numeric(sum(post) / sum(pre) * pre)
-  b <- as.numeric(post)
+  if (scale_pre == "default") {
+    a <- as.numeric(pre * sum(post) / sum(pre))
+  } else {
+    a <- as.numeric(pre * scale_pre)
+  }
+  if (scale_post == "default") {
+    b <- as.numeric(post)
+  } else {
+    b <- as.numeric(post * scale_post)
+  }
+
   OT <- transport::transport(a, b, costm)
 
   if (is.null(costmat_ref)) {

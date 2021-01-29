@@ -112,3 +112,26 @@ valid_bandwidths <- function(vec, lag, lead, accept, precision) {
   sum_across <- apply(no_more_than_precision, 1, sum, na.rm = TRUE)
   sum_across >= accept
 }
+
+
+### organize_subsamples ---------------------------
+#~ create subsample distribution
+#~ given a distribution, rewrite it as a pmf (opposite of uncount)
+organize_subsamples <- function(dist, size, support) {
+  subsample_dist <- sample(dist, size, replace = FALSE)
+  sapply(
+    seq_along(support),
+    function(supp) {
+      sum(subsample_dist == supp)
+    }
+  )
+}
+
+#~ count_across_columns <- function(dt, support) {
+#~   t(sapply(
+#~     seq_along(support),
+#~     function(supp) {
+#~       apply(dt, 2, function(x) sum(x == supp))
+#~     }
+#~   ))
+#~ }
