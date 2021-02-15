@@ -450,9 +450,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
 
   if (!quietly) message(paste("candidate bandwidths:"))
   if (!quietly) print(valid_d)
-
   #~ evaluate real/empirical optimal transport at all values in d_star
-  main_bw <- ifelse(conservative, 2 * d_star, d_star)
+  main_bw <- if (conservative) 2 * d_star else d_star
   real_main <- sapply(
     seq_along(main_bw),
     function(bw_index) {
@@ -488,17 +487,20 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                        main = real_main,
                        control = real_control,
                        diff = real_cost)
+    result_index <- which.max(real$diff)
+    result <- real_cost[result_index]
+    d <- d_star[result_index]
   }
   if (est == "ba") {
     real_cost <- real_main
 
     real <- data.frame(bandwidth = d_star,
                        main = real_main)
+    result_index <- which.max(real$main)
+    result <- real_cost[result_index]
+    d <- d_star[result_index]
   }
 
-  result_index <- which.max(real$main)
-  result <- real_cost[result_index]
-  d <- d_star[result_index]
 
   out$d_star <- d
   out$empirical_cost <- result
