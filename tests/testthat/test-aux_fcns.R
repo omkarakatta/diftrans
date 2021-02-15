@@ -9,5 +9,7 @@ test_that("make sure pre_df and post_df use common support", {
 
 dist <- c(rep(1, 99), 2) # 99 ones and 1 two
 subsample <- organize_subsamples(dist, 50, c(1, 2, 3))
-expect_equal(subsample["3"], 0)
-expect_equal(subsample["1"] > subsample["2"], TRUE)
+test_that("organize_subsamples is correct", {
+  expect_equal(as.numeric(subsample["3"]), 0)
+  expect_equal(as.logical(subsample["1"] > subsample["2"]), TRUE)
+})

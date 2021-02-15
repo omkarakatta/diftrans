@@ -32,13 +32,16 @@ out <- diftrans(pre_main = pre_treated, post_main = post_treated,
                 subsample_pre_control_size = 5,
                 subsample_post_control_size = 5,
                 seed = 1,
-                conservative = TRUE)
+                conservative = TRUE,
+                quietly = TRUE)
 
 tc <- diftrans(pre_main = pre_treated, post_main = post_treated,
                   estimator = "tc", var = x, count = count,
-                  suppress_progress_bar = TRUE,
+                  suppress_progress_bar = TRUE, #~ TODO: unnecessary argument?
+                  quietly = TRUE,
                   bandwidth = 0)
 
 test_that("diftrans works", {
-  expect_equal(tc$main, 1)
+  expect_equal(tc$empirical_cost, 1)
+  expect_equal(tc$empirical_cost, out$empirical_cost)
 })

@@ -54,13 +54,31 @@
 #'     \code{pre_control}, and \code{post_control}; default is \code{count}
 #'     (see Daljord et al. (2021))
 #' @param bandwidth_seq a vector of bandwidth values to try; default is \code{seq(0, 40000, 1000)}
+#' @param minimum_bandwidth minimum bandwidth to consider for the estimator;
+#'     defaults to 0
+#' @param maximum_bandwidth maximum bandwidth to consider for the estimator;
+#'     defaults to infinity
 #' @param estimator a string that takes on the value of "dit" for
 #'     differences-in-transports estimator or "tc" for the transport cost;
 #'     if \code{pre_control} and \code{post_control} are specified, default is "dit";
 #'     otherwise, default is "tc"
+#' @param sims_bandwidth_selection number of simulations for the bandwidth
+#'     selection process; defaults to 0
+#' @param precision threshold to choose the bandwidth; defaults to 0.0005, i.e.,
+#'     5 percent.
+#' @param sensitivity_lag,sensitivity_lead,sensitivity_accept
+#'     acceptable bandwidths are bandwidths such that among the
+#'     \code{sensitivity_lag} previous bandwidths and \code{sensitivity_lead}
+#'     bandwidths, \code{sensitivity_accept} of them have a placebo cost that is less
+#'     than \code{precision}; TODO: move to Details
+#' @param sims_subsampling number of subsampling simulations
+#' @param subsample_pre_main_size,subsample_post_main_size,subsample_pre_control_size,subsample_post_control_size
+#'     sample size of subsample distributions
+#' @param seed for reproducibility
 #' @param conservative if \code{TRUE}, then the bandwidth sequence will be
-#'     multiplied by 2 to provide a conservative estimate of the transport costs/
-#'     difference-in-transports estimator; default is \code{FALSE}
+#'     multiplied by 2 to provide a conservative estimate of the
+#'     difference-in-transports estimator; default is \code{FALSE}, only valid
+#'     for difference-in-transports estimator
 #' @param quietly if \code{TRUE}, some results and will be suppressed from printing; default is \code{FALSE}
 #' @param suppress_progress_bar if \code{TRUE}, the progress bar will be suppressed; default is \code{FALSE}
 #' @param save_result if \code{TRUE}, the estimator as
@@ -173,8 +191,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                      var = MSRP,
                      count = count,
                      bandwidth_seq = seq(0, 40000, 1000),
-                     minimum_bandwidth = 0, #~ TODO: document this, particularly for post/pre-trends
-                     maximum_bandwidth = Inf, #~ TODO: document this
+                     minimum_bandwidth = 0,
+                     maximum_bandwidth = Inf,
                      estimator = ifelse(!is.null(pre_control)
                                         &
                                         !is.null(post_control),
@@ -191,7 +209,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                      subsample_pre_control_size = NULL,
                      subsample_post_control_size = NULL,
                      seed = 1,
-                     conservative = FALSE, #~ TODO: only valid for dit
+                     conservative = FALSE,
                      quietly = FALSE,
                      suppress_progress_bar = FALSE,
                      save_result = FALSE,
