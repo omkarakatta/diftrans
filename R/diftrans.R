@@ -238,6 +238,10 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
 
   out$seed <- seed
 
+  #~ set seed for reproducibility
+  set.seed(seed)
+  if (!quietly) message(paste("seed has been set:", seed))
+
   #~ TODO: bandwidths > 0 error check
   #~ TODO: check what happens when no bandwidth is given but cost matrices are given
   #~ TODO: send a warning that if conservative = T and est != "dit", then we ignore conservative = T; instead, request the user to use twice the bandwidth in bandwidth_seq; i.e., tell the users that conservative = T only applies when est != "dit"
@@ -269,8 +273,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
 
   out$estimator <- est
 
-  #~ set seed for reproducibility
-  set.seed(seed)
+  if (!quietly) message(paste("estimator has been set:", estimator))
+
   #~ check support
   check_main <- check_support(pre_main, post_main,
                               var = !!rlang::ensym(var))
@@ -292,6 +296,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     }
   }
 
+  if (!quietly) message(paste("supports have been computed."))
+
   pre_main_count <- pre_main[[rlang::ensym(count)]]
   post_main_count <- post_main[[rlang::ensym(count)]]
   pre_main_total <- sum(pre_main_count)
@@ -302,6 +308,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     pre_control_total <- sum(pre_control_count)
     post_control_total <- sum(post_control_count)
   }
+
+  if (!quietly) message(paste("counts have been computed."))
 
   #~ select appropriate bandwidth -- d_star
   if (sims_bandwidth_selection > 0) {
@@ -318,6 +326,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
       placebo <- sapply(
         seq_len(sims_bandwidth_selection),
         function(sim) {
+          if (!quietly) print(paste("placebo simulation:", sim))
           pre_count <- pre_main_placebo[seq_along(main_support), sim]
           post_count <- post_main_placebo[seq_along(main_support), sim]
           pre_placebo <- data.frame(x = main_support,
@@ -354,6 +363,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
       placebo <- sapply(
         seq_len(sims_bandwidth_selection),
         function(sim) {
+          if (!quietly) print(paste("placebo simulation:", sim))
           pre_count <- pre_main_placebo[seq_along(main_support), sim]
           post_count <- post_main_placebo[seq_along(main_support), sim]
           pre_main_placebo <- data.frame(x = main_support,
@@ -408,6 +418,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     out$placebo <- placebo_cleaned
     out$placebo_summary <- placebo_summary
 
+    if (!quietly) message(paste("Placebo summary has been created."))
+
     valid_d_index <- valid_bandwidths(placebo_summary$mean,
                                       sensitivity_lag,
                                       sensitivity_lead,
@@ -432,6 +444,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
   }
 
   out$acceptable_bandwidths <- valid_d
+
+  if (!quietly) message(paste("candidate bandwidths:", valid_d))
 
   #~ evaluate real/empirical optimal transport at all values in d_star
   main_bw <- ifelse(conservative, 2 * d_star, d_star)
@@ -486,6 +500,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
   out$empirical_cost <- result
   out$empirical_table <- real
 
+  if (!quietly) message(paste("empirical cost:", result))
+
   #~ TODO: print: The (conservative) ba/dit estimate is result (in %) at bw d
   #~ TODO: send result, d, and real to user
 
@@ -521,12 +537,15 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
       }
     )
 
+    if (!quietly) message(paste("subsamples have been generated."))
+
     stopifnot(ncol(pre_main_subsamples) == sims_subsampling) #~ check dimensions
 
     if (est == "ba") {
       subsample <- sapply(
         seq_len(sims_subsampling),
         function(sim) {
+          if (!quietly) message(paste("subsamples:", sim))
           pre_count <- pre_main_subsamples[seq_along(main_support), sim]
           post_count <- post_main_subsamples[seq_along(main_support), sim]
           pre_subsample <- data.frame(x = main_support,
@@ -575,6 +594,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
       subsample <- sapply(
         seq_len(sims_subsampling),
         function(sim) {
+          if (!quietly) message(paste("subsamples:", sim))
           pre_count <- pre_main_subsamples[seq_along(main_support), sim]
           post_count <- post_main_subsamples[seq_along(main_support), sim]
           pre_main_subsample <- data.frame(x = main_support,
@@ -619,6 +639,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
   }
 
   #~ TODO: send subsample to user
+
+  message("DONE")
 
   return(out)
 
