@@ -191,7 +191,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                      subsample_pre_control_size = NULL,
                      subsample_post_control_size = NULL,
                      seed = 1,
-                     conservative = FALSE,
+                     conservative = FALSE, #~ TODO: only valid for dit
                      quietly = FALSE,
                      suppress_progress_bar = FALSE,
                      save_result = FALSE,
@@ -258,7 +258,10 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     }
     #~ est_message <- "Computing Transport Costs..."
     est <- "ba"
-    conservative <- FALSE
+    if (conservative) {
+      message("Setting `conservative` to FALSE")
+      conservative <- FALSE
+    }
     #~ if (!suppress_progress_bar & !quietly) message(est_message)
   } else if (estimator %in% dit_messages) {
     if (is.null(pre_control) || is.null(post_control)) {
@@ -445,7 +448,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
 
   out$acceptable_bandwidths <- valid_d
 
-  if (!quietly) message(paste("candidate bandwidths:", valid_d))
+  if (!quietly) message(paste("candidate bandwidths:"))
+  if (!quietly) print(valid_d)
 
   #~ evaluate real/empirical optimal transport at all values in d_star
   main_bw <- ifelse(conservative, 2 * d_star, d_star)
@@ -501,6 +505,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
   out$empirical_table <- real
 
   if (!quietly) message(paste("empirical cost:", result))
+  if (!quietly) message(paste("bandwidth:", d))
 
   #~ TODO: print: The (conservative) ba/dit estimate is result (in %) at bw d
   #~ TODO: send result, d, and real to user
