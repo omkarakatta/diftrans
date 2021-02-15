@@ -11,7 +11,10 @@ get_OTcost(
   var = MSRP,
   count = count,
   costmat = NULL,
-  costmat_ref = NULL
+  costmat_ref = NULL,
+  scale_pre = "default",
+  scale_post = "default",
+  total = 1
 )
 }
 \arguments{
@@ -34,6 +37,13 @@ and \code{post_df}; defaults to \code{count}}
 
 \item{costmat_ref}{The cost matrix that is used to reference output of
 code{\link[transport]{transport}}}
+
+\item{scale_pre, scale_post}{The scaling factor of the counts to be used in
+the \code{\link[transport]{transport}} function; defaults to "default",
+which scales the counts in the pre-distribution to sum to the total of
+the counts in the post-distribution; can also be "subsample"}
+
+\item{total}{The total mass count for subsample scaling}
 }
 \value{
 A list of the total mass transferred (\code{tot_cost}),
@@ -86,6 +96,13 @@ whose dimension is the length of the common support
 whose dimension is the length of the support of \code{pre_df}
 by the length of the support of \code{post_df}
 }
+
+When fed into \code{\link{transport}}, the pre- and post-distribution
+counts will be scaled so they sum to the total in the post-distribution.
+This is when we scale using the "default" process.
+If we scale using the "subsample" process, then we ensure that regardless
+of the subsample size, the total in the pre- and post-distributions for
+the subsample is equal to \code{total}.
 }
 \examples{
 \dontrun{

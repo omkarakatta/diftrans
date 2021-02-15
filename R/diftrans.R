@@ -113,6 +113,8 @@
 #'
 #' @export
 #' @importFrom rlang ensym
+#' @importFrom stats quantile
+#' @importFrom stats rmultinom
 #' @examples
 #' # Find conservative transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 0
 #' # # step 1: find support
@@ -441,10 +443,10 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     placebo_cleaned <- cbind(bandwidth = bandwidth_seq, as.data.frame(placebo))
     placebo_summary <- placebo_cleaned %>%
       dplyr::rowwise(bandwidth) %>%
-      dplyr::summarize(mean = mean(c_across()),
-                       quantile0.90 = quantile(c_across(), prob = 0.90),
-                       quantile0.95 = quantile(c_across(), prob = 0.95),
-                       quantile0.99 = quantile(c_across(), prob = 0.99))
+      dplyr::summarize(mean = mean(dplyr::c_across()),
+                       quantile0.90 = quantile(dplyr::c_across(), prob = 0.90),
+                       quantile0.95 = quantile(dplyr::c_across(), prob = 0.95),
+                       quantile0.99 = quantile(dplyr::c_across(), prob = 0.99))
 
     #~ TODO: send placebo_cleaned and placebo_summary to user
     out$placebo <- placebo_cleaned

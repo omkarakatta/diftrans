@@ -12,7 +12,20 @@ diftrans(
   var = MSRP,
   count = count,
   bandwidth_seq = seq(0, 40000, 1000),
+  minimum_bandwidth = 0,
+  maximum_bandwidth = Inf,
   estimator = ifelse(!is.null(pre_control) & !is.null(post_control), "dit", "tc"),
+  sims_bandwidth_selection = 0,
+  precision = 5e-04,
+  sensitivity_lag = 5,
+  sensitivity_lead = 5,
+  sensitivity_accept = 5,
+  sims_subsampling = 0,
+  subsample_pre_main_size = NULL,
+  subsample_post_main_size = NULL,
+  subsample_pre_control_size = NULL,
+  subsample_post_control_size = NULL,
+  seed = 1,
   conservative = FALSE,
   quietly = FALSE,
   suppress_progress_bar = FALSE,
@@ -48,14 +61,38 @@ differences-in-transports estimator}
 
 \item{bandwidth_seq}{a vector of bandwidth values to try; default is \code{seq(0, 40000, 1000)}}
 
+\item{minimum_bandwidth}{minimum bandwidth to consider for the estimator;
+defaults to 0}
+
+\item{maximum_bandwidth}{maximum bandwidth to consider for the estimator;
+defaults to infinity}
+
 \item{estimator}{a string that takes on the value of "dit" for
 differences-in-transports estimator or "tc" for the transport cost;
 if \code{pre_control} and \code{post_control} are specified, default is "dit";
 otherwise, default is "tc"}
 
+\item{sims_bandwidth_selection}{number of simulations for the bandwidth
+selection process; defaults to 0}
+
+\item{precision}{threshold to choose the bandwidth; defaults to 0.0005, i.e.,
+5 percent.}
+
+\item{sensitivity_lag, sensitivity_lead, sensitivity_accept}{acceptable bandwidths are bandwidths such that among the
+\code{sensitivity_lag} previous bandwidths and \code{sensitivity_lead}
+bandwidths, \code{sensitivity_accept} of them have a placebo cost that is less
+than \code{precision}; TODO: move to Details}
+
+\item{sims_subsampling}{number of subsampling simulations}
+
+\item{subsample_pre_main_size, subsample_post_main_size, subsample_pre_control_size, subsample_post_control_size}{sample size of subsample distributions}
+
+\item{seed}{for reproducibility}
+
 \item{conservative}{if \code{TRUE}, then the bandwidth sequence will be
-multiplied by 2 to provide a conservative estimate of the transport costs/
-difference-in-transports estimator; default is \code{FALSE}}
+multiplied by 2 to provide a conservative estimate of the
+difference-in-transports estimator; default is \code{FALSE}, only valid
+for difference-in-transports estimator}
 
 \item{quietly}{if \code{TRUE}, some results and will be suppressed from printing; default is \code{FALSE}}
 
