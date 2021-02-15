@@ -117,14 +117,18 @@ valid_bandwidths <- function(vec, lag, lead, accept, precision) {
 ### organize_subsamples ---------------------------
 #~ create subsample distribution
 #~ given a distribution, rewrite it as a pmf (opposite of uncount)
+#~ support should contain unique, ordered values,
+#~ but no check will be done to ensure this.
 organize_subsamples <- function(dist, size, support) {
   subsample_dist <- sample(dist, size, replace = FALSE)
-  sapply(
+  counts <- sapply(
     seq_along(support),
-    function(supp) {
-      sum(subsample_dist == supp)
+    function(index) {
+      sum(subsample_dist == support[[index]])
     }
   )
+  names(counts) <- support
+  counts
 }
 
 #~ count_across_columns <- function(dt, support) {
