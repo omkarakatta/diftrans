@@ -486,21 +486,18 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     real <- data.frame(bandwidths = d_star,
                        main = real_main,
                        control = real_control,
-                       diff = real_cost)
-    result_index <- which.max(real$diff)
-    result <- real_cost[result_index]
-    d <- d_star[result_index]
+                       result = real_cost)
   }
   if (est == "ba") {
     real_cost <- real_main
 
     real <- data.frame(bandwidth = d_star,
-                       main = real_main)
-    result_index <- which.max(real$main)
-    result <- real_cost[result_index]
-    d <- d_star[result_index]
+                       result = real_main)
   }
 
+  result_index <- which.max(real$result)
+  result <- real_cost[result_index]
+  d <- d_star[result_index]
 
   out$d_star <- d
   out$empirical_cost <- result
