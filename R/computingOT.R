@@ -245,16 +245,16 @@ get_OTcost <- function(pre_df,
 
   #~ compute and normalize cost
   if (scale_pre == "default") {
-    a <- as.numeric(pre * sum(post) / sum(pre))
+    a <- as.numeric(pre * (sum(post) / sum(pre)))
   } else if (scale_pre == "subsample") {
-    a <- as.numeric(pre * sum(post) / sum(pre) * total / sum(post))
+    a <- as.numeric(pre * (sum(post) / sum(pre)) * (total / sum(post)))
   } else {
     a <- as.numeric(pre * scale_pre)
   }
   if (scale_post == "default") {
     b <- as.numeric(post)
   } else if (scale_post == "subsample") {
-    b <- as.numeric(post * total / sum(post))
+    b <- as.numeric(post * (total / sum(post)))
   } else {
     b <- as.numeric(post * scale_post)
   }
