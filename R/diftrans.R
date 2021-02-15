@@ -535,6 +535,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     post_main_dist <- post_main %>%
       tidyr::uncount({{count}}) %>%
       .[[rlang::ensym(var)]]
+
     pre_main_subsamples <- sapply(
       seq_len(sims_subsampling),
       function(sim) {
@@ -560,7 +561,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
       subsample <- sapply(
         seq_len(sims_subsampling),
         function(sim) {
-          if (!quietly) message(paste("subsamples:", sim))
+          if (!quietly) print(paste("subsample:", sim))
           pre_count <- pre_main_subsamples[seq_along(main_support), sim]
           post_count <- post_main_subsamples[seq_along(main_support), sim]
           pre_subsample <- data.frame(x = main_support,
@@ -581,6 +582,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
         }
       )
     }
+
     if (est == "dit") {
       pre_control_dist <- pre_control %>%
         tidyr::uncount({{count}}) %>%
@@ -609,7 +611,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
       subsample <- sapply(
         seq_len(sims_subsampling),
         function(sim) {
-          if (!quietly) message(paste("subsamples:", sim))
+          if (!quietly) print(paste("subsample:", sim))
           pre_count <- pre_main_subsamples[seq_along(main_support), sim]
           post_count <- post_main_subsamples[seq_along(main_support), sim]
           pre_main_subsample <- data.frame(x = main_support,
