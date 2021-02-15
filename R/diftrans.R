@@ -213,24 +213,6 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
       || sims_subsampling < 0) {
     stop("`sims_subsampling` needs to be a non-negative integer.")
   }
-  if (sims_subsampling > 0) {
-    if (round(subsample_pre_main_size) != subsample_pre_main_size
-        || subsample_pre_main_size <= 0) {
-      stop("`subsample_pre_main_size` needs to be positive integer.")
-    }
-    if (round(subsample_post_main_size) != subsample_post_main_size
-        || subsample_post_main_size <= 0) {
-      stop("`subsample_post_main_size` needs to be positive integer.")
-    }
-    if (round(subsample_pre_control_size) != subsample_pre_control_size
-        || subsample_pre_control_size <= 0) {
-      stop("`subsample_pre_control_size` needs to be positive integer.")
-    }
-    if (round(subsample_post_control_size) != subsample_post_control_size
-        || subsample_post_control_size <= 0) {
-      stop("`subsample_post_control_size` needs to be positive integer.")
-    }
-  }
   if (!is.numeric(seed)) {
     stop("`seed` must be numeric.")
   }
@@ -272,6 +254,35 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     #~ if (!suppress_progress_bar & !quietly) message(est_message)
   } else {
     stop("Invalid estimator. Double-check inputs.")
+  }
+
+
+  if (sims_subsampling > 0) {
+    if (round(subsample_pre_main_size) != subsample_pre_main_size
+        || subsample_pre_main_size <= 0) {
+      stop("`subsample_pre_main_size` needs to be positive integer.")
+    }
+    if (round(subsample_post_main_size) != subsample_post_main_size
+        || subsample_post_main_size <= 0) {
+      stop("`subsample_post_main_size` needs to be positive integer.")
+    }
+    if (est == "dit") {
+      if (round(subsample_pre_control_size) != subsample_pre_control_size
+          || subsample_pre_control_size <= 0) {
+        stop("`subsample_pre_control_size` needs to be positive integer.")
+      }
+      if (round(subsample_post_control_size) != subsample_post_control_size
+          || subsample_post_control_size <= 0) {
+        stop("`subsample_post_control_size` needs to be positive integer.")
+      }
+    } else {
+      if (!is.null(subsample_pre_control_size)) {
+        message("Before-and-after estimator does not use `subsample_pre_control_size`.")
+      }
+      if (!is.null(subsample_post_control_size)) {
+        message("Before-and-after estimator does not use `subsample_post_control_size`.")
+      }
+    }
   }
 
   out$estimator <- est
