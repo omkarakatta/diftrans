@@ -164,6 +164,13 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 #'      by the length of the support of \code{post_df}
 #' }
 #'
+#' When fed into \code{\link{transport}}, the pre- and post-distribution
+#' counts will be scaled so they sum to the total in the post-distribution.
+#' This is when we scale using the "default" process.
+#' If we scale using the "subsample" process, then we ensure that regardless
+#' of the subsample size, the total in the pre- and post-distributions for
+#' the subsample is equal to \code{total}.
+#'
 #' @param pre_df A two-column \code{data.frame} describing the pre-distribution;
 #' @param post_df A two-column \code{data.frame} describing the
 #'   post-distribution;
@@ -180,7 +187,8 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 #' @param scale_pre,scale_post The scaling factor of the counts to be used in
 #'   the \code{\link[transport]{transport}} function; defaults to "default",
 #'   which scales the counts in the pre-distribution to sum to the total of
-#'   the counts in the post-distribution
+#'   the counts in the post-distribution; can also be "subsample"
+#' @param total The total mass count for subsample scaling
 #'
 #' @return A list of the total mass transferred (\code{tot_cost}),
 #'   the proportion of mass transferred (\code{prop_cost}), and the
@@ -213,7 +221,8 @@ get_OTcost <- function(pre_df,
                        costmat = NULL,
                        costmat_ref = NULL,
                        scale_pre = "default",
-                       scale_post = "default") {
+                       scale_post = "default",
+                       total = 1) {
 
   #~ ensure the supports are unique and the same in pre- and post-distributions
   check <- check_support(pre_df, post_df, var = !!rlang::ensym(var))
@@ -237,11 +246,15 @@ get_OTcost <- function(pre_df,
   #~ compute and normalize cost
   if (scale_pre == "default") {
     a <- as.numeric(pre * sum(post) / sum(pre))
+  } else if (scale_pre == "subsample") {
+    a <- as.numeric(pre * sum(post) / sum(pre) * total / sum(post))
   } else {
     a <- as.numeric(pre * scale_pre)
   }
   if (scale_post == "default") {
     b <- as.numeric(post)
+  } else if (scale_post == "subsample") {
+    b <- as.numeric(post * total / sum(post))
   } else {
     b <- as.numeric(post * scale_post)
   }

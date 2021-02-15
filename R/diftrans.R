@@ -292,18 +292,26 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     }
   }
 
+  pre_main_count <- pre_main[[rlang::ensym(count)]]
+  post_main_count <- post_main[[rlang::ensym(count)]]
+  pre_main_total <- sum(pre_main_count)
+  post_main_total <- sum(post_main_count)
+  if (est == "dit") {
+    pre_control_count <- pre_control[[rlang::ensym(count)]]
+    post_control_count <- post_control[[rlang::ensym(count)]]
+    pre_control_total <- sum(pre_control_count)
+    post_control_total <- sum(post_control_count)
+  }
+
   #~ select appropriate bandwidth -- d_star
   if (sims_bandwidth_selection > 0) {
 
     #~ get placebo distributions for main
-    pre_main_count <- pre_main[[rlang::ensym(count)]]
-    post_main_count <- post_main[[rlang::ensym(count)]]
-
     pre_main_placebo <- rmultinom(n = sims_bandwidth_selection,
-                                  size = sum(pre_main_count),
+                                  size = pre_main_total,
                                   prob = pre_main_count)
     post_main_placebo <- rmultinom(n = sims_bandwidth_selection,
-                                   size = sum(post_main_count),
+                                   size = post_main_total,
                                    prob = pre_main_count)
 
     if (est == "ba") {
@@ -336,14 +344,11 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
 
     if (est == "dit") {
       #~ get placebo distributions for control
-      pre_control_count <- pre_control[[rlang::ensym(count)]]
-      post_control_count <- post_control[[rlang::ensym(count)]]
-
       pre_control_placebo <- rmultinom(n = sims_bandwidth_selection,
-                                    size = sum(pre_control_count),
+                                    size = pre_control_total,
                                     prob = pre_control_count)
       post_control_placebo <- rmultinom(n = sims_bandwidth_selection,
-                                     size = sum(post_control_count),
+                                     size = post_control_total,
                                      prob = pre_control_count)
 
       placebo <- sapply(
@@ -415,7 +420,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     if (est == "ba") {
       d_star <- min(valid_d)
     }
-    if (est == "bw") {
+    if (est == "dit") {
       d_star <- valid_d
     }
 
@@ -535,8 +540,9 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                                          count = y,
                                          costmat = costm_main,
                                          costmat_ref = costm_ref_main,
-                                         scale_pre = "default",
-                                         scale_post = "default")
+                                         scale_pre = "subsample",
+                                         scale_post = "subsample",
+                                         total = post_main_total)
           subsample_result$prop_cost
         }
       )
@@ -590,8 +596,9 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                                        count = y,
                                        costmat = costm_main,
                                        costmat_ref = costm_ref_main,
-                                       scale_pre = "default",
-                                       scale_post = "default")
+                                       scale_pre = "subsample",
+                                       scale_post = "subsample",
+                                       total = post_main_total)
 
           subsample_control <- get_OTcost(pre_control_subsample,
                                           post_control_subsample,
@@ -600,8 +607,9 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                                           count = y,
                                           costmat = costm_control,
                                           costmat_ref = costm_ref_control,
-                                          scale_pre = "default",
-                                          scale_post = "default")
+                                          scale_pre = "subsample",
+                                          scale_post = "subsample",
+                                          total = post_control_total)
 
           subsample_real$prop_cost - subsample_control$prop_cost
         }
