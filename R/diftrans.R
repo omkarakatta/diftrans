@@ -72,7 +72,7 @@
 #'     bandwidths, \code{sensitivity_accept} of them have a placebo cost that is less
 #'     than \code{precision}; TODO: move to Details
 #' @param sims_subsampling number of subsampling simulations
-#' @param subsample_pre_main_size,subsample_post_main_size,subsample_pre_control_size,subsample_post_control_size
+#' @param pre_main_subsample_size,post_main_subsample_size,pre_control_subsample_size,post_control_subsample_size
 #'     sample size of subsample distributions
 #' @param seed for reproducibility
 #' @param conservative if \code{TRUE}, then the bandwidth sequence will be
@@ -80,9 +80,6 @@
 #'     difference-in-transports estimator; default is \code{FALSE}, only valid
 #'     for difference-in-transports estimator
 #' @param quietly if \code{TRUE}, some results and will be suppressed from printing; default is \code{FALSE}
-#' @param suppress_progress_bar if \code{TRUE}, the progress bar will be suppressed; default is \code{FALSE}
-#' @param save_result if \code{TRUE}, the estimator as
-#'     well as the associated bandwidth will be returned
 #' @param costm_main if \code{NULL}, the cost matrix with common support will be such that if the transport 
 #'     distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.
 #' @param costm_ref_main if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be 
@@ -105,11 +102,6 @@
 #'   \item \code{diff2d}: \code{main2d - control}
 #' }
 #'
-#' If \code{save_result = TRUE}, then a list is returned, with the first element
-#' (labeled \code{out}) being the data.frame described above.
-#' The second element (labeled \code{dit}) is the differences-in-transports
-#' estimator, and the third and final element (labeled \code{optimal_bandwidth})
-#' is the bandwidth associated with the estimator.
 #'
 #' @export
 #' @importFrom rlang ensym
@@ -188,8 +180,10 @@
 #' dit$dit
 #~ if sims_bandwidth_selection is 0, skip bandwidth selection procedure
 #~ sims_bandwidth_selection > 0 => choose appropriate d_star among bandwidth_seq!
-diftrans <- function(pre_main = NULL, post_main = NULL,
-                     pre_control = NULL, post_control = NULL,
+diftrans <- function(pre_main = NULL,
+                     post_main = NULL,
+                     pre_control = NULL,
+                     post_control = NULL,
                      var = MSRP,
                      count = count,
                      bandwidth_seq = seq(0, 40000, 1000),
@@ -206,17 +200,17 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                      sensitivity_lead = 5,
                      sensitivity_accept = 5,
                      sims_subsampling = 0,
-                     subsample_pre_main_size = NULL,
-                     subsample_post_main_size = NULL,
-                     subsample_pre_control_size = NULL,
-                     subsample_post_control_size = NULL,
+                     pre_main_subsample_size = NULL,
+                     post_main_subsample_size = NULL,
+                     pre_control_subsample_size = NULL,
+                     post_control_subsample_size = NULL,
                      seed = 1,
                      conservative = FALSE,
                      quietly = FALSE,
-                     suppress_progress_bar = FALSE,
-                     save_result = FALSE,
-                     costm_main = NULL, costm_ref_main = NULL,
-                     costm_control = NULL, costm_ref_control = NULL) {
+                     costm_main = NULL,
+                     costm_ref_main = NULL,
+                     costm_control = NULL,
+                     costm_ref_control = NULL) {
 
   #~ initialize output
   out <- list()
@@ -264,43 +258,41 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
       message("Setting `conservative` to FALSE")
       conservative <- FALSE
     }
-    #~ if (!suppress_progress_bar & !quietly) message(est_message)
   } else if (estimator %in% dit_messages) {
     if (is.null(pre_control) || is.null(post_control)) {
       message("`pre_control` and/or `post_control` is mising.")
     }
     #~ est_message <- "Computing Differences-in-Transports Estimator..."
     est <- "dit"
-    #~ if (!suppress_progress_bar & !quietly) message(est_message)
   } else {
     stop("Invalid estimator. Double-check inputs.")
   }
 
 
   if (sims_subsampling > 0) {
-    if (round(subsample_pre_main_size) != subsample_pre_main_size
-        || subsample_pre_main_size <= 0) {
-      stop("`subsample_pre_main_size` needs to be positive integer.")
+    if (round(pre_main_subsample_size) != pre_main_subsample_size
+        || pre_main_subsample_size <= 0) {
+      stop("`pre_main_subsample_size` needs to be positive integer.")
     }
-    if (round(subsample_post_main_size) != subsample_post_main_size
-        || subsample_post_main_size <= 0) {
-      stop("`subsample_post_main_size` needs to be positive integer.")
+    if (round(post_main_subsample_size) != post_main_subsample_size
+        || post_main_subsample_size <= 0) {
+      stop("`post_main_subsample_size` needs to be positive integer.")
     }
     if (est == "dit") {
-      if (round(subsample_pre_control_size) != subsample_pre_control_size
-          || subsample_pre_control_size <= 0) {
-        stop("`subsample_pre_control_size` needs to be positive integer.")
+      if (round(pre_control_subsample_size) != pre_control_subsample_size
+          || pre_control_subsample_size <= 0) {
+        stop("`pre_control_subsample_size` needs to be positive integer.")
       }
-      if (round(subsample_post_control_size) != subsample_post_control_size
-          || subsample_post_control_size <= 0) {
-        stop("`subsample_post_control_size` needs to be positive integer.")
+      if (round(post_control_subsample_size) != post_control_subsample_size
+          || post_control_subsample_size <= 0) {
+        stop("`post_control_subsample_size` needs to be positive integer.")
       }
     } else {
-      if (!is.null(subsample_pre_control_size)) {
-        message("Before-and-after estimator does not use `subsample_pre_control_size`.")
+      if (!is.null(pre_control_subsample_size)) {
+        message("Before-and-after estimator does not use `pre_control_subsample_size`.")
       }
-      if (!is.null(subsample_post_control_size)) {
-        message("Before-and-after estimator does not use `subsample_post_control_size`.")
+      if (!is.null(post_control_subsample_size)) {
+        message("Before-and-after estimator does not use `post_control_subsample_size`.")
       }
     }
   }
@@ -560,7 +552,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
       seq_len(sims_subsampling),
       function(sim) {
         organize_subsamples(pre_main_dist,
-                            subsample_pre_main_size,
+                            pre_main_subsample_size,
                             main_support)
       }
     )
@@ -568,7 +560,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
       seq_len(sims_subsampling),
       function(sim) {
         organize_subsamples(post_main_dist,
-                            subsample_post_main_size,
+                            post_main_subsample_size,
                             main_support)
       }
     )
@@ -614,7 +606,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
         seq_len(sims_subsampling),
         function(sim) {
           organize_subsamples(pre_control_dist,
-                              subsample_pre_control_size,
+                              pre_control_subsample_size,
                               control_support)
         }
       )
@@ -622,7 +614,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
         seq_len(sims_subsampling),
         function(sim) {
           organize_subsamples(post_control_dist,
-                              subsample_post_control_size,
+                              post_control_subsample_size,
                               control_support)
         }
       )
@@ -679,85 +671,7 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
 
   message("DONE")
 
-  return(out)
-
-#~   # initialization
-#~   main_prop <- rep(NA_real_, length(bandwidth_seq))
-#~   if (conservative) maincons_prop <- rep(NA_real_, length(bandwidth_seq))
-#~   if (est == "dit") control_prop <- rep(NA_real_, length(bandwidth_seq))
-#~ 
-#~   # computation
-#~   if (!suppress_progress_bar) {
-#~     pb <- utils::txtProgressBar(min = 0, max = length(bandwidth_seq), initial = 0)
-#~   }
-#~   for (i in seq_along(bandwidth_seq)) {
-#~     if (!suppress_progress_bar) utils::setTxtProgressBar(pb, i)
-#~ 
-#~     bandwidth <- bandwidth_seq[i]
-#~     main_cost <- get_OTcost(pre_main,
-#~                             post_main,
-#~                             bandwidth = bandwidth,
-#~                             var = !!rlang::ensym(var),
-#~                             count = !!rlang::ensym(count),
-#~                             costmat = costm_main,
-#~                             costmat_ref = costm_ref_main)
-#~     if (conservative) maincons_cost <- get_OTcost(pre_main,
-#~                                                   post_main,
-#~                                                   bandwidth = 2*bandwidth,
-#~                                                   var = !!rlang::ensym(var),
-#~                                                   count = !!rlang::ensym(count),
-#~                                                   costmat = costm_main,
-#~                                                   costmat_ref = costm_ref_main)
-#~     if (est == "dit") control_cost <- get_OTcost(pre_control,
-#~                                                  post_control,
-#~                                                  bandwidth = bandwidth,
-#~                                                  var = !!rlang::ensym(var),
-#~                                                  count = !!rlang::ensym(count),
-#~                                                  costmat = costm_control,
-#~                                                  costmat_ref = costm_ref_control)
-#~ 
-#~     main_prop[i] <- main_cost$prop_cost
-#~     if (conservative) maincons_prop[i] <- maincons_cost$prop_cost
-#~     if (est == "dit") control_prop[i] <- control_cost$prop_cost
-#~   }
-#~ 
-#~   cat("\n")
-#~ 
-#~   # compile results
-#~   if (est == "dit") {
-#~     diffprop <- main_prop - control_prop
-#~ 
-#~     if (conservative) {
-#~       diffprop2d <- maincons_prop - control_prop
-#~       out <- data.frame(bandwidth = bandwidth_seq,
-#~                         main = main_prop,
-#~                         main2d = maincons_prop,
-#~                         control = control_prop,
-#~                         diff = diffprop,
-#~                         diff2d = diffprop2d)
-#~       whichmax <- which.max(diffprop2d)
-#~       dit <- diffprop2d[whichmax]
-#~       dstar <- bandwidth_seq[whichmax]
-#~       if (!quietly) message(paste("The conservative diff-in-transports estimator is ", dit, " at d = ", dstar, sep = ""))
-#~     } else {
-#~       out <- data.frame(bandwidth = bandwidth_seq,
-#~                         main = main_prop,
-#~                         control = control_prop,
-#~                         diff = diffprop)
-#~       whichmax <- which.max(diffprop)
-#~       dit <- diffprop[whichmax]
-#~       dstar <- bandwidth_seq[whichmax]
-#~       if (!quietly) message(paste("The non-conservative diff-in-transports estimator is ", dit, " at d = ", dstar, sep = ""))
-#~     }
-#~     if (save_result) out <- list(out = out, dit = dit, optimal_bandwidth = dstar)
-#~   }
-#~ 
-#~   if (est == "tc"){
-#~     out <- data.frame(bandwidth = bandwidth_seq,
-#~                       main = main_prop)
-#~     if (conservative) out <- cbind(out, main2d = maincons_prop)
-#~     if (!quietly) message(paste("The transport cost for the specified bandwidths have been computed."))
-#~   }
-#~ 
-#~   return(invisible(out))
+  out$call <- match.call()
+  class(out) <- "diftrans"
+  return(invisible(out))
 }
