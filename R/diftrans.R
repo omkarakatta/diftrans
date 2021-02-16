@@ -13,24 +13,38 @@
 ###
 ###
 
-#' Obtain Transport Costs and Differences-in-Transports Estimator
+#' Compute Before-and-After Estimator and Differences-in-Transports Estimator
 #'
-#' Given the pre and post probability mass functions as well as a vector of
-#' bandwidths, this function returns the associated transport costs.
-#' If another set of pre and post probability mass functions are given for the
-#' control group, then the differences-in-transports estimator is returned.
+#' This function implements the before-and-after estimation procedure and the
+#' differences-in-transports estimator described in Daljord et al. (2021).
 #'
 #' The \code{pre_main}, \code{post_main}, \code{pre_control}, and
-#' \code{post_control} variables are all probability mass functions.
-#' That is, they are a tibble with two columns:
+#' \code{post_control} arguments are data frames, each with two columns:
 #' \itemize{
-#'   \item column 1 contains the full support of \code{var}, and
-#'   \item column 2 contains the corresponding mass of each value
+#'   \item column 1 contains the "common support" of \code{var}, and
+#'   \item column 2 contains the corresponding mass/counts of each value
 #'          in the support.
 #' }
-#' Since column 1 contains the full support of \code{var} and all these
-#' distributions are of \code{var}, column 1 must be the same for all
-#' distributions.
+#' By "common support", we refer to the union of the support of
+#' \code{pre_main}, \code{post_main}, \code{pre_control}, \code{post_control}.
+#' Thus, all four data frames should share the same column for the support.
+#' (Strictly speaking, \code{pre_main} and \code{post_main} must have the same
+#' support column, and \code{pre_control} and \code{post_control} must have the
+#' the same support column; however, each pair's respective common support
+#' columns may be different.)
+#'
+#' The column names across the data frames must be the same.
+#' The name of of the first column with the support is fed into the \code{var}
+#' argument, and the name of the second column with the mass is fed into
+#' of the \code{count} argument.
+#'
+#' This function uses \code{link[transport]{transport:transport()}} to compute
+#' the optimal transport cost between the pre- and post-distributions.
+#' By default, the ground cost between any two values of the commons support
+#' is 1 if the absolute difference of the two values is greater than some
+#' bandwidth and 0 otherwise.
+#' The choice of bandwidths to consider can be specified in the vector
+#' \code{bandwidth_vec}.
 #'
 #' The cost matrices specified by \code{costm} should use a common support of
 #' the respective distributions.
@@ -53,7 +67,7 @@
 #' @param count the title of the second column of \code{pre_main}, \code{post_main},
 #'     \code{pre_control}, and \code{post_control}; default is \code{count}
 #'     (see Daljord et al. (2021))
-#' @param bandwidth_seq a vector of bandwidth values to try; default is \code{seq(0, 40000, 1000)}
+#' @param bandwidth_vec a vector of bandwidth values to try; default is \code{seq(0, 40000, 1000)}
 #' @param minimum_bandwidth minimum bandwidth to consider for the estimator;
 #'     defaults to 0
 #' @param maximum_bandwidth maximum bandwidth to consider for the estimator;
@@ -81,17 +95,17 @@
 #'     for difference-in-transports estimator
 #' @param quietly if \code{TRUE}, some results and will be suppressed from printing; default is \code{FALSE}
 #' @param costm_main if \code{NULL}, the cost matrix with common support will be such that if the transport 
-#'     distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.
+#'     distance is greater than what is specified in \code{bandwidth_vec}, cost is 1 and 0 otherwise.
 #' @param costm_ref_main if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be 
 #'     using the minimal support of main distributions
 #' @param costm_control if \code{NULL}, the cost matrix with common support will be such that if the transport 
-#'     distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.
+#'     distance is greater than what is specified in \code{bandwidth_vec}, cost is 1 and 0 otherwise.
 #' @param costm_ref_control if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be 
 #'     using the minimal support of control distributions
 #'
-#' @return a data.frame with the transport costs associated with each value of \code{bandwidth_seq}.
+#' @return a data.frame with the transport costs associated with each value of \code{bandwidth_vec}.
 #' \itemize{
-#'   \item \code{bandwidth}: same as \code{bandwidth_seq}
+#'   \item \code{bandwidth}: same as \code{bandwidth_vec}
 #'   \item \code{main}: transport costs associated with main distributions
 #'   \item \code{main2d}: transport costs associated with main distributions using twice the bandwidth;
 #'                        appears only if \code{conservative = TRUE}
@@ -179,14 +193,14 @@
 #' dit$optimal_bandwidth
 #' dit$dit
 #~ if sims_bandwidth_selection is 0, skip bandwidth selection procedure
-#~ sims_bandwidth_selection > 0 => choose appropriate d_star among bandwidth_seq!
+#~ sims_bandwidth_selection > 0 => choose appropriate d_star among bandwidth_vec!
 diftrans <- function(pre_main = NULL,
                      post_main = NULL,
                      pre_control = NULL,
                      post_control = NULL,
                      var = MSRP,
                      count = count,
-                     bandwidth_seq = seq(0, 40000, 1000),
+                     bandwidth_vec = seq(0, 40000, 1000),
                      minimum_bandwidth = 0,
                      maximum_bandwidth = Inf,
                      estimator = ifelse(!is.null(pre_control)
@@ -240,7 +254,7 @@ diftrans <- function(pre_main = NULL,
 
   #~ TODO: bandwidths > 0 error check
   #~ TODO: check what happens when no bandwidth is given but cost matrices are given
-  #~ TODO: send a warning that if conservative = T and est != "dit", then we ignore conservative = T; instead, request the user to use twice the bandwidth in bandwidth_seq; i.e., tell the users that conservative = T only applies when est != "dit"
+  #~ TODO: send a warning that if conservative = T and est != "dit", then we ignore conservative = T; instead, request the user to use twice the bandwidth in bandwidth_vec; i.e., tell the users that conservative = T only applies when est != "dit"
   #~ TODO: allow for placebo matrix to be an argument
 
 
@@ -360,9 +374,9 @@ diftrans <- function(pre_main = NULL,
           post_placebo <- data.frame(x = main_support,
                                      y = post_count)
           sapply(
-            seq_along(bandwidth_seq),
+            seq_along(bandwidth_vec),
             function(bw_index) {
-              bw <- bandwidth_seq[bw_index]
+              bw <- bandwidth_vec[bw_index]
               placebo_result <- get_OTcost(pre_placebo,
                                            post_placebo,
                                            bw,
@@ -405,9 +419,9 @@ diftrans <- function(pre_main = NULL,
                                      y = post_count)
 
           sapply(
-            seq_along(bandwidth_seq),
+            seq_along(bandwidth_vec),
             function(bw_index) {
-              bw <- bandwidth_seq[bw_index]
+              bw <- bandwidth_vec[bw_index]
               main_bw <- ifelse(conservative, 2 * bw, bw)
               control_bw <- bw
               placebo_main <- get_OTcost(pre_main_placebo,
@@ -430,9 +444,9 @@ diftrans <- function(pre_main = NULL,
         }
       )
     }
-    #~ dim(placebo): length(bandwidth_seq) x sims_bandwidth_selection
+    #~ dim(placebo): length(bandwidth_vec) x sims_bandwidth_selection
     colnames(placebo) <- paste0("sim", seq_len(sims_bandwidth_selection))
-    placebo_cleaned <- cbind(bandwidth = bandwidth_seq, as.data.frame(placebo))
+    placebo_cleaned <- cbind(bandwidth = bandwidth_vec, as.data.frame(placebo))
     placebo_summary <- placebo_cleaned %>%
       dplyr::rowwise(bandwidth) %>%
       dplyr::summarize(mean = mean(dplyr::c_across()),
@@ -451,9 +465,9 @@ diftrans <- function(pre_main = NULL,
                                       sensitivity_lead,
                                       sensitivity_accept,
                                       precision)
-    valid_d <- bandwidth_seq[valid_d_index &
-                             bandwidth_seq >= minimum_bandwidth &
-                             bandwidth_seq <= maximum_bandwidth]
+    valid_d <- bandwidth_vec[valid_d_index &
+                             bandwidth_vec >= minimum_bandwidth &
+                             bandwidth_vec <= maximum_bandwidth]
 
     if (est == "ba") {
       d_star <- min(valid_d)
@@ -464,8 +478,8 @@ diftrans <- function(pre_main = NULL,
 
     #~ TODO: send d_star to user; d_star = all the valid bandwidths
   } else {
-    valid_d <- bandwidth_seq[bandwidth_seq >= minimum_bandwidth &
-                             bandwidth_seq <= maximum_bandwidth]
+    valid_d <- bandwidth_vec[bandwidth_vec >= minimum_bandwidth &
+                             bandwidth_vec <= maximum_bandwidth]
     d_star <- valid_d
   }
 
