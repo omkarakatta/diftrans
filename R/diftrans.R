@@ -723,9 +723,9 @@ diftrans <- function(pre_main = NULL,
 print.diftrans <- function(x,...) {
   if (x$est == "ba") {
     estimator <- "Before-and-After Estimate of "
-  } else if (x$est == "dit" & conservative) {
+  } else if (x$est == "dit" & x$conservative) {
     estimator <- "Conservative Differences-in-Transports estimate of "
-  } else if (x$est == "dit" & !conservative) {
+  } else if (x$est == "dit" & !x$conservative) {
     estimator <- "Differences-in-Transports estimate of "
   }
 
@@ -739,16 +739,4 @@ print.diftrans <- function(x,...) {
     )
   )
   cat("\n")
-
-  # cat("Call: diftrans\n\n")
-  
-  # cat(
-  #   paste(
-  #     "Estimator:",
-  #     format(estimator, width = 30, justify = "right"),
-  #     sep = ""
-  #   )
-  # )
-  # cat("\n")
-
 }
