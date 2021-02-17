@@ -114,6 +114,7 @@
 #'
 #' @export
 #' @importFrom rlang ensym
+#' @importFrom rlang enquo
 #' @importFrom stats quantile
 #' @importFrom stats rmultinom
 #' @examples
@@ -220,93 +221,50 @@ diftrans <- function(pre_main = NULL,
   #~ initialize output
   out <- list()
 
-# Error Checking ----------
+# Preliminaries ----------
 
-  #~ error checking
-  if (is.null(pre_main) || is.null(post_main)) {
-    stop("`pre_main` and/or `post_main` is missing.")
-  }
-  if (round(sims_bandwidth_selection) != sims_bandwidth_selection
-      || sims_bandwidth_selection < 0) {
-    stop("`sims_bandwidth_selection` needs to be a non-negative integer.")
-  }
-  if (round(sims_subsampling) != sims_subsampling
-      || sims_subsampling < 0) {
-    stop("`sims_subsampling` needs to be a non-negative integer.")
-  }
-  if (!is.numeric(seed)) {
-    stop("`seed` must be numeric.")
-  }
+  prelim <- preliminaries(
+    pre_main = pre_main,
+    post_main = post_main,
+    pre_control = pre_control,
+    post_control = post_control,
+    var = !!rlang::enquo(var),
+    count = !!rlang::enquo(count),
+    bandwidth_vec = bandwidth_vec,
+    minimum_bandwidth = minimum_bandwidth,
+    maximum_bandwidth = maximum_bandwidth,
+    estimator = estimator,
+    sims_bandwidth_selection = sims_bandwidth_selection,
+    precision = precision,
+    sensitivity_lag = sensitivity_lag,
+    sensitivity_lead = sensitivity_lead,
+    sensitivity_accept = sensitivity_accept,
+    sims_subsampling = sims_subsampling,
+    pre_main_subsample_size = pre_main_subsample_size,
+    post_main_subsample_size = post_main_subsample_size,
+    pre_control_subsample_size = pre_control_subsample_size,
+    post_control_subsample_size = post_control_subsample_size,
+    seed = seed,
+    conservative = conservative,
+    quietly = quietly
+  )
 
+  est <- prelim$est
+  pre_main_total <- prelim$pre_main_total
+  post_main_total <- prelim$post_main_total
+  pre_control_total <- prelim$pre_control_total
+  post_control_total <- prelim$post_control_total
+
+  out$est <- prelim$est
+  out$pre_main_total <- prelim$pre_main_total
+  out$post_main_total <- prelim$post_main_total
+  out$pre_control_total <- prelim$pre_control_total
+  out$post_control_total <- prelim$post_control_total
 
   out$seed <- seed
 
-  #~ set seed for reproducibility
-  set.seed(seed)
-  if (!quietly) message(paste("seed has been set:", seed))
-
-  #~ TODO: bandwidths > 0 error check
-  #~ TODO: check what happens when no bandwidth is given but cost matrices are given
-  #~ TODO: send a warning that if conservative = T and est != "dit", then we ignore conservative = T; instead, request the user to use twice the bandwidth in bandwidth_vec; i.e., tell the users that conservative = T only applies when est != "dit"
   #~ TODO: allow for placebo matrix to be an argument
 
-# Get Estimator ----------
-
-  estimator <- tolower(estimator)
-  tc_messages <- c("tc", "ba", "before-and-after", "transport costs")
-  dit_messages <- c("dit", "differences-in-transports", "diff-in-transports")
-  if (estimator %in% tc_messages) {
-    if (!is.null(pre_control) || !is.null(post_control)) {
-      message("`pre_control` and/or `post_control` will be ignored.")
-    }
-    #~ est_message <- "Computing Transport Costs..."
-    est <- "ba"
-    if (conservative) {
-      message("Setting `conservative` to FALSE")
-      conservative <- FALSE
-    }
-  } else if (estimator %in% dit_messages) {
-    if (is.null(pre_control) || is.null(post_control)) {
-      message("`pre_control` and/or `post_control` is mising.")
-    }
-    est <- "dit"
-  } else {
-    stop("Invalid estimator. Double-check inputs.")
-  }
-
-  out$estimator <- est
-
-  if (!quietly) message(paste("estimator has been set:", estimator))
-
-# Error Checks with Estimator ----------
-
-  if (sims_subsampling > 0) {
-    if (round(pre_main_subsample_size) != pre_main_subsample_size
-        || pre_main_subsample_size <= 0) {
-      stop("`pre_main_subsample_size` needs to be positive integer.")
-    }
-    if (round(post_main_subsample_size) != post_main_subsample_size
-        || post_main_subsample_size <= 0) {
-      stop("`post_main_subsample_size` needs to be positive integer.")
-    }
-    if (est == "dit") {
-      if (round(pre_control_subsample_size) != pre_control_subsample_size
-          || pre_control_subsample_size <= 0) {
-        stop("`pre_control_subsample_size` needs to be positive integer.")
-      }
-      if (round(post_control_subsample_size) != post_control_subsample_size
-          || post_control_subsample_size <= 0) {
-        stop("`post_control_subsample_size` needs to be positive integer.")
-      }
-    } else if (est == "ba") {
-      if (!is.null(pre_control_subsample_size)) {
-        message("Before-and-after estimator does not use `pre_control_subsample_size`.")
-      }
-      if (!is.null(post_control_subsample_size)) {
-        message("Before-and-after estimator does not use `post_control_subsample_size`.")
-      }
-    }
-  }
 
 # Check Support ----------
 
@@ -450,7 +408,6 @@ diftrans <- function(pre_main = NULL,
                        quantile0.95 = quantile(dplyr::c_across(), prob = 0.95),
                        quantile0.99 = quantile(dplyr::c_across(), prob = 0.99))
 
-    #~ TODO: send placebo_cleaned and placebo_summary to user
     out$placebo <- placebo_cleaned
     out$placebo_summary <- placebo_summary
 
