@@ -509,7 +509,6 @@ preliminaries <- function(pre_main,
     out$pre_main_subsample_size <- pre_main_subsample_size
     out$post_main_subsample_size <- post_main_subsample_size
     if (est == "ba") {
-      print(pre_control_subsample_size)
       if (!is.null(pre_control_subsample_size)) {
         msg <- "`pre_control_subsample_size` will be ignored for before-and-after estimation."
         send_note(msg, pre_control_subsample_size == 0, message)
