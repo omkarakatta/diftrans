@@ -257,7 +257,7 @@ diftrans <- function(pre_main = NULL,
                      post_control_subsample_size = NULL,
                      seed = 1,
                      conservative = FALSE,
-                     quietly = FALSE,
+                     quietly = TRUE,
                      show_progress = FALSE) {
 
   #~ initialize output
@@ -290,7 +290,7 @@ diftrans <- function(pre_main = NULL,
     seed = seed,
     conservative = conservative,
     quietly = quietly,
-    show_progress
+    show_progress = show_progress
   )
 
   bandwidth_vec <- sort(unique(bandwidth_vec))
