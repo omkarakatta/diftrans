@@ -51,6 +51,25 @@
 #' as the percentage of mass that has been transferred by more than a
 #' a bandwidth's distance away.
 #'
+#' The bandwidth selection process chooses a bandwidth among
+#' \code{bandwidth_vec} to filter out sampling variation.
+#' The selection process differs by the estimator, but for both estimators,
+#' placebo costs are computed for each bandwidth in every simulation.
+#' We identify bandwidths whose mean placebo costs across all simulations
+#' is less than \code{precision}.
+#' For each such bandwidth, we ask whether \code{sensitivity_accept} of the
+#' following \code{sensitivity_lead} and preceding \code{sensitivity_lag}
+#' bandwidths in \code{bandwidth_vec} are also less than \code{precision}.
+#' If this is the case, then we consider such a bandwidth as a candidate
+#' for the estimator.
+#' Note that we also require candidate bandwidths to be at least
+#' \code{minimum_bandwidth} and no more than \code{maximum_bandwidth}.
+#'
+#' For the before-and-after estimator, we choose the smallest of the candidate
+#' bandwidths.
+#' For the differences-in-transports estimator, we choose the candidate
+#' bandwidth with the largest value of the estimator.
+#'
 #'
 #'
 #' TODO: add documentation about bandwidth selection, min and max bw args,
