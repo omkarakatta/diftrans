@@ -54,23 +54,24 @@
 #' TODO: add documentation about bandwidth selection, min and max bw args,
 #' subsampling procedure
 #'
-#' @param pre_main probability mass function (see "Details") for \code{var} of the
-#'     treated group before treatment occurs
-#' @param post_main probability mass function (see "Details") for \code{var} of the
-#'     treated group after treatment occurs
-#' @param pre_control probability mass function (see "Details") for \code{var} of the
-#'     control group before treatment occurs; only required for the computing the
-#'     differences-in-transports estimator
-#' @param post_control probability mass function (see "Details") for \code{var} of the
-#'     treated group after treatment occurs; only required for the computing the
-#'     differences-in-transports estimator
-#' @param var the title of the first column of \code{pre_main}, \code{post_main},
-#'     \code{pre_control}, and \code{post_control}; default is \code{MSRP}
-#'     (see Daljord et al. (2021))
-#' @param count the title of the second column of \code{pre_main}, \code{post_main},
-#'     \code{pre_control}, and \code{post_control}; default is \code{count}
-#'     (see Daljord et al. (2021))
-#' @param bandwidth_vec a vector of bandwidth values to try; default is \code{seq(0, 40000, 1000)}
+#' @param pre_main A two-column \code{data.frame} describing the
+#'  pre-distribution of the treated observations
+#' @param post_main A two-column \code{data.frame} describing the
+#'  post-distribution of the treated observations
+#' @param pre_control A two-column \code{data.frame} describing the
+#'  pre-distribution of the untreated observations; only required for the
+#'  differences-in-transports estimator
+#' @param post_control A two-column \code{data.frame} describing the
+#'  post-distribution of the untreated observations; only required for the
+#'  differences in transports estimator
+#' @param var the title of the common support columns of \code{pre_main},
+#'  \code{post_main}, \code{pre_control}, and \code{post_control};
+#'  defaults to \code{MSRP}
+#' @param count the title of the second column of \code{pre_main},
+#'  \code{post_main}, \code{pre_control}, and \code{post_control};
+#'  defaults to \code{count}
+#' @param bandwidth_vec a vector of non-negative bandwidth values;
+#'  defaults to \code{seq(0, 40000, 1000)}
 #' @param minimum_bandwidth minimum bandwidth to consider for the estimator;
 #'     defaults to 0
 #' @param maximum_bandwidth maximum bandwidth to consider for the estimator;

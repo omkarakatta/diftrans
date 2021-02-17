@@ -171,7 +171,7 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0) {
 #' of the subsample size, the total in the pre- and post-distributions for
 #' the subsample is equal to \code{total}.
 #'
-#' @param pre_df A two-column \code{data.frame} describing the pre-distribution;
+#' @param pre_df A two-column \code{data.frame} describing the pre-distribution
 #' @param post_df A two-column \code{data.frame} describing the
 #'   post-distribution;
 #' @param bandwidth A non-negative number to ignore small transfers;
