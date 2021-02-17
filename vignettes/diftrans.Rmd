@@ -163,13 +163,13 @@ We can compute the transport cost as follows:
 
 ```{r echo = T}
 tc <- diftrans(pre_main = pre_treated, post_main = post_treated,
-                  estimator = "tc", var = x,
-                  bandwidth = 0)
+               estimator = "tc", var = x,
+               bandwidth_vec = 0)
 
-tc
+tc$empirical_cost
 ```
 
-**The transport cost is `r scales::percent(tc$main)`** as expected.
+**The transport cost is `r scales::percent(tc$empirical_cost)`** as expected.
 The `estimator` argument is specified to be `"tc"`, which stands for transport cost.
 (Since we only have two distributions, estimator will take on the value of `"tc"` by default.)
 
@@ -178,10 +178,10 @@ at least `r shift` must result in a transport cost of 0. We verify this by compu
 the transport cost for a sequence of bandwidths from 0 to 10:
 ```{r}
 tc <- diftrans(pre_main = pre_treated, post_main = post_treated,
-                  estimator = "tc", var = x,
-                  bandwidth = seq(0, 10))
+               estimator = "tc", var = x,
+               bandwidth_vec = seq(0, 10))
 
-tc
+tc$empirical_cost
 ```
 
 ### Setup for Difference-in-Transports
@@ -246,12 +246,11 @@ while also specifying our pre- and post-distributions for our control group.
 
 ```{r echo = T}
 dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
-                   pre_control = pre_control, post_control = post_control,
-                   estimator = "dit", var = x,
-                   bandwidth_seq = seq(0, 10, 1),
-                   save_result = TRUE)
-dit$out
-dit$dit
+                pre_control = pre_control, post_control = post_control,
+                estimator = "dit", var = x,
+                bandwidth_vec = seq(0, 10, 1))
+dit$empirical_table
+dit$empirical_cost
 dit$optimal_bandwidth
 ```
 
@@ -259,7 +258,7 @@ Another difference between computing the transport cost and the differences-in-d
 estimator is that the differences-in-transports estimator is printed as a message. 
 To save this result in `dit`, we use `save_result` = TRUE`.
 
-Thus, **the differences-in-transports estimator is `r scales::percent(dit$dit)` at an optimal bandwidth of `r dit$optimal_bandwidth`**. 
+Thus, **the differences-in-transports estimator is `r scales::percent(dit$empirical_cost)` at an optimal bandwidth of `r dit$optimal_bandwidth`**. 
 There is more nuance to computing the differences-in-transports estimator than 
 is presented in this vignette. See Daljord et al. (2021) for a more 
 complete treatment on how to compute the differences-in-transports estimator.
@@ -287,15 +286,15 @@ d_a <- 1
 dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                    pre_control = pre_control, post_control = post_control,
                    estimator = "dit", var = x,
-                   bandwidth_seq = seq(d_a, 10, 1), # smallest bandwidth will be d_a
-                   save_result = TRUE)
-dit$out
-dit$dit
+                   bandwidth_vec = seq(0, 10, 1),
+                   minimum_bandwidth = d_a) # smallest bandwidth will be d_a
+dit$empirical_table
+dit$empirical_cost
 dit$optimal_bandwidth
 ```
 
 Note that this restriction is not binding, so our result is unaffected.
-**Accounting for sampling variability, our differences-in-transports estimate is still `r scales::percent(dit$dit)`**. 
+**Accounting for sampling variability, our differences-in-transports estimate is still `r scales::percent(dit$empirical_cost)`**. 
 
 #### Conservative Differences-in-Transports
 
@@ -308,15 +307,14 @@ group's transport costs.
 dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                    pre_control = pre_control, post_control = post_control,
                    estimator = "dit", var = x,
-                   bandwidth_seq = seq(d_a, 10, 1),
-                   save_result = TRUE,
+                   bandwidth_vec = seq(d_a, 10, 1),
                    conservative = TRUE)
-dit$out
-dit$dit
+dit$empirical_table
+dit$empirical_cost
 dit$optimal_bandwidth
 ```
 
-Finally, we have that the **conservative differences-in-transports estimator is `r scales::percent(dit$dit)` at an optimal bandwidth of `r dit$optimal_bandwidth`**.
+Finally, we have that the **conservative differences-in-transports estimator is `r scales::percent(dit$empirical_cost)` at an optimal bandwidth of `r dit$optimal_bandwidth`**.
 
 Note that `estimator = "dit"` is not necessary. Since we have two sets of pre- and
 post-distributions, `diftrans` is smart enough to return the differences-in-transports 

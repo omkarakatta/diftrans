@@ -27,81 +27,104 @@ diftrans(
   post_control_subsample_size = NULL,
   seed = 1,
   conservative = FALSE,
-  quietly = FALSE
+  quietly = FALSE,
+  show_progress = FALSE
 )
 }
 \arguments{
-\item{pre_main}{probability mass function (see "Details") for \code{var} of the
-treated group before treatment occurs}
+\item{pre_main}{A two-column \code{data.frame} describing the
+pre-distribution of the treated observations}
 
-\item{post_main}{probability mass function (see "Details") for \code{var} of the
-treated group after treatment occurs}
+\item{post_main}{A two-column \code{data.frame} describing the
+post-distribution of the treated observations}
 
-\item{pre_control}{probability mass function (see "Details") for \code{var} of the
-control group before treatment occurs; only required for the computing the
+\item{pre_control}{A two-column \code{data.frame} describing the
+pre-distribution of the untreated observations; only required for the
 differences-in-transports estimator}
 
-\item{post_control}{probability mass function (see "Details") for \code{var} of the
-treated group after treatment occurs; only required for the computing the
-differences-in-transports estimator}
+\item{post_control}{A two-column \code{data.frame} describing the
+post-distribution of the untreated observations; only required for the
+differences in transports estimator}
 
-\item{var}{the title of the first column of \code{pre_main}, \code{post_main},
-\code{pre_control}, and \code{post_control}; default is \code{MSRP}
-(see Daljord et al. (2021))}
+\item{var}{The title of the common support columns of \code{pre_main},
+\code{post_main}, \code{pre_control}, and \code{post_control};
+defaults to \code{MSRP}}
 
-\item{count}{the title of the second column of \code{pre_main}, \code{post_main},
-\code{pre_control}, and \code{post_control}; default is \code{count}
-(see Daljord et al. (2021))}
+\item{count}{The title of the second column of \code{pre_main},
+\code{post_main}, \code{pre_control}, and \code{post_control};
+defaults to \code{count}}
 
-\item{bandwidth_vec}{a vector of bandwidth values to try; default is \code{seq(0, 40000, 1000)}}
+\item{bandwidth_vec}{A vector of non-negative bandwidth values;
+defaults to \code{seq(0, 40000, 1000)}}
 
-\item{minimum_bandwidth}{minimum bandwidth to consider for the estimator;
+\item{minimum_bandwidth}{Minimum bandwidth to consider for the estimator;
 defaults to 0}
 
-\item{maximum_bandwidth}{maximum bandwidth to consider for the estimator;
+\item{maximum_bandwidth}{Maximum bandwidth to consider for the estimator;
 defaults to infinity}
 
-\item{estimator}{a string that takes on the value of "dit" for
+\item{estimator}{A string that takes on the value of "dit" for
 differences-in-transports estimator or "tc" for the transport cost;
-if \code{pre_control} and \code{post_control} are specified, default is "dit";
+if \code{pre_control} and \code{post_control} are specified,
+default is "dit";
 otherwise, default is "tc"}
 
-\item{sims_bandwidth_selection}{number of simulations for the bandwidth
+\item{sims_bandwidth_selection}{Number of simulations for the bandwidth
 selection process; defaults to 0}
 
-\item{precision}{threshold to choose the bandwidth; defaults to 0.0005, i.e.,
+\item{precision}{Threshold to choose the bandwidth; defaults to 0.0005, i.e.,
 5 percent.}
 
-\item{sensitivity_lag, sensitivity_lead, sensitivity_accept}{acceptable bandwidths are bandwidths such that among the
-\code{sensitivity_lag} previous bandwidths and \code{sensitivity_lead}
-bandwidths, \code{sensitivity_accept} of them have a placebo cost that is less
-than \code{precision}; TODO: move to Details}
+\item{sensitivity_lag, sensitivity_lead, sensitivity_accept}{See "Details" to understand how these parameters influence bandwidth
+selection}
 
-\item{sims_subsampling}{number of subsampling simulations}
+\item{sims_subsampling}{Number of subsampling simulations}
 
-\item{pre_main_subsample_size, post_main_subsample_size, pre_control_subsample_size, post_control_subsample_size}{sample size of subsample distributions}
+\item{pre_main_subsample_size, post_main_subsample_size, pre_control_subsample_size, post_control_subsample_size}{Size of subsample distributions}
 
-\item{seed}{for reproducibility}
+\item{seed}{Seed for reproducibility; see \code{\link{set.seed}}}
 
-\item{conservative}{if \code{TRUE}, then the bandwidth sequence will be
+\item{conservative}{If TRUE, then the bandwidth sequence will be
 multiplied by 2 to provide a conservative estimate of the
-difference-in-transports estimator; default is \code{FALSE}, only valid
+difference-in-transports estimator; default is FALSE, only valid
 for difference-in-transports estimator}
 
-\item{quietly}{if \code{TRUE}, some results and will be suppressed from printing; default is \code{FALSE}}
+\item{quietly}{If TRUE, some messages will be suppressed from printing;
+defaults FALSE}
+
+\item{show_progress}{If \code{TRUE}, placebo and subsampling simulations
+will show progress; defaults to FALSE}
 }
 \value{
-a data.frame with the transport costs associated with each value of \code{bandwidth_vec}.
+an object of the "diftrans" class with the following information:
 \itemize{
-\item \code{bandwidth}: same as \code{bandwidth_vec}
-\item \code{main}: transport costs associated with main distributions
-\item \code{main2d}: transport costs associated with main distributions using twice the bandwidth;
-appears only if \code{conservative = TRUE}
-\item \code{control}: transport costs associated with the control distributions;
-appears only if \code{pre_control} and \code{post_control}
-are specified
-\item \code{diff}: \code{main - control}
-\item \code{diff2d}: \code{main2d - control}
+\item \code{bandwidth_vec}: sorted vector of unique bandwidth values used
+for evaluating ground cost
+\item \code{est}: either "ba" for the before-and-after estimator
+or "dit" for the differences-in-transports estimator
+\item \code{pre_main_total}: total count in \code{pre_main}
+\item \code{post_main_total}: total count in \code{post_main}
+\item \code{pre_control_total}: total count in \code{pre_control}
+\item \code{post_control_total}: total count in \code{post_control}
+\item \code{sims_bandwidth_selection}: number of simulations to run for
+bandwidth selection
+\item \code{pre_main_subsample_size},
+\code{post_main_subsample_size},
+\code{post_control_subsample_size},
+\code{post_control_subsample_size}: size of subsample distributions
+\item \code{seed}: seed (see \code{\link{set.seed}})
+\item \code{main_support}: common support of the treated distributions
+\item \code{control_support}: common support of the untreated distributions
+\item \code{empirical_table}: data frame of transport costs at each
+bandwidth in \code{bandwidth_vec} as well as indicators for the
+candidate bandwidths and the final bandwidth chosen for the estimate
+(\code{optimal_bandwidth})
+\item \code{candidate_bandwidths}: vector of candidate bandwidths that
+survive the bandwidth selection
+\item \code{optimal_bandwidth}: final bandwidth for estimator
+\item \code{empirical_cost}: value of estimator at \code{optimal_bandwidth}
+\item \code{subsample}: vector of costs that arise from subsampling
+\item \code{call}: function call to produce the object of class "diftrans"
 }
 }
 \description{
@@ -142,12 +165,37 @@ As a result, the transport costs to be used by our estimators can be viewed
 as the percentage of mass that has been transferred by more than a
 a bandwidth's distance away.
 
-TODO: add documentation about bandwidth selection, min and max bw args,
-subsampling procedure
+The bandwidth selection process chooses a bandwidth among
+\code{bandwidth_vec} to filter out sampling variation.
+The selection process differs by the estimator, but for both estimators,
+placebo costs are computed for each bandwidth in every simulation.
+We identify bandwidths whose mean placebo costs across all simulations
+is less than \code{precision}.
+For each such bandwidth, we ask whether \code{sensitivity_accept} of the
+following \code{sensitivity_lead} and preceding \code{sensitivity_lag}
+bandwidths in \code{bandwidth_vec} are also less than \code{precision}.
+If this is the case, then we consider such a bandwidth as a candidate
+for the estimator.
+Note that we also require candidate bandwidths to be at least
+\code{minimum_bandwidth} and no more than \code{maximum_bandwidth}.
+
+For the before-and-after estimator, we choose the smallest of the candidate
+bandwidths.
+For the differences-in-transports estimator, we choose the candidate
+bandwidth with the largest value of the estimator.
+
+For the subsampling procedure, we sample \code{pre_main_subsample_size}
+observations from the pre-distribution of the treated units
+without replacement.
+Similarly, we sample \code{post_main_subsample_size} observations from
+the post-distribution without replacement
+If we are computing the differences-in-transports estimator, we do the
+the same with the utreated analogues.
 }
 \examples{
-# Find conservative transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 0
-# # step 1: find support
+# Compute transport cost between Beijing 2010 and Beijing 2011
+# with bandwidth = 0
+## step 1: find support
 support_Beijing <- Beijing_sample \%>\%
   dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2012-01-01") \%>\%
   dplyr::select(MSRP) \%>\%
@@ -156,7 +204,7 @@ support_Beijing <- Beijing_sample \%>\%
   dplyr::filter(!is.na(MSRP)) \%>\%
   unlist()
 temp <- data.frame(MSRP = support_Beijing)
-# # step 2: prepare probability mass functions
+## step 2: prepare distributions
 pre_Beijing <- Beijing_sample \%>\%
   dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2011-01-01") \%>\%
   dplyr::group_by(dplyr::across(c(MSRP))) \%>\%
@@ -175,14 +223,13 @@ post_Beijing <- Beijing_sample \%>\%
   dplyr::select(MSRP, count) \%>\%
   tidyr::replace_na(list(count = 0)) \%>\%
   tibble::as_tibble()
-# # step 3: compute results
+## step 3: compute results
 tc <- diftrans(pre_Beijing, post_Beijing, conservative = TRUE, bandwidth = 0)
-tc$main2d
+tc$empirical_cost
 
-# Find transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 10000
-# tc_10000 <- diftrans(pre_Beijing, post_Beijing, bandwidth = 10000)# tc_10000$main
-# Find conservative differences-in-transport estimator using Tianjin as a control
-# # step 1: find support
+# Find conservative differences-in-transport estimator using Tianjin
+# as a control
+## step 1: find support
 support_Tianjin <- Tianjin_sample \%>\%
   dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2012-01-01") \%>\%
   dplyr::select(MSRP) \%>\%
@@ -191,7 +238,7 @@ support_Tianjin <- Tianjin_sample \%>\%
   dplyr::filter(!is.na(MSRP)) \%>\%
   unlist()
 temp <- data.frame(MSRP = support_Tianjin)
-# # step 2: prepare probability mass functions
+## step 2: prepare distributions
 pre_Tianjin <- Tianjin_sample \%>\%
   dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2011-01-01") \%>\%
   dplyr::group_by(dplyr::across(c(MSRP))) \%>\%
@@ -210,10 +257,9 @@ post_Tianjin <- Tianjin_sample \%>\%
   dplyr::select(MSRP, count) \%>\%
   tidyr::replace_na(list(count = 0)) \%>\%
   tibble::as_tibble()
-# # step 3: compute results
+## step 3: compute results
 dit <- diftrans(pre_Beijing, post_Beijing, pre_Tianjin, post_Tianjin,
-                   conservative = TRUE, bandwidth = seq(0, 40000, 1000),
-                   save_result = TRUE)
+                   conservative = TRUE, bandwidth = seq(0, 40000, 1000))
 dit$optimal_bandwidth
-dit$dit
+dit$empirical_cost
 }

@@ -18,7 +18,7 @@ get_OTcost(
 )
 }
 \arguments{
-\item{pre_df}{A two-column \code{data.frame} describing the pre-distribution;}
+\item{pre_df}{A two-column \code{data.frame} describing the pre-distribution}
 
 \item{post_df}{A two-column \code{data.frame} describing the
 post-distribution;}
