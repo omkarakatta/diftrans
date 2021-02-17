@@ -338,16 +338,18 @@ diftrans <- function(pre_main = NULL,
   post_main_count <- post_main[[rlang::ensym(count)]]
   pre_main_total <- sum(pre_main_count)
   post_main_total <- sum(post_main_count)
+  out$pre_main_total <- pre_main_total
+  out$post_main_total <- post_main_total
   if (est == "dit") {
     pre_control_count <- pre_control[[rlang::ensym(count)]]
     post_control_count <- post_control[[rlang::ensym(count)]]
     pre_control_total <- sum(pre_control_count)
     post_control_total <- sum(post_control_count)
+    out$pre_main_total <- pre_control_total
+    out$post_main_total <- post_control_total
   }
 
   if (!quietly) message(paste("counts have been computed."))
-
-  #~ TODO: save counts to output
 
 # Bandwidth Selection ----------
 
