@@ -555,12 +555,13 @@ diftrans <- function(pre_main = NULL,
   cand_real <- cbind(real, "candidates" = cand_bw_index)
   filtered_real <- real[cand_bw_index, ]
 
-  result_index <- which.max(real$result)
+  max_result <- max(filtered_real$result)
+  result_index <- which(cand_real$result == max_result)
   result_column <- rep("-", nrow(cand_real))
   result_column[result_index] <- "*"
   result_real <- cbind(cand_real, "estimate" = result_column)
-  result <- empirical_cost[result_index]
-  d_star <- acc_bw[result_index]
+  result <- result_real[result_index, "result"]
+  d_star <- result_real[result_index, "bandwidth"]
 
   out$optimal_bandwidth <- d_star
   out$empirical_cost <- result
