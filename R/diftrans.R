@@ -97,14 +97,6 @@
 #'     difference-in-transports estimator; default is \code{FALSE}, only valid
 #'     for difference-in-transports estimator
 #' @param quietly if \code{TRUE}, some results and will be suppressed from printing; default is \code{FALSE}
-#' @param costm_main if \code{NULL}, the cost matrix with common support will be such that if the transport 
-#'     distance is greater than what is specified in \code{bandwidth_vec}, cost is 1 and 0 otherwise.
-#' @param costm_ref_main if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be 
-#'     using the minimal support of main distributions
-#' @param costm_control if \code{NULL}, the cost matrix with common support will be such that if the transport 
-#'     distance is greater than what is specified in \code{bandwidth_vec}, cost is 1 and 0 otherwise.
-#' @param costm_ref_control if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be 
-#'     using the minimal support of control distributions
 #'
 #' @return a data.frame with the transport costs associated with each value of \code{bandwidth_vec}.
 #' \itemize{
@@ -223,11 +215,7 @@ diftrans <- function(pre_main = NULL,
                      post_control_subsample_size = NULL,
                      seed = 1,
                      conservative = FALSE,
-                     quietly = FALSE,
-                     costm_main = NULL,
-                     costm_ref_main = NULL,
-                     costm_control = NULL,
-                     costm_ref_control = NULL) {
+                     quietly = FALSE) {
 
   #~ initialize output
   out <- list()
@@ -384,9 +372,7 @@ diftrans <- function(pre_main = NULL,
                                            post_placebo,
                                            bw,
                                            var = x,
-                                           count = y,
-                                           costmat = costm_main,
-                                           costmat_ref = costm_ref_main)
+                                           count = y)
               placebo_result$prop_cost
             }
           )
@@ -431,16 +417,12 @@ diftrans <- function(pre_main = NULL,
                                          post_main_placebo,
                                          main_bw,
                                          var = x,
-                                         count = y,
-                                         costmat = costm_main,
-                                         costmat_ref = costm_ref_main)
+                                         count = y)
               placebo_control <- get_OTcost(pre_control_placebo,
                                             post_control_placebo,
                                             control_bw,
                                             var = x,
-                                            count = y,
-                                            costmat = costm_control,
-                                            costmat_ref = costm_ref_control)
+                                            count = y)
               abs(placebo_main$prop_cost - placebo_control$prop_cost)
             }
           )
@@ -499,9 +481,7 @@ diftrans <- function(pre_main = NULL,
                          post_main,
                          bandwidth = main_bw[bw_index],
                          var = !!rlang::ensym(var),
-                         count = !!rlang::ensym(count),
-                         costmat = costm_main,
-                         costmat_ref = costm_ref_main)
+                         count = !!rlang::ensym(count))
       cost$prop_cost
     }
   )
@@ -515,9 +495,7 @@ diftrans <- function(pre_main = NULL,
                            post_control,
                            bandwidth = control_bw[bw_index],
                            var = !!rlang::ensym(var),
-                           count = !!rlang::ensym(count),
-                           costmat = costm_main,
-                           costmat_ref = costm_ref_main)
+                           count = !!rlang::ensym(count))
         cost$prop_cost
       }
     )
@@ -602,8 +580,6 @@ diftrans <- function(pre_main = NULL,
                                          d,
                                          var = x,
                                          count = y,
-                                         costmat = costm_main,
-                                         costmat_ref = costm_ref_main,
                                          scale_pre = "subsample",
                                          scale_post = "subsample",
                                          total = post_main_total)
@@ -660,8 +636,6 @@ diftrans <- function(pre_main = NULL,
                                        main_d,
                                        var = x,
                                        count = y,
-                                       costmat = costm_main,
-                                       costmat_ref = costm_ref_main,
                                        scale_pre = "subsample",
                                        scale_post = "subsample",
                                        total = post_main_total)
@@ -671,8 +645,6 @@ diftrans <- function(pre_main = NULL,
                                           control_d,
                                           var = x,
                                           count = y,
-                                          costmat = costm_control,
-                                          costmat_ref = costm_ref_control,
                                           scale_pre = "subsample",
                                           scale_post = "subsample",
                                           total = post_control_total)
