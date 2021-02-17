@@ -718,6 +718,8 @@ diftrans <- function(pre_main = NULL,
   class(out) <- "diftrans"
   return(out)
 }
+
+#' @export
 print.diftrans <- function(x,...) {
   if (x$est == "ba") {
     estimator <- "Before-and-After Estimate of "
