@@ -251,7 +251,7 @@ diftrans <- function(pre_main = NULL,
 
   # error checking / get estimator
   estimator <- tolower(estimator)
-  tc_messages <- c("tc", "ba", "before-and-after")
+  tc_messages <- c("tc", "ba", "before-and-after", "transport costs")
   dit_messages <- c("dit", "differences-in-transports", "diff-in-transports")
   if (estimator %in% tc_messages) {
     if (!is.null(pre_control) || !is.null(post_control)) {
