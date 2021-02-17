@@ -188,7 +188,7 @@
 #' dit$optimal_bandwidth
 #' dit$dit
 #~ if sims_bandwidth_selection is 0, skip bandwidth selection procedure
-#~ sims_bandwidth_selection > 0 => choose appropriate d_star among bandwidth_vec!
+#~ sims_bandwidth_selection > 0 => choose appropriate acc_bw among bandwidth_vec!
 diftrans <- function(pre_main = NULL,
                      post_main = NULL,
                      pre_control = NULL,
@@ -220,6 +220,8 @@ diftrans <- function(pre_main = NULL,
   #~ initialize output
   out <- list()
 
+# Error Checking ----------
+
   #~ error checking
   if (is.null(pre_main) || is.null(post_main)) {
     stop("`pre_main` and/or `post_main` is missing.")
@@ -248,8 +250,8 @@ diftrans <- function(pre_main = NULL,
   #~ TODO: send a warning that if conservative = T and est != "dit", then we ignore conservative = T; instead, request the user to use twice the bandwidth in bandwidth_vec; i.e., tell the users that conservative = T only applies when est != "dit"
   #~ TODO: allow for placebo matrix to be an argument
 
+# Get Estimator ----------
 
-  # error checking / get estimator
   estimator <- tolower(estimator)
   tc_messages <- c("tc", "ba", "before-and-after", "transport costs")
   dit_messages <- c("dit", "differences-in-transports", "diff-in-transports")
@@ -267,12 +269,16 @@ diftrans <- function(pre_main = NULL,
     if (is.null(pre_control) || is.null(post_control)) {
       message("`pre_control` and/or `post_control` is mising.")
     }
-    #~ est_message <- "Computing Differences-in-Transports Estimator..."
     est <- "dit"
   } else {
     stop("Invalid estimator. Double-check inputs.")
   }
 
+  out$estimator <- est
+
+  if (!quietly) message(paste("estimator has been set:", estimator))
+
+# Error Checks with Estimator ----------
 
   if (sims_subsampling > 0) {
     if (round(pre_main_subsample_size) != pre_main_subsample_size
@@ -302,11 +308,8 @@ diftrans <- function(pre_main = NULL,
     }
   }
 
-  out$estimator <- est
+# Check Support ----------
 
-  if (!quietly) message(paste("estimator has been set:", estimator))
-
-  #~ check support
   check_main <- check_support(pre_main, post_main,
                               var = !!rlang::ensym(var))
   if (check_main$status == 1) {
@@ -329,6 +332,8 @@ diftrans <- function(pre_main = NULL,
 
   if (!quietly) message(paste("supports have been computed."))
 
+# Get Counts ----------
+
   pre_main_count <- pre_main[[rlang::ensym(count)]]
   post_main_count <- post_main[[rlang::ensym(count)]]
   pre_main_total <- sum(pre_main_count)
@@ -342,7 +347,10 @@ diftrans <- function(pre_main = NULL,
 
   if (!quietly) message(paste("counts have been computed."))
 
-  #~ select appropriate bandwidth -- d_star
+  #~ TODO: save counts to output
+
+# Bandwidth Selection ----------
+
   if (sims_bandwidth_selection > 0) {
 
     #~ get placebo distributions for main
@@ -427,7 +435,9 @@ diftrans <- function(pre_main = NULL,
         }
       )
     }
+
     #~ dim(placebo): length(bandwidth_vec) x sims_bandwidth_selection
+    #~ TODO: add a stopifnot condition to ensure dimensions are correct
     colnames(placebo) <- paste0("sim", seq_len(sims_bandwidth_selection))
     placebo_cleaned <- cbind(bandwidth = bandwidth_vec, as.data.frame(placebo))
     placebo_summary <- placebo_cleaned %>%
@@ -443,35 +453,37 @@ diftrans <- function(pre_main = NULL,
 
     if (!quietly) message(paste("Placebo summary has been created."))
 
-    valid_d_index <- valid_bandwidths(placebo_summary$mean,
+    cand_bw_index <- valid_bandwidths(placebo_summary$mean,
                                       sensitivity_lag,
                                       sensitivity_lead,
                                       sensitivity_accept,
                                       precision)
-    valid_d <- bandwidth_vec[valid_d_index &
+    cand_bw <- bandwidth_vec[cand_bw_index &
                              bandwidth_vec >= minimum_bandwidth &
                              bandwidth_vec <= maximum_bandwidth]
 
     if (est == "ba") {
-      d_star <- min(valid_d)
+      acc_bw <- min(cand_bw)
     } else if (est == "dit") {
-      d_star <- valid_d
+      acc_bw <- cand_bw
     }
 
-    #~ TODO: send d_star to user; d_star = all the valid bandwidths
   } else {
-    valid_d <- bandwidth_vec[bandwidth_vec >= minimum_bandwidth &
+    cand_bw <- bandwidth_vec[bandwidth_vec >= minimum_bandwidth &
                              bandwidth_vec <= maximum_bandwidth]
-    d_star <- valid_d
+    acc_bw <- cand_bw
   }
 
-  out$acceptable_bandwidths <- valid_d
+  out$candidate_bandwidths <- cand_bw
 
   if (!quietly) message(paste("candidate bandwidths:"))
-  if (!quietly) print(valid_d)
-  #~ evaluate real/empirical optimal transport at all values in d_star
-  main_bw <- if (conservative) 2 * d_star else d_star
-  real_main <- sapply(
+  if (!quietly) print(cand_bw)
+
+# Evaluate Empirical Costs ----------
+
+  #~ evaluate real/empirical optimal transport at all values in acc_bw
+  main_bw <- if (conservative) 2 * acc_bw else acc_bw
+  main_cost <- sapply(
     seq_along(main_bw),
     function(bw_index) {
       cost <- get_OTcost(pre_main,
@@ -484,13 +496,13 @@ diftrans <- function(pre_main = NULL,
   )
 
   if (est == "ba") {
-    real_cost <- real_main
+    empirical_cost <- main_cost
 
-    real <- data.frame(bandwidth = d_star,
-                       result = real_main)
+    real <- data.frame(bandwidth = acc_bw,
+                       result = empirical_cost)
   } else if (est == "dit") {
-    control_bw <- d_star
-    real_control <- sapply(
+    control_bw <- acc_bw
+    control_cost <- sapply(
       seq_along(control_bw),
       function(bw_index) {
         cost <- get_OTcost(pre_control,
@@ -501,27 +513,28 @@ diftrans <- function(pre_main = NULL,
         cost$prop_cost
       }
     )
-    real_cost <- real_main - real_control
+    empirical_cost <- main_cost - control_cost
 
-    real <- data.frame(bandwidths = d_star,
-                       main = real_main,
-                       control = real_control,
-                       result = real_cost)
+    real <- data.frame(bandwidths = acc_bw,
+                       main = main_cost,
+                       control = control_cost,
+                       result = empirical_cost)
   }
 
   result_index <- which.max(real$result)
   result <- real_cost[result_index]
-  d <- d_star[result_index]
+  d_star <- acc_bw[result_index]
 
-  out$d_star <- d
+  out$d_star <- d_star
   out$empirical_cost <- result
   out$empirical_table <- real
 
   if (!quietly) message(paste("empirical cost:", result))
-  if (!quietly) message(paste("bandwidth:", d))
+  if (!quietly) message(paste("bandwidth:", d_star))
 
   #~ TODO: print: The (conservative) ba/dit estimate is result (in %) at bw d
-  #~ TODO: send result, d, and real to user
+
+# Subsampling ----------
 
   if (sims_subsampling > 0) {
     pre_main_dist <- pre_main %>%
@@ -547,35 +560,8 @@ diftrans <- function(pre_main = NULL,
                             main_support)
       }
     )
-
-    if (!quietly) message(paste("subsamples have been generated."))
-
-    stopifnot(ncol(pre_main_subsamples) == sims_subsampling) #~ check dimensions
-
-    if (est == "ba") {
-      subsample <- sapply(
-        seq_len(sims_subsampling),
-        function(sim) {
-          if (!quietly) print(paste("subsample:", sim))
-          pre_count <- pre_main_subsamples[seq_along(main_support), sim]
-          post_count <- post_main_subsamples[seq_along(main_support), sim]
-          pre_subsample <- data.frame(x = main_support,
-                                      y = pre_count)
-          post_subsample <- data.frame(x = main_support,
-                                       y = post_count)
-          subsample_result <- get_OTcost(pre_subsample,
-                                         post_subsample,
-                                         d,
-                                         var = x,
-                                         count = y,
-                                         scale_pre = "subsample",
-                                         scale_post = "subsample",
-                                         total = post_main_total)
-          subsample_result$prop_cost
-        }
-      )
-    } else if (est == "dit") {
-      pre_control_dist <- pre_control %>%
+    if (est == "dit") {
+            pre_control_dist <- pre_control %>%
         tidyr::uncount({{count}}) %>%
         .[[rlang::ensym(var)]]
       post_control_dist <- post_control %>%
@@ -597,8 +583,37 @@ diftrans <- function(pre_main = NULL,
                               control_support)
         }
       )
-      main_d <- ifelse(conservative, 2 * d, d)
-      control_d <- d
+    }
+
+    if (!quietly) message(paste("subsamples have been generated."))
+
+    stopifnot(ncol(pre_main_subsamples) == sims_subsampling) #~ check dimensions
+
+    if (est == "ba") {
+      subsample <- sapply(
+        seq_len(sims_subsampling),
+        function(sim) {
+          if (!quietly) print(paste("subsample:", sim))
+          pre_count <- pre_main_subsamples[seq_along(main_support), sim]
+          post_count <- post_main_subsamples[seq_along(main_support), sim]
+          pre_subsample <- data.frame(x = main_support,
+                                      y = pre_count)
+          post_subsample <- data.frame(x = main_support,
+                                       y = post_count)
+          subsample_result <- get_OTcost(pre_subsample,
+                                         post_subsample,
+                                         d_star,
+                                         var = x,
+                                         count = y,
+                                         scale_pre = "subsample",
+                                         scale_post = "subsample",
+                                         total = post_main_total)
+          subsample_result$prop_cost
+        }
+      )
+    } else if (est == "dit") {
+      main_d <- ifelse(conservative, 2 * d_star, d_star)
+      control_d <- d_star
       subsample <- sapply(
         seq_len(sims_subsampling),
         function(sim) {
@@ -643,6 +658,8 @@ diftrans <- function(pre_main = NULL,
   }
 
   #~ TODO: send subsample to user
+
+# Return Results ----------
 
   message("DONE")
 
