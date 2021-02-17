@@ -490,6 +490,11 @@ diftrans <- function(pre_main = NULL,
     acc_bw <- cand_bw
   }
 
+  if (length(cand_bw) == 0) {
+    message("Error: There are no bandwidths in `bandwidth_vec` that work.")
+    return(out)
+  }
+
   out$candidate_bandwidths <- cand_bw
 
   if (!quietly) message(paste("candidate bandwidths:"))
