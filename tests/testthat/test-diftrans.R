@@ -23,21 +23,20 @@ post_treated <- data.frame(x = support,
   tidyr::replace_na(list(count = 0))
 
 out <- diftrans(pre_main = pre_treated, post_main = post_treated,
-                bandwidth_seq = seq(0, 10, 1),
+                bandwidth_vec = seq(0, 10, 1),
                 estimator = "tc", var = x, count = count,
                 sims_bandwidth_selection = 3,
                 sims_subsampling = 3,
-                subsample_pre_main_size = 5,
-                subsample_post_main_size = 5,
-                subsample_pre_control_size = 5,
-                subsample_post_control_size = 5,
+                pre_main_subsample_size  = 5,
+                post_main_subsample_size = 5,
+                pre_control_subsample_size = 5,
+                post_control_subsample_size = 5,
                 seed = 1,
                 conservative = TRUE,
                 quietly = TRUE)
 
 tc <- diftrans(pre_main = pre_treated, post_main = post_treated,
                   estimator = "tc", var = x, count = count,
-                  suppress_progress_bar = TRUE, #~ TODO: unnecessary argument?
                   quietly = TRUE,
                   bandwidth = 0)
 
