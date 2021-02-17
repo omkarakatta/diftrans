@@ -260,6 +260,12 @@ preliminaries <- function(pre_main,
     msg,
     is.data.frame(pre_main)
   )
+  msg <- "`bandwidth_vec` cannot be an empty vector."
+  msg_list <- collect_msg(
+    msg_list,
+    msg,
+    length(bandwidth_vec) > 0
+  )
   msg <- "Bandwidths in `bandwidth_vec` need to be non-negative numbers."
   msg_list <- collect_msg(
     msg_list,

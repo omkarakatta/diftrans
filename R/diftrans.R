@@ -78,9 +78,6 @@
 #' If we are computing the differences-in-transports estimator, we do the
 #' the same with the utreated analogues.
 #'
-#' TODO: add documentation about bandwidth selection, min and max bw args,
-#' subsampling procedure
-#'
 #' @param pre_main A two-column \code{data.frame} describing the
 #'  pre-distribution of the treated observations
 #' @param post_main A two-column \code{data.frame} describing the
@@ -130,25 +127,33 @@
 #'
 #' @return an object of the "diftrans" class with the following information:
 #' \itemize{
-#'   \item \code{est}: either "ba" for the before-and-after estimator
-#'     or "dit" for the differences-in-transports estimator
-#'   \item \code{pre_main_total}: total count in \code{pre_main}
-#'   \item \code{post_main_total}: total count in \code{post_main}
-#'   \item \code{pre_control_total}: total count in \code{pre_control}
-#'   \item \code{post_control_total}: total count in \code{post_control}
-#'   \item \code{seed}: seed (see \code{\link{set.seed}})
-#'   \item \code{main_support}: common support of the treated distributions
-#'   \item \code{control_support}: common support of the untreated distributions
-#'   \item \code{empirical_table}: data frame of transport costs at each
-#'     bandwidth in \code{bandwidth_vec} as well as indicators for the
-#'     candidate bandwidths and the final bandwidth chosen for the estimate
-#'     (\code{optimal_bandwidth})
-#'   \item \code{candidate_bandwidths}: vector of candidate bandwidths that
-#'     survive the bandwidth selection
-#'   \item \code{optimal_bandwidth}: final bandwidth for estimator
-#'   \item \code{empirical_cost}: value of estimator at \code{optimal_bandwidth}
-#'   \item \code{subsample}: vector of costs that arise from subsampling
-#'   \item \code{call}: function call to produce the object of class "diftrans"
+#'  \item \code{bandwidth_vec}: sorted vector of unique bandwidth values used
+#'    for evaluating ground cost
+#'  \item \code{est}: either "ba" for the before-and-after estimator
+#'    or "dit" for the differences-in-transports estimator
+#'  \item \code{pre_main_total}: total count in \code{pre_main}
+#'  \item \code{post_main_total}: total count in \code{post_main}
+#'  \item \code{pre_control_total}: total count in \code{pre_control}
+#'  \item \code{post_control_total}: total count in \code{post_control}
+#'  \item \code{sims_bandwidth_selection}: number of simulations to run for
+#'    bandwidth selection
+#'  \item \code{pre_main_subsample_size},
+#'        \code{post_main_subsample_size},
+#'        \code{post_control_subsample_size},
+#'        \code{post_control_subsample_size}: size of subsample distributions
+#'  \item \code{seed}: seed (see \code{\link{set.seed}})
+#'  \item \code{main_support}: common support of the treated distributions
+#'  \item \code{control_support}: common support of the untreated distributions
+#'  \item \code{empirical_table}: data frame of transport costs at each
+#'    bandwidth in \code{bandwidth_vec} as well as indicators for the
+#'    candidate bandwidths and the final bandwidth chosen for the estimate
+#'    (\code{optimal_bandwidth})
+#'  \item \code{candidate_bandwidths}: vector of candidate bandwidths that
+#'    survive the bandwidth selection
+#'  \item \code{optimal_bandwidth}: final bandwidth for estimator
+#'  \item \code{empirical_cost}: value of estimator at \code{optimal_bandwidth}
+#'  \item \code{subsample}: vector of costs that arise from subsampling
+#'  \item \code{call}: function call to produce the object of class "diftrans"
 #' }
 #'
 #' @export
@@ -260,6 +265,7 @@ diftrans <- function(pre_main = NULL,
 
 # Preliminaries ----------
 
+
   prelim <- preliminaries(
     pre_main = pre_main,
     post_main = post_main,
@@ -286,6 +292,9 @@ diftrans <- function(pre_main = NULL,
     quietly = quietly,
     show_progress
   )
+
+  bandwidth_vec <- sort(unique(bandwidth_vec))
+  out$bandwidth_vec <- bandwidth_vec
 
   est <- prelim$est
   pre_main_total <- prelim$pre_main_total
