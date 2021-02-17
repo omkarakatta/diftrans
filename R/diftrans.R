@@ -467,14 +467,14 @@ diftrans <- function(pre_main = NULL,
 
     if (!quietly) message(paste("Placebo summary has been created."))
 
-    cand_bw_index <- valid_bandwidths(placebo_summary$mean,
-                                      sensitivity_lag,
-                                      sensitivity_lead,
-                                      sensitivity_accept,
-                                      precision)
-    cand_bw <- bandwidth_vec[cand_bw_index &
-                             bandwidth_vec >= minimum_bandwidth &
-                             bandwidth_vec <= maximum_bandwidth]
+    cand_bw_index <- valid_bandwidths(
+      placebo_summary$mean,
+      sensitivity_lag,
+      sensitivity_lead,
+      sensitivity_accept,
+      precision
+    ) & bandwidth_vec >= minimum_bandwidth & bandwidth_vec <= maximum_bandwidth
+    cand_bw <- bandwidth_vec[cand_bw_index]
 
     if (est == "ba") {
       acc_bw <- min(cand_bw)
@@ -483,6 +483,8 @@ diftrans <- function(pre_main = NULL,
     }
 
   } else {
+    cand_bw_index <- bandwidth_vec >= minimum_bandwidth &
+      bandwidth_vec <= maximum_bandwidth
     cand_bw <- bandwidth_vec[bandwidth_vec >= minimum_bandwidth &
                              bandwidth_vec <= maximum_bandwidth]
     acc_bw <- cand_bw
@@ -495,7 +497,6 @@ diftrans <- function(pre_main = NULL,
 
 # Choosing Empirical Cost ----------
 
-  cand_bw_index <- real$bandwidth == acc_bw
   cand_real <- cbind(real, "candidates" = cand_bw_index)
   filtered_real <- real[cand_bw_index, ]
 
