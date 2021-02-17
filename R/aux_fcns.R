@@ -405,6 +405,7 @@ preliminaries <- function(pre_main,
     }
     if (conservative) {
       message("Setting `conservative` to FALSE")
+      conservative <- FALSE
     }
   } else if (estimator %in% dit_messages) {
     est <- "dit"
@@ -448,6 +449,7 @@ preliminaries <- function(pre_main,
     }
   }
   out$est <- est
+  out$conservative <- conservative
 
   if (length(msg_list) > 0) {
     stop(msg_list)
@@ -554,4 +556,10 @@ preliminaries <- function(pre_main,
   } else {
     return(out)
   }
+}
+
+### whitespace ---------------------------
+
+whitespace <- function(num) {
+  paste(rep(" ", num), collapse = "")
 }

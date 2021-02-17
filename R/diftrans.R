@@ -141,6 +141,9 @@
 #'        \code{post_main_subsample_size},
 #'        \code{post_control_subsample_size},
 #'        \code{post_control_subsample_size}: size of subsample distributions
+#'  \item \code{conservative}: TRUE or FALSE, depending on whether we use
+#'    twice the bandwidth for the treated distributions in the
+#'    differences-tranpsorts-estimator
 #'  \item \code{seed}: seed (see \code{\link{set.seed}})
 #'  \item \code{main_support}: common support of the treated distributions
 #'  \item \code{control_support}: common support of the untreated distributions
@@ -318,6 +321,9 @@ diftrans <- function(pre_main = NULL,
   out$post_main_subsample_size <- prelim$post_main_subsample_size
   out$pre_control_subsample_size <- prelim$pre_control_subsample_size
   out$post_control_subsample_size <- prelim$post_control_subsample_size
+
+  conservative <- prelim$conservative
+  out$conservative <- prelim$conservative
 
   if (est == "ba") {
     message("Before-and-After Estimation...")
@@ -710,5 +716,37 @@ diftrans <- function(pre_main = NULL,
 
   out$call <- match.call()
   class(out) <- "diftrans"
-  return(invisible(out))
+  return(out)
+}
+print.diftrans <- function(x,...) {
+  if (x$est == "ba") {
+    estimator <- "Before-and-After Estimate of "
+  } else if (x$est == "dit" & conservative) {
+    estimator <- "Conservative Differences-in-Transports estimate of "
+  } else if (x$est == "dit" & !conservative) {
+    estimator <- "Differences-in-Transports estimate of "
+  }
+
+  cat(
+    paste0(
+      estimator,
+      x$empirical_cost,
+      " at bandwidth ",
+      x$optimal_bandwidth,
+      "."
+    )
+  )
+  cat("\n")
+
+  # cat("Call: diftrans\n\n")
+  
+  # cat(
+  #   paste(
+  #     "Estimator:",
+  #     format(estimator, width = 30, justify = "right"),
+  #     sep = ""
+  #   )
+  # )
+  # cat("\n")
+
 }
