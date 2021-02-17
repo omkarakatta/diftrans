@@ -522,7 +522,7 @@ diftrans <- function(pre_main = NULL,
   }
 
   result_index <- which.max(real$result)
-  result <- real_cost[result_index]
+  result <- empirical_cost[result_index]
   d_star <- acc_bw[result_index]
 
   out$d_star <- d_star
