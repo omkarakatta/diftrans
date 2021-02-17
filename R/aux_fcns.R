@@ -242,7 +242,8 @@ preliminaries <- function(pre_main,
                           post_control_subsample_size,
                           seed,
                           conservative,
-                          quietly) {
+                          quietly,
+                          show_progress) {
 
 # Preliminary Error Checks ----------
 
@@ -349,6 +350,12 @@ preliminaries <- function(pre_main,
     msg,
     is.logical(quietly)
   )
+  msg <- "`show_progress` needs to be TRUE or FALSE."
+  msg_list <- collect_msg(
+    msg_list,
+    msg,
+    is.logical(show_progress)
+  )
 
   if (length(msg_list) > 0) {
     stop(msg_list)
@@ -453,10 +460,16 @@ preliminaries <- function(pre_main,
     pre_control_total <- sum(pre_control_count)
     post_control_total <- sum(post_control_count)
   } else {
+    pre_control_count <- 0
+    post_control_count <- 0
     pre_control_total <- 0
     post_control_total <- 0
   }
 
+  out$pre_main_count <- pre_main_count
+  out$post_main_count <- post_main_count
+  out$pre_control_count <- pre_control_count
+  out$post_control_count <- post_control_count
   out$pre_main_total <- pre_main_total
   out$post_main_total <- post_main_total
   out$pre_control_total <- pre_control_total
@@ -522,10 +535,6 @@ preliminaries <- function(pre_main,
   if (length(msg_list) > 0) {
     stop(msg_list)
   } else {
-    return(list(est = est,
-                pre_main_total = pre_main_total,
-                post_main_total = post_main_total,
-                pre_control_total = pre_control_total,
-                post_control_total = post_control_total))
+    return(out)
   }
 }

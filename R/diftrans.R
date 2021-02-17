@@ -97,6 +97,7 @@
 #'     difference-in-transports estimator; default is \code{FALSE}, only valid
 #'     for difference-in-transports estimator
 #' @param quietly if \code{TRUE}, some results and will be suppressed from printing; default is \code{FALSE}
+#' @param show_progress if \code{TRUE}, placebo and subsampling exercise will show progress.
 #'
 #' @return a data.frame with the transport costs associated with each value of \code{bandwidth_vec}.
 #' \itemize{
@@ -216,7 +217,8 @@ diftrans <- function(pre_main = NULL,
                      post_control_subsample_size = NULL,
                      seed = 1,
                      conservative = FALSE,
-                     quietly = FALSE) {
+                     quietly = FALSE,
+                     show_progress = FALSE) {
 
   #~ initialize output
   out <- list()
@@ -246,7 +248,8 @@ diftrans <- function(pre_main = NULL,
     post_control_subsample_size = post_control_subsample_size,
     seed = seed,
     conservative = conservative,
-    quietly = quietly
+    quietly = quietly,
+    show_progress
   )
 
   est <- prelim$est
@@ -254,6 +257,10 @@ diftrans <- function(pre_main = NULL,
   post_main_total <- prelim$post_main_total
   pre_control_total <- prelim$pre_control_total
   post_control_total <- prelim$post_control_total
+  pre_main_count <- prelim$pre_main_count
+  post_main_count <- prelim$post_main_count
+  pre_control_count <- prelim$pre_control_count
+  post_control_count <- prelim$post_control_count
 
   out$est <- prelim$est
   out$pre_main_total <- prelim$pre_main_total
@@ -318,7 +325,10 @@ diftrans <- function(pre_main = NULL,
       placebo <- sapply(
         seq_len(sims_bandwidth_selection),
         function(sim) {
-          if (!quietly) print(paste("placebo simulation:", sim))
+          progress <- paste("Bandwidth Selection:",
+                            "Running Simulation",
+                            sim, "/", sims_bandwidth_selection)
+          send_note(progress, !show_progress, print)
           pre_count <- pre_main_placebo[seq_along(main_support), sim]
           post_count <- post_main_placebo[seq_along(main_support), sim]
           pre_placebo <- data.frame(x = main_support,
@@ -351,7 +361,10 @@ diftrans <- function(pre_main = NULL,
       placebo <- sapply(
         seq_len(sims_bandwidth_selection),
         function(sim) {
-          if (!quietly) print(paste("placebo simulation:", sim))
+          progress <- paste("Bandwidth Selection:",
+                            "Running Simulation",
+                            sim, "/", sims_bandwidth_selection)
+          send_note(progress, !show_progress, print)
           pre_count <- pre_main_placebo[seq_along(main_support), sim]
           post_count <- post_main_placebo[seq_along(main_support), sim]
           pre_main_placebo <- data.frame(x = main_support,
@@ -546,7 +559,10 @@ diftrans <- function(pre_main = NULL,
       subsample <- sapply(
         seq_len(sims_subsampling),
         function(sim) {
-          if (!quietly) print(paste("subsample:", sim))
+          progress <- paste("Subsampling:",
+                            "Running Simulation",
+                            sim, "/", sims_bandwidth_selection)
+          send_note(progress, !show_progress, print)
           pre_count <- pre_main_subsamples[seq_along(main_support), sim]
           post_count <- post_main_subsamples[seq_along(main_support), sim]
           pre_subsample <- data.frame(x = main_support,
@@ -570,7 +586,10 @@ diftrans <- function(pre_main = NULL,
       subsample <- sapply(
         seq_len(sims_subsampling),
         function(sim) {
-          if (!quietly) print(paste("subsample:", sim))
+          progress <- paste("Subsampling:",
+                            "Running Simulation",
+                            sim, "/", sims_bandwidth_selection)
+          send_note(progress, !show_progress, print)
           pre_count <- pre_main_subsamples[seq_along(main_support), sim]
           post_count <- post_main_subsamples[seq_along(main_support), sim]
           pre_main_subsample <- data.frame(x = main_support,
