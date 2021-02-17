@@ -498,6 +498,8 @@ preliminaries <- function(pre_main,
       & post_main_subsample_size > 0
       & post_main_subsample_size < post_main_total
     )
+    out$pre_main_subsample_size <- pre_main_subsample_size
+    out$post_main_subsample_size <- post_main_subsample_size
     if (est == "ba") {
       print(pre_control_subsample_size)
       if (!is.null(pre_control_subsample_size)) {
@@ -508,6 +510,8 @@ preliminaries <- function(pre_main,
         msg <- "`post_control_subsample_size` will be ignored for before-and-after estimation."
         send_note(msg, post_control_subsample_size == 0, message)
       }
+      out$pre_control_subsample_size <- 0
+      out$post_control_subsample_size <- 0
     } else if (est == "dit") {
       msg <- "`pre_control_subsample_size` needs to be a positive integer less than the total count in `pre_control`."
       msg_list <- collect_msg(
@@ -519,6 +523,7 @@ preliminaries <- function(pre_main,
         & pre_control_subsample_size > 0
         & pre_control_subsample_size < pre_control_total
       )
+      out$pre_control_subsample_size <- pre_control_subsample_size
       msg <- "`post_control_subsample_size` needs to be a positive integer less than the total count in `post_control`."
       msg_list <- collect_msg(
         msg_list,
@@ -529,7 +534,13 @@ preliminaries <- function(pre_main,
         & post_control_subsample_size > 0
         & post_control_subsample_size < post_control_total
       )
+      out$pre_control_subsample_size <- pre_control_subsample_size
     }
+  } else if (sims_subsampling == 0) {
+    out$pre_main_subsample_size <- 0
+    out$post_main_subsample_size <- 0
+    out$pre_control_subsample_size <- 0
+    out$post_control_subsample_size <- 0
   }
 
   if (length(msg_list) > 0) {

@@ -303,6 +303,13 @@ diftrans <- function(pre_main = NULL,
   out$pre_control_total <- prelim$pre_control_total
   out$post_control_total <- prelim$post_control_total
 
+  out$sims_bandwidth_selection <- sims_bandwidth_selection
+  out$sims_subsampling <- sims_subsampling
+  out$pre_main_subsample_size <- prelim$pre_main_subsample_size
+  out$post_main_subsample_size <- prelim$post_main_subsample_size
+  out$pre_control_subsample_size <- prelim$pre_control_subsample_size
+  out$post_control_subsample_size <- prelim$post_control_subsample_size
+
   if (est == "ba") {
     message("Before-and-After Estimation...")
   } else if (est == "dit") {
