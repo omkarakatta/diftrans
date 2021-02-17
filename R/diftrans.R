@@ -51,6 +51,8 @@
 #' as the percentage of mass that has been transferred by more than a
 #' a bandwidth's distance away.
 #'
+#'
+#'
 #' TODO: add documentation about bandwidth selection, min and max bw args,
 #' subsampling procedure
 #'
@@ -64,41 +66,44 @@
 #' @param post_control A two-column \code{data.frame} describing the
 #'  post-distribution of the untreated observations; only required for the
 #'  differences in transports estimator
-#' @param var the title of the common support columns of \code{pre_main},
+#' @param var The title of the common support columns of \code{pre_main},
 #'  \code{post_main}, \code{pre_control}, and \code{post_control};
 #'  defaults to \code{MSRP}
-#' @param count the title of the second column of \code{pre_main},
+#' @param count The title of the second column of \code{pre_main},
 #'  \code{post_main}, \code{pre_control}, and \code{post_control};
 #'  defaults to \code{count}
-#' @param bandwidth_vec a vector of non-negative bandwidth values;
+#' @param bandwidth_vec A vector of non-negative bandwidth values;
 #'  defaults to \code{seq(0, 40000, 1000)}
-#' @param minimum_bandwidth minimum bandwidth to consider for the estimator;
-#'     defaults to 0
-#' @param maximum_bandwidth maximum bandwidth to consider for the estimator;
-#'     defaults to infinity
-#' @param estimator a string that takes on the value of "dit" for
-#'     differences-in-transports estimator or "tc" for the transport cost;
-#'     if \code{pre_control} and \code{post_control} are specified, default is "dit";
-#'     otherwise, default is "tc"
-#' @param sims_bandwidth_selection number of simulations for the bandwidth
-#'     selection process; defaults to 0
-#' @param precision threshold to choose the bandwidth; defaults to 0.0005, i.e.,
-#'     5 percent.
+#' @param minimum_bandwidth Minimum bandwidth to consider for the estimator;
+#'  defaults to 0
+#' @param maximum_bandwidth Maximum bandwidth to consider for the estimator;
+#'  defaults to infinity
+#' @param estimator A string that takes on the value of "dit" for
+#'  differences-in-transports estimator or "tc" for the transport cost;
+#'  if \code{pre_control} and \code{post_control} are specified,
+#'  default is "dit";
+#'  otherwise, default is "tc"
+#' @param sims_bandwidth_selection Number of simulations for the bandwidth
+#'  selection process; defaults to 0
+#' @param precision Threshold to choose the bandwidth; defaults to 0.0005, i.e.,
+#'  5 percent.
 #' @param sensitivity_lag,sensitivity_lead,sensitivity_accept
-#'     acceptable bandwidths are bandwidths such that among the
-#'     \code{sensitivity_lag} previous bandwidths and \code{sensitivity_lead}
-#'     bandwidths, \code{sensitivity_accept} of them have a placebo cost that is less
-#'     than \code{precision}; TODO: move to Details
-#' @param sims_subsampling number of subsampling simulations
+#'  Acceptable bandwidths are bandwidths such that among the
+#'  \code{sensitivity_lag} previous bandwidths and \code{sensitivity_lead}
+#'  bandwidths, \code{sensitivity_accept} of them have a placebo cost that is less
+#'  than \code{precision}; TODO: move to Details
+#' @param sims_subsampling Number of subsampling simulations
 #' @param pre_main_subsample_size,post_main_subsample_size,pre_control_subsample_size,post_control_subsample_size
-#'     sample size of subsample distributions
-#' @param seed for reproducibility
-#' @param conservative if \code{TRUE}, then the bandwidth sequence will be
-#'     multiplied by 2 to provide a conservative estimate of the
-#'     difference-in-transports estimator; default is \code{FALSE}, only valid
-#'     for difference-in-transports estimator
-#' @param quietly if \code{TRUE}, some results and will be suppressed from printing; default is \code{FALSE}
-#' @param show_progress if \code{TRUE}, placebo and subsampling exercise will show progress.
+#'  Size of subsample distributions
+#' @param seed Seed for reproducibility; see \code{\link{set.seed}}
+#' @param conservative If TRUE, then the bandwidth sequence will be
+#'  multiplied by 2 to provide a conservative estimate of the
+#'  difference-in-transports estimator; default is FALSE, only valid
+#'  for difference-in-transports estimator
+#' @param quietly If TRUE, some messages will be suppressed from printing;
+#'  defaults FALSE
+#' @param show_progress If \code{TRUE}, placebo and subsampling simulations
+#'  will show progress; defaults to FALSE
 #'
 #' @return a data.frame with the transport costs associated with each value of \code{bandwidth_vec}.
 #' \itemize{
