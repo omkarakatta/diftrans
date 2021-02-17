@@ -70,7 +70,13 @@
 #' For the differences-in-transports estimator, we choose the candidate
 #' bandwidth with the largest value of the estimator.
 #'
-#'
+#' For the subsampling procedure, we sample \code{pre_main_subsample_size}
+#' observations from the pre-distribution of the treated units
+#' without replacement.
+#' Similarly, we sample \code{post_main_subsample_size} observations from
+#' the post-distribution without replacement
+#' If we are computing the differences-in-transports estimator, we do the
+#' the same with the utreated analogues.
 #'
 #' TODO: add documentation about bandwidth selection, min and max bw args,
 #' subsampling procedure
@@ -107,10 +113,8 @@
 #' @param precision Threshold to choose the bandwidth; defaults to 0.0005, i.e.,
 #'  5 percent.
 #' @param sensitivity_lag,sensitivity_lead,sensitivity_accept
-#'  Acceptable bandwidths are bandwidths such that among the
-#'  \code{sensitivity_lag} previous bandwidths and \code{sensitivity_lead}
-#'  bandwidths, \code{sensitivity_accept} of them have a placebo cost that is less
-#'  than \code{precision}; TODO: move to Details
+#'  See "Details" to understand how these parameters influence bandwidth
+#'  selection
 #' @param sims_subsampling Number of subsampling simulations
 #' @param pre_main_subsample_size,post_main_subsample_size,pre_control_subsample_size,post_control_subsample_size
 #'  Size of subsample distributions
@@ -124,19 +128,28 @@
 #' @param show_progress If \code{TRUE}, placebo and subsampling simulations
 #'  will show progress; defaults to FALSE
 #'
-#' @return a data.frame with the transport costs associated with each value of \code{bandwidth_vec}.
+#' @return an object of the "diftrans" class with the following information:
 #' \itemize{
-#'   \item \code{bandwidth}: same as \code{bandwidth_vec}
-#'   \item \code{main}: transport costs associated with main distributions
-#'   \item \code{main2d}: transport costs associated with main distributions using twice the bandwidth;
-#'                        appears only if \code{conservative = TRUE}
-#'   \item \code{control}: transport costs associated with the control distributions;
-#'                        appears only if \code{pre_control} and \code{post_control}
-#'                        are specified
-#'   \item \code{diff}: \code{main - control}
-#'   \item \code{diff2d}: \code{main2d - control}
+#'   \item \code{est}: either "ba" for the before-and-after estimator
+#'     or "dit" for the differences-in-transports estimator
+#'   \item \code{pre_main_total}: total count in \code{pre_main}
+#'   \item \code{post_main_total}: total count in \code{post_main}
+#'   \item \code{pre_control_total}: total count in \code{pre_control}
+#'   \item \code{post_control_total}: total count in \code{post_control}
+#'   \item \code{seed}: seed (see \code{\link{set.seed}})
+#'   \item \code{main_support}: common support of the treated distributions
+#'   \item \code{control_support}: common support of the untreated distributions
+#'   \item \code{empirical_table}: data frame of transport costs at each
+#'     bandwidth in \code{bandwidth_vec} as well as indicators for the
+#'     candidate bandwidths and the final bandwidth chosen for the estimate
+#'     (\code{optimal_bandwidth})
+#'   \item \code{candidate_bandwidths}: vector of candidate bandwidths that
+#'     survive the bandwidth selection
+#'   \item \code{optimal_bandwidth}: final bandwidth for estimator
+#'   \item \code{empirical_cost}: value of estimator at \code{optimal_bandwidth}
+#'   \item \code{subsample}: vector of costs that arise from subsampling
+#'   \item \code{call}: function call to produce the object of class "diftrans"
 #' }
-#'
 #'
 #' @export
 #' @importFrom rlang ensym
@@ -144,8 +157,9 @@
 #' @importFrom stats quantile
 #' @importFrom stats rmultinom
 #' @examples
-#' # Find conservative transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 0
-#' # # step 1: find support
+#' # Compute transport cost between Beijing 2010 and Beijing 2011
+#' # with bandwidth = 0
+#' ## step 1: find support
 #' support_Beijing <- Beijing_sample %>%
 #'   dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2012-01-01") %>%
 #'   dplyr::select(MSRP) %>%
@@ -154,7 +168,7 @@
 #'   dplyr::filter(!is.na(MSRP)) %>%
 #'   unlist()
 #' temp <- data.frame(MSRP = support_Beijing)
-#' # # step 2: prepare probability mass functions
+#' ## step 2: prepare distributions
 #' pre_Beijing <- Beijing_sample %>%
 #'   dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2011-01-01") %>%
 #'   dplyr::group_by(dplyr::across(c(MSRP))) %>%
@@ -173,14 +187,13 @@
 #'   dplyr::select(MSRP, count) %>%
 #'   tidyr::replace_na(list(count = 0)) %>%
 #'   tibble::as_tibble()
-#' # # step 3: compute results
+#' ## step 3: compute results
 #' tc <- diftrans(pre_Beijing, post_Beijing, conservative = TRUE, bandwidth = 0)
-#' tc$main2d
+#' tc$empirical_cost
 #'
-#' # Find transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 10000
-#' # tc_10000 <- diftrans(pre_Beijing, post_Beijing, bandwidth = 10000)# tc_10000$main
-#' # Find conservative differences-in-transport estimator using Tianjin as a control
-#' # # step 1: find support
+#' # Find conservative differences-in-transport estimator using Tianjin
+#' # as a control
+#' ## step 1: find support
 #' support_Tianjin <- Tianjin_sample %>%
 #'   dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2012-01-01") %>%
 #'   dplyr::select(MSRP) %>%
@@ -189,7 +202,7 @@
 #'   dplyr::filter(!is.na(MSRP)) %>%
 #'   unlist()
 #' temp <- data.frame(MSRP = support_Tianjin)
-#' # # step 2: prepare probability mass functions
+#' ## step 2: prepare distributions
 #' pre_Tianjin <- Tianjin_sample %>%
 #'   dplyr::filter(ym >= as.Date("2010-01-01") & ym < "2011-01-01") %>%
 #'   dplyr::group_by(dplyr::across(c(MSRP))) %>%
@@ -208,14 +221,11 @@
 #'   dplyr::select(MSRP, count) %>%
 #'   tidyr::replace_na(list(count = 0)) %>%
 #'   tibble::as_tibble()
-#' # # step 3: compute results
+#' ## step 3: compute results
 #' dit <- diftrans(pre_Beijing, post_Beijing, pre_Tianjin, post_Tianjin,
-#'                    conservative = TRUE, bandwidth = seq(0, 40000, 1000),
-#'                    save_result = TRUE)
+#'                    conservative = TRUE, bandwidth = seq(0, 40000, 1000))
 #' dit$optimal_bandwidth
-#' dit$dit
-#~ if sims_bandwidth_selection is 0, skip bandwidth selection procedure
-#~ sims_bandwidth_selection > 0 => choose appropriate acc_bw among bandwidth_vec!
+#' dit$empirical_cost
 diftrans <- function(pre_main = NULL,
                      post_main = NULL,
                      pre_control = NULL,
@@ -536,7 +546,7 @@ diftrans <- function(pre_main = NULL,
   result <- empirical_cost[result_index]
   d_star <- acc_bw[result_index]
 
-  out$d_star <- d_star
+  out$optimal_bandwidth <- d_star
   out$empirical_cost <- result
   out$empirical_table <- result_real
 
