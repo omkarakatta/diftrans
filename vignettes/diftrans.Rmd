@@ -55,7 +55,7 @@ The documentation file for `diftrans::diftrans` can be found by running the foll
 
 Install the `diftrans` from [GitHub](https://github.com/omkarakatta/diftrans) with:
 
-``` r
+```r
 # install.packages("devtools")
 devtools::install_github("omkarakatta/diftrans")
 ```
@@ -64,7 +64,7 @@ devtools::install_github("omkarakatta/diftrans")
 
 To cite the `diftrans` package, use the BibTeX entry provided by:
 
-``` r
+```r
 citation("diftrans")
 ```
 
@@ -81,7 +81,7 @@ The workhorse function in the `diftrans` package is also called `diftrans`, whic
 library(dplyr)
 library(magrittr)
 library(knitr)
-library(diftrans)
+devtools::load_all()
 
 mykable <- function(dt){
   kable(dt,
@@ -307,7 +307,8 @@ group's transport costs.
 dit <- diftrans(pre_main = pre_treated, post_main = post_treated,
                    pre_control = pre_control, post_control = post_control,
                    estimator = "dit", var = x,
-                   bandwidth_vec = seq(d_a, 10, 1),
+                   bandwidth_vec = seq(0, 10, 1),
+                   minimum_bandwidth = d_a,
                    conservative = TRUE)
 dit$empirical_table
 dit$empirical_cost
