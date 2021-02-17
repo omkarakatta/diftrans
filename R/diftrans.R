@@ -439,7 +439,8 @@ diftrans <- function(pre_main = NULL,
     }
 
     #~ dim(placebo): length(bandwidth_vec) x sims_bandwidth_selection
-    #~ TODO: add a stopifnot condition to ensure dimensions are correct
+    stopifnot(dim(placebo) == c(length(bandwidth_vec),
+                                sims_bandwidth_selection))
     colnames(placebo) <- paste0("sim", seq_len(sims_bandwidth_selection))
     placebo_cleaned <- cbind(bandwidth = bandwidth_vec, as.data.frame(placebo))
     placebo_summary <- placebo_cleaned %>%
