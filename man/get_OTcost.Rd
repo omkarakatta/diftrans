@@ -65,7 +65,7 @@ and \code{post_df} need to be unique and the same across the two
 distributions.
 The second column named \code{count} provides the mass on the
 respective value of the support.
-If the sum of \code{count} in each \code{pre_df} and \code{post_df},
+If the sum of \code{count} in each \code{pre_df} and \code{post_df} is 1,
 then \code{pre_df} and \code{post_df} are probability mass functions.
 
 The \code{bandwidth} argument should be a non-negative number.

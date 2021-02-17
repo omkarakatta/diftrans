@@ -2,7 +2,7 @@
 % Please edit documentation in R/diftrans.R
 \name{diftrans}
 \alias{diftrans}
-\title{Obtain Transport Costs and Differences-in-Transports Estimator}
+\title{Compute Before-and-After Estimator and Differences-in-Transports Estimator}
 \usage{
 diftrans(
   pre_main = NULL,
@@ -11,7 +11,7 @@ diftrans(
   post_control = NULL,
   var = MSRP,
   count = count,
-  bandwidth_seq = seq(0, 40000, 1000),
+  bandwidth_vec = seq(0, 40000, 1000),
   minimum_bandwidth = 0,
   maximum_bandwidth = Inf,
   estimator = ifelse(!is.null(pre_control) & !is.null(post_control), "dit", "tc"),
@@ -21,19 +21,13 @@ diftrans(
   sensitivity_lead = 5,
   sensitivity_accept = 5,
   sims_subsampling = 0,
-  subsample_pre_main_size = NULL,
-  subsample_post_main_size = NULL,
-  subsample_pre_control_size = NULL,
-  subsample_post_control_size = NULL,
+  pre_main_subsample_size = NULL,
+  post_main_subsample_size = NULL,
+  pre_control_subsample_size = NULL,
+  post_control_subsample_size = NULL,
   seed = 1,
   conservative = FALSE,
-  quietly = FALSE,
-  suppress_progress_bar = FALSE,
-  save_result = FALSE,
-  costm_main = NULL,
-  costm_ref_main = NULL,
-  costm_control = NULL,
-  costm_ref_control = NULL
+  quietly = FALSE
 )
 }
 \arguments{
@@ -59,7 +53,7 @@ differences-in-transports estimator}
 \code{pre_control}, and \code{post_control}; default is \code{count}
 (see Daljord et al. (2021))}
 
-\item{bandwidth_seq}{a vector of bandwidth values to try; default is \code{seq(0, 40000, 1000)}}
+\item{bandwidth_vec}{a vector of bandwidth values to try; default is \code{seq(0, 40000, 1000)}}
 
 \item{minimum_bandwidth}{minimum bandwidth to consider for the estimator;
 defaults to 0}
@@ -85,7 +79,7 @@ than \code{precision}; TODO: move to Details}
 
 \item{sims_subsampling}{number of subsampling simulations}
 
-\item{subsample_pre_main_size, subsample_post_main_size, subsample_pre_control_size, subsample_post_control_size}{sample size of subsample distributions}
+\item{pre_main_subsample_size, post_main_subsample_size, pre_control_subsample_size, post_control_subsample_size}{sample size of subsample distributions}
 
 \item{seed}{for reproducibility}
 
@@ -95,28 +89,11 @@ difference-in-transports estimator; default is \code{FALSE}, only valid
 for difference-in-transports estimator}
 
 \item{quietly}{if \code{TRUE}, some results and will be suppressed from printing; default is \code{FALSE}}
-
-\item{suppress_progress_bar}{if \code{TRUE}, the progress bar will be suppressed; default is \code{FALSE}}
-
-\item{save_result}{if \code{TRUE}, the estimator as
-well as the associated bandwidth will be returned}
-
-\item{costm_main}{if \code{NULL}, the cost matrix with common support will be such that if the transport
-distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.}
-
-\item{costm_ref_main}{if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be
-using the minimal support of main distributions}
-
-\item{costm_control}{if \code{NULL}, the cost matrix with common support will be such that if the transport
-distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.}
-
-\item{costm_ref_control}{if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be
-using the minimal support of control distributions}
 }
 \value{
-a data.frame with the transport costs associated with each value of \code{bandwidth_seq}.
+a data.frame with the transport costs associated with each value of \code{bandwidth_vec}.
 \itemize{
-\item \code{bandwidth}: same as \code{bandwidth_seq}
+\item \code{bandwidth}: same as \code{bandwidth_vec}
 \item \code{main}: transport costs associated with main distributions
 \item \code{main2d}: transport costs associated with main distributions using twice the bandwidth;
 appears only if \code{conservative = TRUE}
@@ -126,36 +103,47 @@ are specified
 \item \code{diff}: \code{main - control}
 \item \code{diff2d}: \code{main2d - control}
 }
-
-If \code{save_result = TRUE}, then a list is returned, with the first element
-(labeled \code{out}) being the data.frame described above.
-The second element (labeled \code{dit}) is the differences-in-transports
-estimator, and the third and final element (labeled \code{optimal_bandwidth})
-is the bandwidth associated with the estimator.
 }
 \description{
-Given the pre and post probability mass functions as well as a vector of
-bandwidths, this function returns the associated transport costs.
-If another set of pre and post probability mass functions are given for the
-control group, then the differences-in-transports estimator is returned.
+This function implements the before-and-after estimation procedure and the
+differences-in-transports estimator described in Daljord et al. (2021).
 }
 \details{
-The \code{pre_main}, \code{post_main}, \code{pre_control}, and
-\code{post_control} variables are all probability mass functions.
-That is, they are a tibble with two columns:
-\itemize{
-\item column 1 contains the full support of \code{var}, and
-\item column 2 contains the corresponding mass of each value
-in the support.
-}
-Since column 1 contains the full support of \code{var} and all these
-distributions are of \code{var}, column 1 must be the same for all
+The pre- and post-distributions given by \code{pre_main}
+and \code{post_main} need to be \code{data.frame} objects of
+two columns. The first column, whose title should be given by
+\code{var}, contains the common support of the two distributions.
+In other words, the values in \code{var} in each \code{pre_df}
+and \code{post_df} need to be unique and the same across the two
 distributions.
+The second column named \code{count} provides the mass on the
+respective value of the support.
+If the sum of \code{count} in each \code{pre_df} and \code{post_df} is 1,
+then \code{pre_df} and \code{post_df} are probability mass functions.
 
-The cost matrices specified by \code{costm} should use a common support of
-the respective distributions.
-However, \code{costm_ref} matrices should use the minimal support of the
-respective pre and post distributions.
+The other pair of pre- and post-distributions given by \code{pre_control}
+and \code{post_control} follow the same conventions.
+In particular, their column names must also be \code{var} and \code{count}.
+
+If \code{pre_main} and \code{post_main} are specified but \code{pre_control}
+and \code{post_control} are not, then the function computes the
+before-and-after estimator between \code{pre_main} and \code{post_main}.
+If \code{pre_control} and \code{post_control} are also specified, then
+the function computes the differences-in-transports estimator.
+
+When \code{conservative} is set to TRUE, the differences-in-transports
+estimator uses twice the bandwidth when computing the optimal transport cost
+between the main distributions.
+
+Each entry of \code{bandwidth_vec} should be a non-negative number.
+If mass is transferred less than this number, we ignore these transfers.
+Otherwise, we place equal weight on the transfers.
+As a result, the transport costs to be used by our estimators can be viewed
+as the percentage of mass that has been transferred by more than a
+a bandwidth's distance away.
+
+TODO: add documentation about bandwidth selection, min and max bw args,
+subsampling procedure
 }
 \examples{
 # Find conservative transport cost of MSRP in Beijing between 2010 and 2011 using bandwidth = 0
