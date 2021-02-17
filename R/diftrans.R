@@ -51,6 +51,9 @@
 #' as the percentage of mass that has been transferred by more than a
 #' a bandwidth's distance away.
 #'
+#' TODO: add documentation about bandwidth selection, min and max bw args,
+#' subsampling procedure
+#'
 #' @param pre_main probability mass function (see "Details") for \code{var} of the
 #'     treated group before treatment occurs
 #' @param post_main probability mass function (see "Details") for \code{var} of the
