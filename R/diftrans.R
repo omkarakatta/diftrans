@@ -292,7 +292,7 @@ diftrans <- function(pre_main = NULL,
           || post_control_subsample_size <= 0) {
         stop("`post_control_subsample_size` needs to be positive integer.")
       }
-    } else {
+    } else if (est == "ba") {
       if (!is.null(pre_control_subsample_size)) {
         message("Before-and-after estimator does not use `pre_control_subsample_size`.")
       }
@@ -378,9 +378,7 @@ diftrans <- function(pre_main = NULL,
           )
         }
       )
-    }
-
-    if (est == "dit") {
+    } else if (est == "dit") {
       #~ get placebo distributions for control
       pre_control_placebo <- rmultinom(n = sims_bandwidth_selection,
                                     size = pre_control_total,
@@ -456,8 +454,7 @@ diftrans <- function(pre_main = NULL,
 
     if (est == "ba") {
       d_star <- min(valid_d)
-    }
-    if (est == "dit") {
+    } else if (est == "dit") {
       d_star <- valid_d
     }
 
@@ -486,7 +483,12 @@ diftrans <- function(pre_main = NULL,
     }
   )
 
-  if (est == "dit") {
+  if (est == "ba") {
+    real_cost <- real_main
+
+    real <- data.frame(bandwidth = d_star,
+                       result = real_main)
+  } else if (est == "dit") {
     control_bw <- d_star
     real_control <- sapply(
       seq_along(control_bw),
@@ -506,12 +508,6 @@ diftrans <- function(pre_main = NULL,
                        control = real_control,
                        result = real_cost)
   }
-  if (est == "ba") {
-    real_cost <- real_main
-
-    real <- data.frame(bandwidth = d_star,
-                       result = real_main)
-  }
 
   result_index <- which.max(real$result)
   result <- real_cost[result_index]
@@ -528,14 +524,6 @@ diftrans <- function(pre_main = NULL,
   #~ TODO: send result, d, and real to user
 
   if (sims_subsampling > 0) {
-#~     pre_main_count <- pre_main[[rlang::ensym(count)]]
-#~     post_main_count <- post_main[[rlang::ensym(count)]]
-#~     pre_main_subsamples <- rmultinom(n = sims_bandwidth_selection,
-#~                                      size = subsample_main_pre_size,
-#~                                      prop = pre_main_count)
-#~     post_main_subsamples <- rmultinom(n = sims_bandwidth_selection,
-#~                                       size = subsample_main_post_size,
-#~                                       prop = post_main_count)
     pre_main_dist <- pre_main %>%
       tidyr::uncount({{count}}) %>%
       .[[rlang::ensym(var)]]
@@ -586,9 +574,7 @@ diftrans <- function(pre_main = NULL,
           subsample_result$prop_cost
         }
       )
-    }
-
-    if (est == "dit") {
+    } else if (est == "dit") {
       pre_control_dist <- pre_control %>%
         tidyr::uncount({{count}}) %>%
         .[[rlang::ensym(var)]]
