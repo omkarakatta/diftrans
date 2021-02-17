@@ -18,38 +18,38 @@
 #' This function implements the before-and-after estimation procedure and the
 #' differences-in-transports estimator described in Daljord et al. (2021).
 #'
-#' The \code{pre_main}, \code{post_main}, \code{pre_control}, and
-#' \code{post_control} arguments are data frames, each with two columns:
-#' \itemize{
-#'   \item column 1 contains the "common support" of \code{var}, and
-#'   \item column 2 contains the corresponding mass/counts of each value
-#'          in the support.
-#' }
-#' By "common support", we refer to the union of the support of
-#' \code{pre_main}, \code{post_main}, \code{pre_control}, \code{post_control}.
-#' Thus, all four data frames should share the same column for the support.
-#' (Strictly speaking, \code{pre_main} and \code{post_main} must have the same
-#' support column, and \code{pre_control} and \code{post_control} must have the
-#' the same support column; however, each pair's respective common support
-#' columns may be different.)
+#' The pre- and post-distributions given by \code{pre_main}
+#' and \code{post_main} need to be \code{data.frame} objects of
+#' two columns. The first column, whose title should be given by
+#' \code{var}, contains the common support of the two distributions.
+#' In other words, the values in \code{var} in each \code{pre_df}
+#' and \code{post_df} need to be unique and the same across the two
+#' distributions.
+#' The second column named \code{count} provides the mass on the
+#' respective value of the support.
+#' If the sum of \code{count} in each \code{pre_df} and \code{post_df} is 1,
+#' then \code{pre_df} and \code{post_df} are probability mass functions.
 #'
-#' The column names across the data frames must be the same.
-#' The name of of the first column with the support is fed into the \code{var}
-#' argument, and the name of the second column with the mass is fed into
-#' of the \code{count} argument.
+#' The other pair of pre- and post-distributions given by \code{pre_control}
+#' and \code{post_control} follow the same conventions.
+#' In particular, their column names must also be \code{var} and \code{count}.
 #'
-#' This function uses \code{link[transport]{transport:transport()}} to compute
-#' the optimal transport cost between the pre- and post-distributions.
-#' By default, the ground cost between any two values of the commons support
-#' is 1 if the absolute difference of the two values is greater than some
-#' bandwidth and 0 otherwise.
-#' The choice of bandwidths to consider can be specified in the vector
-#' \code{bandwidth_vec}.
+#' If \code{pre_main} and \code{post_main} are specified but \code{pre_control}
+#' and \code{post_control} are not, then the function computes the
+#' before-and-after estimator between \code{pre_main} and \code{post_main}.
+#' If \code{pre_control} and \code{post_control} are also specified, then
+#' the function computes the differences-in-transports estimator.
 #'
-#' The cost matrices specified by \code{costm} should use a common support of
-#' the respective distributions.
-#' However, \code{costm_ref} matrices should use the minimal support of the
-#' respective pre and post distributions.
+#' When \code{conservative} is set to TRUE, the differences-in-transports
+#' estimator uses twice the bandwidth when computing the optimal transport cost
+#' between the main distributions.
+#'
+#' Each entry of \code{bandwidth_vec} should be a non-negative number.
+#' If mass is transferred less than this number, we ignore these transfers.
+#' Otherwise, we place equal weight on the transfers.
+#' As a result, the transport costs to be used by our estimators can be viewed
+#' as the percentage of mass that has been transferred by more than a
+#' a bandwidth's distance away.
 #'
 #' @param pre_main probability mass function (see "Details") for \code{var} of the
 #'     treated group before treatment occurs
