@@ -44,7 +44,7 @@ To print each message on its own line, set \code{newline} to TRUE
 \code{dontadd} and \code{newline} must be a boolean.
 }
 \seealso{
-\code{\link{send_note}}, \code{\link{check_for_errors}}
+\code{\link{send_note}}, \code{\link{preliminaries}}
 
 Other debugging: 
 \code{\link{send_note}()}

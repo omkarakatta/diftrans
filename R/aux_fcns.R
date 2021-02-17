@@ -207,7 +207,7 @@ send_note <- function(note, quietly, fcn) {
 #'
 #' @family debugging
 #'
-#' @seealso \code{\link{send_note}}, \code{\link{check_for_errors}}
+#' @seealso \code{\link{send_note}}, \code{\link{preliminaries}}
 collect_msg <- function(msg_list, new_msg, dontadd, newline = TRUE) {
   if (!dontadd) {
     if (newline) new_msg <- paste0("\n", new_msg)
