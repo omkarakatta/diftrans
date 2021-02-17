@@ -309,6 +309,53 @@ diftrans <- function(pre_main = NULL,
   msg <- "Supports have been computed."
   send_note(msg, quietly, message)
 
+# Compute Empirical Costs ----------
+
+  #~ evaluate real/empirical optimal transport at all values in acc_bw
+  main_bw <- if (conservative) 2 * bandwidth_vec else bandwidth_vec
+  main_cost <- sapply(
+    seq_along(main_bw),
+    function(bw_index) {
+      cost <- get_OTcost(pre_main,
+                         post_main,
+                         bandwidth = main_bw[bw_index],
+                         var = !!rlang::ensym(var),
+                         count = !!rlang::ensym(count))
+      cost$prop_cost
+    }
+  )
+
+  if (est == "ba") {
+    empirical_cost <- main_cost
+    real <- data.frame(bandwidth = bandwidth_vec,
+                       result = empirical_cost)
+  } else if (est == "dit") {
+    control_bw <- bandwidth_vec
+    control_cost <- sapply(
+      seq_along(control_bw),
+      function(bw_index) {
+        cost <- get_OTcost(pre_control,
+                           post_control,
+                           bandwidth = control_bw[bw_index],
+                           var = !!rlang::ensym(var),
+                           count = !!rlang::ensym(count))
+        cost$prop_cost
+      }
+    )
+    empirical_cost <- main_cost - control_cost
+
+    real <- data.frame(bandwidth = bandwidth_vec,
+                       main = main_cost,
+                       control = control_cost,
+                       result = empirical_cost)
+  }
+
+  out$empirical_table <- real
+
+  msg <- "Empirical costs have been computed."
+  send_note(msg, quietly, message)
+
+
 # Bandwidth Selection ----------
 
   if (sims_bandwidth_selection > 0) {
@@ -445,60 +492,28 @@ diftrans <- function(pre_main = NULL,
   if (!quietly) message(paste("candidate bandwidths:"))
   if (!quietly) print(cand_bw)
 
-# Evaluate Empirical Costs ----------
+# Choosing Empirical Cost ----------
 
-  #~ evaluate real/empirical optimal transport at all values in acc_bw
-  main_bw <- if (conservative) 2 * acc_bw else acc_bw
-  main_cost <- sapply(
-    seq_along(main_bw),
-    function(bw_index) {
-      cost <- get_OTcost(pre_main,
-                         post_main,
-                         bandwidth = main_bw[bw_index],
-                         var = !!rlang::ensym(var),
-                         count = !!rlang::ensym(count))
-      cost$prop_cost
-    }
-  )
-
-  if (est == "ba") {
-    empirical_cost <- main_cost
-
-    real <- data.frame(bandwidth = acc_bw,
-                       result = empirical_cost)
-  } else if (est == "dit") {
-    control_bw <- acc_bw
-    control_cost <- sapply(
-      seq_along(control_bw),
-      function(bw_index) {
-        cost <- get_OTcost(pre_control,
-                           post_control,
-                           bandwidth = control_bw[bw_index],
-                           var = !!rlang::ensym(var),
-                           count = !!rlang::ensym(count))
-        cost$prop_cost
-      }
-    )
-    empirical_cost <- main_cost - control_cost
-
-    real <- data.frame(bandwidths = acc_bw,
-                       main = main_cost,
-                       control = control_cost,
-                       result = empirical_cost)
-  }
+  cand_bw_index <- real$bandwidth == acc_bw
+  cand_real <- cbind(real, "candidates" = cand_bw_index)
+  filtered_real <- real[cand_bw_index, ]
 
   result_index <- which.max(real$result)
+  result_column <- rep("-", nrow(cand_real))
+  result_column[result_index] <- "*"
+  result_real <- cbind(cand_real, "estimate" = result_column)
   result <- empirical_cost[result_index]
   d_star <- acc_bw[result_index]
 
   out$d_star <- d_star
   out$empirical_cost <- result
-  out$empirical_table <- real
+  out$empirical_table <- result_real
 
   if (!quietly) message(paste("empirical cost:", result))
   if (!quietly) message(paste("bandwidth:", d_star))
 
   #~ TODO: print: The (conservative) ba/dit estimate is result (in %) at bw d
+
 
 # Subsampling ----------
 
