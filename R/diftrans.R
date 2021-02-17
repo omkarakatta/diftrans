@@ -583,7 +583,7 @@ diftrans <- function(pre_main = NULL,
         function(sim) {
           progress <- paste("Subsampling:",
                             "Running Simulation",
-                            sim, "/", sims_bandwidth_selection)
+                            sim, "/", sims_subsampling)
           send_note(progress, !show_progress, print)
           pre_count <- pre_main_subsamples[seq_along(main_support), sim]
           post_count <- post_main_subsamples[seq_along(main_support), sim]
@@ -610,7 +610,7 @@ diftrans <- function(pre_main = NULL,
         function(sim) {
           progress <- paste("Subsampling:",
                             "Running Simulation",
-                            sim, "/", sims_bandwidth_selection)
+                            sim, "/", sims_subsampling)
           send_note(progress, !show_progress, print)
           pre_count <- pre_main_subsamples[seq_along(main_support), sim]
           post_count <- post_main_subsamples[seq_along(main_support), sim]
