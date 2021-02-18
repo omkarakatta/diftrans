@@ -143,7 +143,7 @@
 #'        \code{post_control_subsample_size}: size of subsample distributions
 #'  \item \code{conservative}: TRUE or FALSE, depending on whether we use
 #'    twice the bandwidth for the treated distributions in the
-#'    differences-tranpsorts-estimator
+#'    differences-transports-estimator
 #'  \item \code{seed}: seed (see \code{\link{set.seed}})
 #'  \item \code{main_support}: common support of the treated distributions
 #'  \item \code{control_support}: common support of the untreated distributions
@@ -516,7 +516,8 @@ diftrans <- function(pre_main = NULL,
       dplyr::summarize(mean = mean(dplyr::c_across()),
                        quantile0.90 = quantile(dplyr::c_across(), prob = 0.90),
                        quantile0.95 = quantile(dplyr::c_across(), prob = 0.95),
-                       quantile0.99 = quantile(dplyr::c_across(), prob = 0.99))
+                       quantile0.99 = quantile(dplyr::c_across(), prob = 0.99),
+                       sd = sd(dplyr::c_across()))
 
     out$placebo <- placebo_cleaned
     out$placebo_summary <- placebo_summary
@@ -720,7 +721,7 @@ diftrans <- function(pre_main = NULL,
 }
 
 #' @export
-print.diftrans <- function(x,...) {
+print.diftrans <- function(x, accuracy = 0.01, ...) {
   if (x$est == "ba") {
     estimator <- "Before-and-After Estimate of "
   } else if (x$est == "dit" & x$conservative) {
@@ -729,14 +730,154 @@ print.diftrans <- function(x,...) {
     estimator <- "Differences-in-Transports estimate of "
   }
 
+  # cat("\n")
   cat(
     paste0(
       estimator,
-      x$empirical_cost,
+      scales::percent(x$empirical_cost, accuracy = accuracy),
       " at bandwidth ",
       x$optimal_bandwidth,
       "."
     )
   )
   cat("\n")
+}
+
+#' @importFrom tibble as_tibble
+#' @export
+summary.diftrans <- function(x, accuracy = 0.01,...) {
+  align <- 35
+  header <- 60
+  round <- nchar(accuracy)
+  skipped <- "Skipped"
+  if (x$est == "ba") {
+    estimator <- "Before-and-After"
+  } else if (x$est == "dit") {
+    estimator <- "Differences-in-Transports"
+  }
+
+  if (x$sims_bandwidth_selection == 0) {
+    cand_bw <- skipped
+    placebo_skipped <- TRUE
+  } else {
+    cand_bw <- x$candidate_bandwidths
+    placebo_skipped <- FALSE
+    placebo_summary <- x$placebo_summary
+    names(placebo_summary) <- c(
+      "bandwidth",
+      "mean",
+      "90%ile",
+      "95%ile",
+      "99%ile",
+      "std. dev."
+    )
+  }
+
+  if (x$sims_subsampling == 0) {
+    subsample_skipped <- TRUE
+  } else {
+    subsample_skipped <- FALSE
+    subsample_summary <- c(
+      "mean" = round(mean(x$subsample), 2),
+      "std. dev." = round(sd(x$subsample), 2),
+      "min" = round(min(x$subsample), round),
+      "25%ile" = round(quantile(x$subsample, probs = 0.25, names = FALSE),
+                             round),
+      "median" = round(quantile(x$subsample, probs = 0.5, names = FALSE),
+                       round),
+      "75%ile" = round(quantile(x$subsample, probs = 0.75, names = FALSE),
+                             round),
+      "max" = round(min(x$subsample), round)
+    )
+  }
+
+  cat(whitespace(header, "Call: diftrans", "-"))
+  cat("\n")
+  cat(
+    paste0(
+      whitespace(align, "Estimator:"),
+      estimator
+    )
+  )
+  cat("\n")
+  cat(
+    paste0(
+      whitespace(align, "Conservative:"),
+      x$conservative
+    )
+  )
+  cat("\n")
+  cat(
+    paste0(
+      whitespace(align, "Estimate:"),
+      scales::percent(x$empirical_cost, accuracy = accuracy)
+    )
+  )
+  cat("\n")
+  cat(
+    paste0(
+      whitespace(align, "Seed:"),
+      x$seed
+    )
+  )
+  cat("\n")
+  cat("\n")
+  cat(whitespace(header, "Bandwidth Selection", "-"))
+  cat("\n")
+  cat(
+    paste0(
+      whitespace(align, "Simulations:"),
+      x$sims_bandwidth_selection
+    )
+  )
+  cat("\n")
+  cat(
+    paste0(
+      whitespace(align, "Optimal Bandwidth:"),
+      x$optimal_bandwidth
+    )
+  )
+  cat("\n")
+  cat(
+    paste0(
+      whitespace(align, "Candidate Bandwidths:"),
+      paste(cand_bw, collapse = " ")
+    )
+  )
+  cat("\n")
+  cat(
+    paste0(
+      whitespace(align, "Summary of Placebo Results:"),
+      ifelse(placebo_skipped, skipped, " ")
+    )
+  )
+  cat("\n")
+  if (!placebo_skipped) {
+    print(placebo_summary)
+  }
+  cat("\n")
+  cat("\n")
+  cat(whitespace(header, "Empirical Costs", "-"))
+  cat("\n")
+  print(tibble::as_tibble(x$empirical_table))
+  cat("\n")
+  cat(whitespace(header, "Subsampling", "-"))
+  cat("\n")
+  cat(
+    paste0(
+      whitespace(align, "Simulations:"),
+      x$sims_subsampling
+    )
+  )
+  cat("\n")
+  cat(
+    paste0(
+      whitespace(align, "Summary of Subsampling Results:"),
+      ifelse(subsample_skipped, skipped, " ")
+    )
+  )
+  cat("\n")
+  if (!subsample_skipped) {
+    print(subsample_summary)
+  }
 }

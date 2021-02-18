@@ -559,6 +559,13 @@ preliminaries <- function(pre_main,
 
 ### whitespace ---------------------------
 
-whitespace <- function(num) {
-  paste(rep(" ", num), collapse = "")
+whitespace <- function(num, str = NULL, fill = " ") {
+  if (is.null(str)) {
+    str <- ""
+  }
+  numchar <- nchar(str)
+  more_spaces <- num - numchar
+  more_spaces <- ifelse(more_spaces < 0, 0, more_spaces)
+  whitesp <- paste(rep(fill, more_spaces), collapse = "")
+  paste(str, whitesp, collapse = "")
 }
