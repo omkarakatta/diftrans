@@ -1066,3 +1066,47 @@ plot_control.diftrans <- function(x,
 
   return(plot)
 }
+
+plot_subsample <- function(x, ...) {
+  UseMethod("plot_subsample")
+}
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_histogram
+#' @export
+plot_subsample.diftrans <- function(x,
+                                    FCN = function(x) {x},
+                                    binwidth = NULL,
+                                    fill = "#000000",
+                                    color = "#000000",
+                                    alpha = 0.35) {
+  subsample <- x$subsample
+  sims_subsampling <- x$sims_subsampling
+  optimal_bw <- x$optimal_bandwidth
+  if (sims_subsampling == 0) {
+    stop("There are no subsampling results to plot.")
+  }
+
+  if (is.null(binwidth)) {
+    binwidth <- 30
+    message("`binwidth` not specified; setting `binwidth` to 30")
+  }
+
+  plot <- ggplot2::ggplot() +
+    ggplot2::geom_histogram(
+      ggplot2::aes(
+        x = FCN(subsample),
+        y = ..density..,
+      ),
+      binwidth = binwidth,
+      fill = fill,
+      color = color,
+      alpha = alpha
+    ) +
+    ggplot2::ylab("") +
+    ggplot2::xlab("") +
+    ggplot2::ggtitle(paste("Subsampling Results; Bandwidth =", optimal_bw))
+
+  return(plot)
+
+}

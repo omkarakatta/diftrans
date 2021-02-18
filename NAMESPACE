@@ -2,6 +2,7 @@
 
 S3method(plot_control,diftrans)
 S3method(plot_main,diftrans)
+S3method(plot_subsample,diftrans)
 S3method(print,diftrans)
 S3method(summary,diftrans)
 export("%>%")
