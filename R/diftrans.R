@@ -13,6 +13,8 @@
 ###
 ###
 
+### diftrans ---------------------------
+
 #' Compute Before-and-After Estimator and Differences-in-Transports Estimator
 #'
 #' This function implements the before-and-after estimation procedure and the
@@ -736,6 +738,8 @@ diftrans <- function(pre_main = NULL,
   return(out)
 }
 
+### is.diftrans ---------------------------
+
 #' Check if object is of class "diftrans"
 #'
 #' @param x An object
@@ -746,6 +750,8 @@ diftrans <- function(pre_main = NULL,
 is.diftrans <- function(x) {
   inherits(x, "diftrans")
 }
+
+### print.diftrans ---------------------------
 
 #' @importFrom scales percent
 #' @export
@@ -770,6 +776,8 @@ print.diftrans <- function(x, accuracy = 0.01, ...) {
   )
   cat("\n")
 }
+
+### summary.diftrans ---------------------------
 
 #' @importFrom tibble as_tibble
 #' @importFrom scales percent
@@ -912,6 +920,8 @@ summary.diftrans <- function(object, accuracy = 0.01,...) {
   }
 }
 
+### plot_main ---------------------------
+
 plot_main <- function(x,
                       ...) {
   UseMethod("plot_main")
@@ -992,6 +1002,8 @@ plot_main.diftrans <- function(x,
 
   return(plot)
 }
+
+### plot_control ---------------------------
 
 plot_control <- function(x,
                          ...) {
@@ -1076,6 +1088,8 @@ plot_control.diftrans <- function(x,
 
   return(plot)
 }
+
+### plot_subsample ---------------------------
 
 plot_subsample <- function(x, ...) {
   UseMethod("plot_subsample")
