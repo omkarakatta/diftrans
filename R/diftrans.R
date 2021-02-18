@@ -164,6 +164,7 @@
 #' @importFrom rlang enquo
 #' @importFrom stats quantile
 #' @importFrom stats rmultinom
+#' @importFrom stats sd
 #' @examples
 #' # Compute transport cost between Beijing 2010 and Beijing 2011
 #' # with bandwidth = 0
@@ -735,11 +736,18 @@ diftrans <- function(pre_main = NULL,
   return(out)
 }
 
+#' Check if object is of class "diftrans"
+#'
+#' @param x An object
+#'
+#' @return TRUE if \code{x} is a "diftrans" object; FALSE otherwise
+#'
 #' @export
-is.diftrans <- function(x, ...) {
+is.diftrans <- function(x) {
   inherits(x, "diftrans")
 }
 
+#' @importFrom scales percent
 #' @export
 print.diftrans <- function(x, accuracy = 0.01, ...) {
   if (x$est == "ba") {
@@ -764,25 +772,27 @@ print.diftrans <- function(x, accuracy = 0.01, ...) {
 }
 
 #' @importFrom tibble as_tibble
+#' @importFrom scales percent
+#' @importFrom stats sd
 #' @export
-summary.diftrans <- function(x, accuracy = 0.01,...) {
+summary.diftrans <- function(object, accuracy = 0.01,...) {
   align <- 35
   header <- 60
   round <- nchar(accuracy)
   skipped <- "Skipped"
-  if (x$est == "ba") {
+  if (object$est == "ba") {
     estimator <- "Before-and-After"
-  } else if (x$est == "dit") {
+  } else if (object$est == "dit") {
     estimator <- "Differences-in-Transports"
   }
 
-  if (x$sims_bandwidth_selection == 0) {
+  if (object$sims_bandwidth_selection == 0) {
     cand_bw <- skipped
     placebo_skipped <- TRUE
   } else {
-    cand_bw <- x$candidate_bandwidths
+    cand_bw <- object$candidate_bandwidths
     placebo_skipped <- FALSE
-    placebo_summary <- x$placebo_summary
+    placebo_summary <- object$placebo_summary
     names(placebo_summary) <- c(
       "bandwidth",
       "mean",
@@ -793,21 +803,21 @@ summary.diftrans <- function(x, accuracy = 0.01,...) {
     )
   }
 
-  if (x$sims_subsampling == 0) {
+  if (object$sims_subsampling == 0) {
     subsample_skipped <- TRUE
   } else {
     subsample_skipped <- FALSE
     subsample_summary <- c(
-      "mean" = round(mean(x$subsample), 2),
-      "std. dev." = round(sd(x$subsample), 2),
-      "min" = round(min(x$subsample), round),
-      "25%ile" = round(quantile(x$subsample, probs = 0.25, names = FALSE),
+      "mean" = round(mean(object$subsample), 2),
+      "std. dev." = round(sd(object$subsample), 2),
+      "min" = round(min(object$subsample), round),
+      "25%ile" = round(quantile(object$subsample, probs = 0.25, names = FALSE),
                              round),
-      "median" = round(quantile(x$subsample, probs = 0.5, names = FALSE),
+      "median" = round(quantile(object$subsample, probs = 0.5, names = FALSE),
                        round),
-      "75%ile" = round(quantile(x$subsample, probs = 0.75, names = FALSE),
+      "75%ile" = round(quantile(object$subsample, probs = 0.75, names = FALSE),
                              round),
-      "max" = round(min(x$subsample), round)
+      "max" = round(min(object$subsample), round)
     )
   }
 
@@ -823,21 +833,21 @@ summary.diftrans <- function(x, accuracy = 0.01,...) {
   cat(
     paste0(
       whitespace(align, "Conservative:"),
-      x$conservative
+      object$conservative
     )
   )
   cat("\n")
   cat(
     paste0(
       whitespace(align, "Estimate:"),
-      scales::percent(x$empirical_cost, accuracy = accuracy)
+      scales::percent(object$empirical_cost, accuracy = accuracy)
     )
   )
   cat("\n")
   cat(
     paste0(
       whitespace(align, "Seed:"),
-      x$seed
+      object$seed
     )
   )
   cat("\n")
@@ -847,14 +857,14 @@ summary.diftrans <- function(x, accuracy = 0.01,...) {
   cat(
     paste0(
       whitespace(align, "Simulations:"),
-      x$sims_bandwidth_selection
+      object$sims_bandwidth_selection
     )
   )
   cat("\n")
   cat(
     paste0(
       whitespace(align, "Optimal Bandwidth:"),
-      x$optimal_bandwidth
+      object$optimal_bandwidth
     )
   )
   cat("\n")
@@ -879,14 +889,14 @@ summary.diftrans <- function(x, accuracy = 0.01,...) {
   cat("\n")
   cat(whitespace(header, "Empirical Costs", "-"))
   cat("\n")
-  print(tibble::as_tibble(x$empirical_table))
+  print(tibble::as_tibble(object$empirical_table))
   cat("\n")
   cat(whitespace(header, "Subsampling", "-"))
   cat("\n")
   cat(
     paste0(
       whitespace(align, "Simulations:"),
-      x$sims_subsampling
+      object$sims_subsampling
     )
   )
   cat("\n")

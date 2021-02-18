@@ -1,5 +1,6 @@
 utils::globalVariables(c("grayscale",
                          "waiver",
+                         "..density..",
                          "MSRP",
                          "bandwidth",
                          "x",

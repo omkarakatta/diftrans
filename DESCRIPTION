@@ -36,7 +36,8 @@ Imports:
     transport,
     rlang,
     tibble,
-    tidyr
+    tidyr,
+    scales
 Suggests: 
     testthat,
     knitr,

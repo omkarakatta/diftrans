@@ -220,6 +220,26 @@ collect_msg <- function(msg_list, new_msg, dontadd, newline = TRUE) {
 
 #~ error checks
 #~ get estimator and counts
+#' Preliminary Error Checks
+#'
+#' Check arguments of \code{\link{diftrans}} and modify them if necessary
+#'
+#' This function uses \code{\link{collect_msg}} to store error messages so that
+#' users get a list of potential problems to fix rather than debugging errors
+#' one at a time.
+#'
+#' @inheritParams diftrans
+#'
+#' @return Either a list of error messages, or a list of modified objects:
+#'  \enumerate{
+#'    \item estimator
+#'    \item conservative
+#'    \item count columns from distributions
+#'    \item totals from distributions
+#'    \item subsample sizes
+#'  }
+#'
+#' @seealso \code{\link{collect_msg}}
 preliminaries <- function(pre_main,
                           post_main,
                           pre_control,
