@@ -783,7 +783,7 @@ print.diftrans <- function(x, accuracy = 0.01, ...) {
 #' @importFrom scales percent
 #' @importFrom stats sd
 #' @export
-summary.diftrans <- function(object, accuracy = 0.01,...) {
+summary.diftrans <- function(object, accuracy = 0.01, ...) {
   align <- 35
   header <- 60
   round <- nchar(accuracy)
@@ -922,8 +922,7 @@ summary.diftrans <- function(object, accuracy = 0.01,...) {
 
 ### plot_main ---------------------------
 
-plot_main <- function(x,
-                      ...) {
+plot_main <- function(x, ...) {
   UseMethod("plot_main")
 }
 #' @importFrom tidyr uncount
@@ -1005,8 +1004,7 @@ plot_main.diftrans <- function(x,
 
 ### plot_control ---------------------------
 
-plot_control <- function(x,
-                         ...) {
+plot_control <- function(x, ...) {
   UseMethod("plot_control")
 }
 #' @importFrom tidyr uncount
