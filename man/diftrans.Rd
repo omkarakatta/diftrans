@@ -114,7 +114,7 @@ bandwidth selection
 \code{post_control_subsample_size}: size of subsample distributions
 \item \code{conservative}: TRUE or FALSE, depending on whether we use
 twice the bandwidth for the treated distributions in the
-differences-tranpsorts-estimator
+differences-transports-estimator
 \item \code{seed}: seed (see \code{\link{set.seed}})
 \item \code{main_support}: common support of the treated distributions
 \item \code{control_support}: common support of the untreated distributions
