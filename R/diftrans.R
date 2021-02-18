@@ -721,6 +721,11 @@ diftrans <- function(pre_main = NULL,
 }
 
 #' @export
+is.diftrans <- function(x, ...) {
+  inherits(x, "diftrans")
+}
+
+#' @export
 print.diftrans <- function(x, accuracy = 0.01, ...) {
   if (x$est == "ba") {
     estimator <- "Before-and-After Estimate of "
