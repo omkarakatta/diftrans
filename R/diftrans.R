@@ -366,6 +366,21 @@ diftrans <- function(pre_main = NULL,
   msg <- "Supports have been computed."
   send_note(msg, quietly, message)
 
+  pre_main_copy <- data.frame(support = main_support,
+                              count = pre_main_count)
+  post_main_copy <- data.frame(support = main_support,
+                               count = post_main_count)
+  out$pre_main <- pre_main_copy
+  out$post_main <- post_main_copy
+  if (est == "dit") {
+    pre_control_copy <- data.frame(support = control_support,
+                                   count = pre_control_count)
+    post_control_copy <- data.frame(support = control_support,
+                                    count = post_control_count)
+    out$pre_control <- pre_control_copy
+    out$post_control <- post_control_copy
+  }
+
 # Compute Empirical Costs ----------
 
   #~ evaluate real/empirical optimal transport at all values in acc_bw
@@ -885,4 +900,169 @@ summary.diftrans <- function(x, accuracy = 0.01,...) {
   if (!subsample_skipped) {
     print(subsample_summary)
   }
+}
+
+plot_main <- function(x,
+                      ...) {
+  UseMethod("plot_main")
+}
+#' @importFrom tidyr uncount
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_histogram
+#' @importFrom ggplot2 guides
+#' @importFrom ggplot2 scale_fill_manual
+#' @importFrom ggplot2 scale_color_manual
+#' @export
+plot_main.diftrans <- function(x,
+                               grayscale = FALSE,
+                               binwidth = NULL,
+                               pre_fill = ifelse(grayscale,
+                                                 "#0c0c0c",
+                                                 "#E69F00"),
+                               pre_color = ifelse(grayscale,
+                                                  "#0c0c0c",
+                                                  "#E69F00"),
+                               post_fill = ifelse(grayscale,
+                                                 "#dbd9d9",
+                                                 "#56B4E9"),
+                               post_color = ifelse(grayscale,
+                                                  "#dbd9d9",
+                                                  "#56B4E9"),
+                               alpha = ifelse(grayscale, 0.8, 0.35),
+                               pre_label = "Pre-Distribution",
+                               post_label = "Post-Distribution",
+                               FCN = function(x) {x},
+                               ...) {
+  pre <- x$pre_main
+  post <- x$post_main
+  pre_dist <- tidyr::uncount(pre, count)$support
+  post_dist <- tidyr::uncount(post, count)$support
+
+  if (is.null(binwidth)) {
+    binwidth <- 30
+    message("`binwidth` not specified; setting `binwidth` to 30")
+  }
+
+  plot <- ggplot2::ggplot() +
+    ggplot2::geom_histogram(
+      ggplot2::aes(
+        x = FCN(pre_dist),
+        y = ..density..,
+        fill = "0",
+        color = "0",
+      ),
+      alpha = alpha,
+      binwidth = binwidth,
+    ) +
+    ggplot2::geom_histogram(
+      ggplot2::aes(
+        x = FCN(post_dist),
+        y = ..density..,
+        fill = "1",
+        color = "1",
+      ),
+      alpha = alpha,
+      binwidth = binwidth,
+    ) +
+    ggplot2::guides(color = FALSE) +
+    ggplot2::scale_color_manual(
+      values = c(pre_color, post_color),
+      labels = c(pre_label, post_label),
+      name = ""
+    ) +
+    ggplot2::scale_fill_manual(
+      values = c(pre_fill, post_fill),
+      labels = c(pre_label, post_label),
+      name = ""
+    ) +
+    ggplot2::ylab("") +
+    ggplot2::xlab("") +
+    ggplot2::ggtitle("")
+
+  return(plot)
+}
+
+plot_control <- function(x,
+                         ...) {
+  UseMethod("plot_control")
+}
+#' @importFrom tidyr uncount
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_histogram
+#' @importFrom ggplot2 guides
+#' @importFrom ggplot2 scale_fill_manual
+#' @importFrom ggplot2 scale_color_manual
+#' @export
+plot_control.diftrans <- function(x,
+                               grayscale = FALSE,
+                               binwidth = NULL,
+                               pre_fill = ifelse(grayscale,
+                                                 "#0c0c0c",
+                                                 "#E69F00"),
+                               pre_color = ifelse(grayscale,
+                                                  "#0c0c0c",
+                                                  "#E69F00"),
+                               post_fill = ifelse(grayscale,
+                                                 "#dbd9d9",
+                                                 "#56B4E9"),
+                               post_color = ifelse(grayscale,
+                                                  "#dbd9d9",
+                                                  "#56B4E9"),
+                               alpha = ifelse(grayscale, 0.8, 0.35),
+                               pre_label = "Pre-Distribution",
+                               post_label = "Post-Distribution",
+                               FCN = function(x) {x},
+                               ...) {
+  if (x$est == "ba") {
+    stop("This method only works with difference-in-transports.")
+  }
+  pre <- x$pre_control
+  post <- x$post_control
+  pre_dist <- tidyr::uncount(pre, count)$support
+  post_dist <- tidyr::uncount(post, count)$support
+
+  if (is.null(binwidth)) {
+    binwidth <- 30
+    message("`binwidth` not specified; setting `binwidth` to 30")
+  }
+
+  plot <- ggplot2::ggplot() +
+    ggplot2::geom_histogram(
+      ggplot2::aes(
+        x = FCN(pre_dist),
+        y = ..density..,
+        fill = "0",
+        color = "0",
+      ),
+      alpha = alpha,
+      binwidth = binwidth,
+    ) +
+    ggplot2::geom_histogram(
+      ggplot2::aes(
+        x = FCN(post_dist),
+        y = ..density..,
+        fill = "1",
+        color = "1",
+      ),
+      alpha = alpha,
+      binwidth = binwidth,
+    ) +
+    ggplot2::guides(color = FALSE) +
+    ggplot2::scale_color_manual(
+      values = c(pre_color, post_color),
+      labels = c(pre_label, post_label),
+      name = ""
+    ) +
+    ggplot2::scale_fill_manual(
+      values = c(pre_fill, post_fill),
+      labels = c(pre_label, post_label),
+      name = ""
+    ) +
+    ggplot2::ylab("") +
+    ggplot2::xlab("") +
+    ggplot2::ggtitle("")
+
+  return(plot)
 }
