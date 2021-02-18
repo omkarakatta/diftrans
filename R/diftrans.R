@@ -328,6 +328,10 @@ diftrans <- function(pre_main = NULL,
   conservative <- prelim$conservative
   out$conservative <- prelim$conservative
 
+  out$precision <- precision
+  out$sensitivity_lag <- sensitivity_lag
+  out$sensitivity_lead <- sensitivity_lead
+
   if (est == "ba") {
     message("Before-and-After Estimation...")
   } else if (est == "dit") {
@@ -876,6 +880,46 @@ summary.diftrans <- function(object, accuracy = 0.01, ...) {
     )
   )
   cat("\n")
+  if (!placebo_skipped) {
+    cat(
+      paste0(
+        whitespace(align, "Criteria:")
+      )
+    )
+    cat("\n")
+    cat(
+      paste0(
+        whitespace(5),
+        whitespace(align - 6, "Precision:"),
+        object$precision
+      )
+    )
+    cat("\n")
+    cat(
+      paste0(
+        whitespace(5),
+        whitespace(align - 6, "Lag:"),
+        object$sensitivity_lag
+      )
+    )
+    cat("\n")
+    cat(
+      paste0(
+        whitespace(5),
+        whitespace(align  - 6, "Lead:"),
+        object$sensitivity_lead
+      )
+    )
+    cat("\n")
+    cat(
+      paste0(
+        whitespace(5),
+        whitespace(align  - 6, "Accept:"),
+        object$sensitivity_lead
+      )
+    )
+    cat("\n")
+  }
   cat(
     paste0(
       whitespace(align, "Candidate Bandwidths:"),
@@ -1101,7 +1145,8 @@ plot_subsample.diftrans <- function(x,
                                     binwidth = NULL,
                                     fill = "#000000",
                                     color = "#000000",
-                                    alpha = 0.35) {
+                                    alpha = 0.35,
+                                    title = NULL) {
   subsample <- x$subsample
   sims_subsampling <- x$sims_subsampling
   optimal_bw <- x$optimal_bandwidth
@@ -1112,6 +1157,9 @@ plot_subsample.diftrans <- function(x,
   if (is.null(binwidth)) {
     binwidth <- 30
     message("`binwidth` not specified; setting `binwidth` to 30")
+  }
+  if (is.null(title)) {
+    title <- paste("Subsampling Results; Bandwidth =", optimal_bw)
   }
 
   plot <- ggplot2::ggplot() +
@@ -1127,7 +1175,118 @@ plot_subsample.diftrans <- function(x,
     ) +
     ggplot2::ylab("") +
     ggplot2::xlab("") +
-    ggplot2::ggtitle(paste("Subsampling Results; Bandwidth =", optimal_bw))
+    ggplot2::ggtitle(title)
+
+  return(plot)
+
+}
+
+
+### plot_empirical_placebo ---------------------------
+
+plot_empirical_placebo <- function(x, ...) {
+  UseMethod("plot_empirical_placebo")
+}
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_line
+#' @importFrom ggplot2 scale_color_manual
+#' @importFrom ggplot2 scale_linetype_manual
+#' @importFrom ggplot2 ggtitle
+#' @importFrom ggplot2 geom_vline
+#' @importFrom ggplot2 geom_hline
+#' @export
+plot_empirical_placebo.diftrans <- function(x,
+                                   grayscale = FALSE,
+                                   empirical_color = ifelse(grayscale,
+                                                            "#0c0c0c",
+                                                            "#E69F00"),
+                                   empirical_linetype = "solid",
+                                   placebo_color = ifelse(grayscale,
+                                                          "#dbd9d9",
+                                                          "#56B4E9"),
+                                   placebo_linetype = "dashed",
+                                   empirical_label = NULL,
+                                   placebo_label = NULL,
+                                   xFCN = function(x) {x},
+                                   empiricalFCN = function(x) {x},
+                                   placeboFCN = function(x) {x},
+                                   optimal_bandwidth_color = "#000000",
+                                   optimal_bandwidth_linetype = "dotted",
+                                   precision_color = "#000000",
+                                   precision_linetype = "dotted",
+                                   title = NULL,
+                                   ...) {
+  sims_bandwidth_selection <- x$sims_bandwidth_selection
+  if (sims_bandwidth_selection == 0) {
+    stop("There are no bandwidth selection results to plot.")
+  }
+  optimal_bandwidth <- x$optimal_bandwidth
+  precision <- x$precision
+  placebo_cost <- x$placebo_summary["mean"]
+  empirical_cost <- x$empirical_table["result"]
+  bandwidth <- x$bandwidth_vec
+  plot_df <- data.frame(bandwidth = xFCN(bandwidth),
+                        empirical = empiricalFCN(empirical_cost),
+                        placebo = placeboFCN(placebo_cost))
+  names(plot_df) <- c("bandwidth", "empirical", "placebo")
+
+  if (is.null(empirical_label)) {
+    empirical_label <- "Empirical Costs"
+  }
+  if (is.null(placebo_label)) {
+    placebo_label <- paste0("Placebo Costs (",
+                            sims_bandwidth_selection,
+                            " simulations)")
+  }
+  if (is.null(title)) {
+    title <- paste0("Optimal Bandwidth: ",
+                    optimal_bandwidth,
+                    "   Precision: ",
+                    precision)
+  }
+
+  plot <- ggplot2::ggplot(data = plot_df,
+                  ggplot2::aes(x = bandwidth)) +
+    ggplot2::geom_line(
+      data = plot_df,
+      ggplot2::aes(
+        y = empirical,
+        color = "0",
+        linetype = "0"
+      )
+    ) +
+    ggplot2::geom_line(
+      data = plot_df,
+      ggplot2::aes(
+        y = .data$placebo,
+        color = "1",
+        linetype = "1"
+      )
+    ) +
+    ggplot2::scale_color_manual(
+      values = c(empirical_color, placebo_color),
+      labels = c(empirical_label,
+                 placebo_label),
+      name = ""
+    ) +
+    ggplot2::scale_linetype_manual(
+      values = c(empirical_linetype, placebo_linetype),
+      labels = c(empirical_label,
+                 placebo_label),
+      name = ""
+    ) +
+    ggplot2::geom_vline(
+      xintercept = optimal_bandwidth,
+      color = optimal_bandwidth_color,
+      linetype = optimal_bandwidth_linetype
+    ) +
+    ggplot2::geom_hline(
+      yintercept = precision,
+      color = precision_color,
+      linetype = precision_linetype
+    ) +
+    ggplot2::ggtitle(title)
 
   return(plot)
 
