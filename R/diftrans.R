@@ -1212,9 +1212,9 @@ plot_empirical_placebo.diftrans <- function(x,
                                    empiricalFCN = function(x) {x},
                                    placeboFCN = function(x) {x},
                                    optimal_bandwidth_color = "#000000",
-                                   optimal_bandwidth_linetype = "dotted",
+                                   optimal_bandwidth_linetype = "longdash",
                                    precision_color = "#000000",
-                                   precision_linetype = "dotted",
+                                   precision_linetype = "longdash",
                                    title = NULL,
                                    ...) {
   sims_bandwidth_selection <- x$sims_bandwidth_selection
@@ -1290,4 +1290,100 @@ plot_empirical_placebo.diftrans <- function(x,
 
   return(plot)
 
+}
+
+### plot_empirical ---------------------------
+
+plot_empirical <- function(x, ...) {
+  UseMethod("plot_empirical")
+}
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_line
+#' @importFrom ggplot2 guides
+#' @importFrom ggplot2 scale_color_manual
+#' @importFrom ggplot2 scale_linetype_manual
+#' @importFrom ggplot2 ggtitle
+#' @importFrom ggplot2 geom_vline
+#' @importFrom ggplot2 theme
+#' @importFrom scales percent
+#' @export
+plot_empirical.diftrans <- function(x,
+                           grayscale = FALSE,
+                           result_color = ifelse(grayscale,
+                                                 "#0c0c0c",
+                                                 "#E69F00"),
+                           result_linetype = "solid",
+                           main_color = ifelse(grayscale,
+                                               "#383838",
+                                               "#56B4E9"),
+                           main_linetype = "dashed",
+                           control_color = ifelse(grayscale,
+                                            "#757575",
+                                            "#009E73"),
+                           control_linetype = "dotted",
+                           result_label = "Difference",
+                           main_label = "Treated",
+                           control_label = "Control",
+                           optimal_bandwidth_color = "#000000",
+                           optimal_bandwidth_linetype = "longdash",
+                           title = NULL,
+                           accuracy = 0.01,
+                           ...) {
+  empirical_table <- x$empirical_table
+  optimal_bandwidth <- x$optimal_bandwidth
+  empirical_cost <- scales::percent(x$empirical_cost, accuracy = accuracy)
+  if (is.null(title)) {
+    estimator <- ifelse(x$est == "ba",
+                        "Before-and-After Estimator of ",
+                        "Difference-in-Transports Estimator of ")
+    title <- paste0(estimator,
+                    empirical_cost,
+                    " at Bandwidth ",
+                    optimal_bandwidth)
+  }
+  plot <- ggplot2::ggplot(data = empirical_table,
+                          ggplot2::aes(x = bandwidth)) +
+    ggplot2::geom_line(
+      ggplot2::aes(
+        y = result,
+        color = "0",
+        linetype = "0"
+      ),
+    ) +
+    ggplot2::geom_vline(
+      xintercept = optimal_bandwidth,
+      linetype = optimal_bandwidth_linetype
+    ) +
+    ggplot2::ggtitle(title)
+  if (x$est == "dit") {
+    plot <- plot +
+      ggplot2::geom_line(
+        ggplot2::aes(
+          y = main,
+          color = "1",
+          linetype = "1"
+        )
+      ) +
+      ggplot2::geom_line(
+        ggplot2::aes(
+          y = control,
+          color = "2",
+          linetype = "2"
+        )
+      ) +
+      ggplot2::scale_color_manual(
+        values = c(result_color, main_color, control_color),
+        labels = c(result_label, main_label, control_label),
+        name = ""
+      ) +
+      ggplot2::guides(linetype = FALSE)
+  } else if (x$est == "ba") {
+    plot <- plot +
+      ggplot2::theme(legend.position = "none") +
+      ggplot2::scale_color_manual(
+        values = c(result_color)
+      )
+  }
+  return(plot)
 }
