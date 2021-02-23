@@ -92,11 +92,12 @@ ba <- diftrans(
   post_main = post_Beijing,
   sims_bandwidth_selection = 500,
   sims_subsampling = 100,
-  subsample_pre_main_size = floor(sum(pre_Beijing$count) * 0.75),
-  subsample_post_main_size = floor(sum(post_Beijing$count) * 0.75),
+  pre_main_subsample_size = floor(sum(pre_Beijing$count) * 0.75),
+  post_main_subsample_size = floor(sum(post_Beijing$count) * 0.75),
   seed = 1,
   conservative = FALSE,
-  quietly = FALSE
+  quietly = FALSE,
+  show_progress = TRUE
 )
 
 save(ba, file = here::here("data", "ba.RData"))
