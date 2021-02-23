@@ -629,7 +629,7 @@ diftrans <- function(pre_main = NULL,
       }
     )
     if (est == "dit") {
-            pre_control_dist <- pre_control %>%
+      pre_control_dist <- pre_control %>%
         tidyr::uncount({{count}}) %>%
         .[[rlang::ensym(var)]]
       post_control_dist <- post_control %>%
