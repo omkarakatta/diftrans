@@ -338,7 +338,9 @@ diftrans <- function(pre_main = NULL,
   }
 
   out$seed <- seed
-  set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
 
   msg <- paste("Seed has been set to", seed)
   send_note(msg, quietly, message)

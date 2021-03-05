@@ -358,12 +358,14 @@ preliminaries <- function(pre_main,
     && round(sensitivity_lag) == sensitivity_lag
     & sensitivity_lag >= 0
   )
-  msg <- "`seed` is invalid."
-  msg_list <- collect_msg(
-    msg_list,
-    msg,
-    is.numeric(seed)
-  )
+  if (!is.null(seed)) {
+    msg <- "`seed` is invalid."
+    msg_list <- collect_msg(
+      msg_list,
+      msg,
+      is.numeric(seed)
+    )
+  }
   msg <- "`conservative` needs to be TRUE or FALSE."
   msg_list <- collect_msg(
     msg_list,
