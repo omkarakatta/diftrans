@@ -255,3 +255,64 @@ ggsave(filename = "before-and-after-correct-size-without-replacement-onlyMSRP.jp
        path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
        width = 7,
        height = 4)
+
+# exploration
+
+pre_total
+post_total
+sum(pre_Beijing$sales)
+sum(post_Beijing$sales)
+
+tp_30000 <- plot_main(ba_transaction_price, binwidth = 30000) +
+  ggtitle("Trans. Price, Binwidth = 30000") +
+  scale_y_continuous(limits = c(0, 7.1e-6), breaks = seq(0, 7.1e-6, 5e-7)) +
+  guides(color = FALSE, fill = FALSE)
+tp_50000 <- plot_main(ba_transaction_price, binwidth = 50000) +
+  ggtitle("Trans. Price, Binwidth = 50000") +
+  scale_y_continuous(limits = c(0, 7.1e-6), breaks = seq(0, 7.1e-6, 5e-7)) +
+  guides(color = FALSE, fill = FALSE)
+tp_70000 <- plot_main(ba_transaction_price, binwidth = 70000) +
+  ggtitle("Trans. Price, Binwidth = 70000") +
+  scale_y_continuous(limits = c(0, 7.1e-6), breaks = seq(0, 7.1e-6, 5e-7)) +
+  guides(color = FALSE, fill = FALSE)
+tp_90000 <- plot_main(ba_transaction_price, binwidth = 90000) +
+  ggtitle("Trans. Price, Binwidth = 90000") +
+  scale_y_continuous(limits = c(0, 7.1e-6), breaks = seq(0, 7.1e-6, 5e-7)) +
+  guides(color = FALSE, fill = FALSE)
+
+msrp_30000 <- plot_main(ba, binwidth = 30000) +
+  ggtitle("MSRP, Binwidth = 30000") +
+  scale_y_continuous(limits = c(0, 7.1e-6), breaks = seq(0, 7.1e-6, 5e-7)) +
+  guides(color = FALSE, fill = FALSE)
+msrp_50000 <- plot_main(ba, binwidth = 50000) +
+  ggtitle("MSRP, Binwidth = 50000") +
+  scale_y_continuous(limits = c(0, 7.1e-6), breaks = seq(0, 7.1e-6, 5e-7)) +
+  guides(color = FALSE, fill = FALSE)
+msrp_70000 <- plot_main(ba, binwidth = 70000) +
+  ggtitle("MSRP, Binwidth = 70000") +
+  scale_y_continuous(limits = c(0, 7.1e-6), breaks = seq(0, 7.1e-6, 5e-7)) +
+  guides(color = FALSE, fill = FALSE)
+msrp_90000 <- plot_main(ba, binwidth = 90000) +
+  ggtitle("MSRP, Binwidth = 90000") +
+  scale_y_continuous(limits = c(0, 7.1e-6), breaks = seq(0, 7.1e-6, 5e-7)) +
+  guides(color = FALSE, fill = FALSE)
+
+library(gridExtra)
+
+tp_hist <- arrangeGrob(tp_30000, tp_50000, tp_70000, tp_90000,
+                       ncol = 2)
+
+ggsave(filename = "tp_hist.jpg",
+       plot = tp_hist,
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 9,
+       height = 9)
+
+msrp_hist <- arrangeGrob(msrp_30000, msrp_50000, msrp_70000, msrp_90000,
+                         ncol = 2)
+
+ggsave(filename = "msrp_hist.jpg",
+       plot = msrp_hist,
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 9,
+       height = 9)
