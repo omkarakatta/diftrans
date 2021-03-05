@@ -164,22 +164,33 @@ post_total <- as.numeric(Beijing[Beijing$year == 2011, "sales"])
 # create samples from MSRP data that is of same size as transaction price data
 
 sims <- 100
-set.seed(23)
-pre_sample <- rmultinom(sims, pre_total, pre_Beijing$sales)
-post_sample <- rmultinom(sims, post_total, post_Beijing$sales)
+set.seed(50)
+pre_Beijing_dist <- unlist(tidyr::uncount(pre_Beijing, sales))
+post_Beijing_dist <- unlist(tidyr::uncount(post_Beijing, sales))
+support <- pre_Beijing$MSRP
 bandwidth_vec <- seq(0, 40000, 1000)
 results <- matrix(NA_real_, nrow = length(bandwidth_vec), ncol = sims)
+pre_sample_storage <- matrix(NA_real_, nrow = length(support), ncol = sims)
+post_sample_storage <- matrix(NA_real_, nrow = length(support), ncol = sims)
+
 for (i in seq_len(sims)) {
-  paste("Simulation", i, "out of", sims)
-  pre_sample_df <- data.frame(MSRP = pre_Beijing$MSRP,
-                              sales = pre_sample[, i])
-  post_sample_df <- data.frame(MSRP = post_Beijing$MSRP,
-                               sales = post_sample[, i])
+  print(paste("Simulation", i, "out of", sims))
+  pre_sample <- organize_subsamples(pre_Beijing_dist, pre_total, support)
+  post_sample <- organize_subsamples(post_Beijing_dist, post_total, support)
+  pre_sample_storage[, i] <- pre_sample
+  post_sample_storage[, i] <- post_sample
+  stopifnot(sum(pre_sample) == pre_total)
+  stopifnot(sum(post_sample) == post_total)
+  pre_sample_df <- data.frame(MSRP = support,
+                              sales = pre_sample)
+  post_sample_df <- data.frame(MSRP = support,
+                               sales = post_sample)
   ba_sample <- diftrans(pre_sample_df,
                         post_sample_df,
                         var = MSRP,
                         count = sales,
-                        bandwidth_vec = bandwidth_vec)
+                        bandwidth_vec = bandwidth_vec,
+                        seed = NULL)
   results[, i] <- ba_sample$empirical_table$result
 }
 
@@ -218,7 +229,29 @@ ggplot() +
   theme_bw() +
   guides(color = FALSE)
 
-ggsave(filename = "before-and-after-correct-size.jpg",
+ggsave(filename = "before-and-after-correct-size-without-replacement.jpg",
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 7,
+       height = 4)
+
+ggplot() +
+  geom_line(data = plot_df %>%
+            filter(!(name %in% c("msrp_sim", "tp_sim"))),
+            aes(x = bandwidth, y = value, color = name), alpha = 0.75, size = 0.5) +
+  geom_line(data = plot_df %>%
+            filter(name %in% c("msrp_sim")),
+            aes(x = bandwidth, y = value), color = "black", alpha = 1) +
+  # geom_line(data = plot_df %>%
+  #           filter(name %in% c("tp_sim")),
+  #           aes(x = bandwidth, y = value), color = "black", alpha = 1) +
+  scale_y_continuous(breaks = seq(0, 90, 5)) +
+  scale_x_continuous(breaks = seq(0, 40000, 2500)) +
+  xlab("Transport Cost (%)") +
+  ylab("Bandwidth") +
+  theme_bw() +
+  guides(color = FALSE)
+
+ggsave(filename = "before-and-after-correct-size-without-replacement-onlyMSRP.jpg",
        path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
        width = 7,
        height = 4)
