@@ -117,3 +117,108 @@ ggsave(filename = "before-and-after.jpg",
        path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
        width = 7,
        height = 4)
+
+### Smaller-sized MSRP -------------------------
+
+devtools::load_all()
+library(dplyr)
+library(ggplot2)
+
+# prepare MSRP data
+
+load(here::here(".hidden", "Beijing_cleaned.RData"))
+
+pre_Beijing_raw <- Beijing_cleaned %>%
+  filter(year == 2010) %>%
+  group_by(MSRP) %>%
+  summarize(sales = sum(sales))
+post_Beijing_raw <- Beijing_cleaned %>%
+  filter(year == 2011) %>%
+  group_by(MSRP) %>%
+  summarize(sales = sum(sales))
+merged <- full_join(pre_Beijing_raw, post_Beijing_raw, by = "MSRP") %>%
+  rename(pre_sales = sales.x,
+         post_sales = sales.y) %>%
+  tidyr::replace_na(list(pre_sales = 0, post_sales = 0))
+pre_Beijing <- merged %>%
+  select(MSRP, pre_sales) %>%
+  rename(sales = pre_sales) %>%
+  arrange(MSRP)
+post_Beijing <- merged %>%
+  select(MSRP, post_sales) %>%
+  rename(sales = post_sales) %>%
+  arrange(MSRP)
+
+# prepare transaction price data to get totals
+
+Beijing_raw <- data.table::fread("~/BFI/3_BMP_GP/data-raw/Beijing_cleaned_merged.csv")
+head(Beijing_raw)
+
+Beijing <- Beijing_raw %>%
+  filter(!is.na(avg_price)) %>%
+  group_by(year) %>%
+  summarize(sales = sum(sales))
+pre_total <- as.numeric(Beijing[Beijing$year == 2010, "sales"])
+post_total <- as.numeric(Beijing[Beijing$year == 2011, "sales"])
+
+# create samples from MSRP data that is of same size as transaction price data
+
+sims <- 100
+set.seed(23)
+pre_sample <- rmultinom(sims, pre_total, pre_Beijing$sales)
+post_sample <- rmultinom(sims, post_total, post_Beijing$sales)
+bandwidth_vec <- seq(0, 40000, 1000)
+results <- matrix(NA_real_, nrow = length(bandwidth_vec), ncol = sims)
+for (i in seq_len(sims)) {
+  paste("Simulation", i, "out of", sims)
+  pre_sample_df <- data.frame(MSRP = pre_Beijing$MSRP,
+                              sales = pre_sample[, i])
+  post_sample_df <- data.frame(MSRP = post_Beijing$MSRP,
+                               sales = post_sample[, i])
+  ba_sample <- diftrans(pre_sample_df,
+                        post_sample_df,
+                        var = MSRP,
+                        count = sales,
+                        bandwidth_vec = bandwidth_vec)
+  results[, i] <- ba_sample$empirical_table$result
+}
+
+# combine MSRP sampled results and transaction price results and actual result
+
+results_df <- as.data.frame(results)
+colnames(results_df) <- paste0("sim", seq_len(sims))
+
+load(here::here("scrapnotes/ba.RData"))
+msrp_results <- ba$empirical_table$result
+
+load(here::here("scrapnotes/ba_transaction_price.RData"))
+tp_results <- ba_transaction_price$empirical_table$result
+
+plot_df <- cbind(bandwidth = bandwidth_vec,
+                 results_df,
+                 msrp_sim = msrp_results,
+                 tp_sim = tp_results) %>%
+  tidyr::pivot_longer(cols = contains("sim")) %>%
+  mutate(value = 100 * value)
+
+ggplot() +
+  geom_line(data = plot_df %>%
+            filter(!(name %in% c("msrp_sim", "tp_sim"))),
+            aes(x = bandwidth, y = value, color = name), alpha = 0.75) +
+  geom_line(data = plot_df %>%
+            filter(name %in% c("msrp_sim")),
+            aes(x = bandwidth, y = value), color = "black", alpha = 0.5) +
+  geom_line(data = plot_df %>%
+            filter(name %in% c("tp_sim")),
+            aes(x = bandwidth, y = value), color = "black", alpha = 0.5) +
+  scale_y_continuous(breaks = seq(0, 90, 5)) +
+  scale_x_continuous(breaks = seq(0, 40000, 2500)) +
+  xlab("Transport Cost (%)") +
+  ylab("Bandwidth") +
+  theme_bw() +
+  guides(color = FALSE)
+
+ggsave(filename = "before-and-after-correct-size.jpg",
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 7,
+       height = 4)
