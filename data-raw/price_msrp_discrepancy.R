@@ -316,3 +316,57 @@ ggsave(filename = "msrp_hist.jpg",
        path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
        width = 9,
        height = 9)
+
+matched_raw <- data.table::fread("~/BFI/3_BMP_GP/data-raw/Beijing_cleaned_merged.csv")
+
+matched <- matched_raw %>%
+  filter(!is.na(avg_price)) %>%
+  select(year, msrp, sales)
+matched_msrp <- matched %>%
+  group_by(year, msrp) %>%
+  summarize(sales = sum(sales)) %>%
+  ungroup()
+matched_pre_raw <- matched_msrp %>% filter(year == 2010) %>% select(-year)
+matched_post_raw <- matched_msrp %>% filter(year == 2011) %>% select(-year)
+merged <- full_join(matched_pre_raw, matched_post_raw, by = "msrp") %>%
+  tidyr::replace_na(list(sales.x = 0, sales.y = 0))
+
+matched_msrp_pre <- merged %>%
+  select(msrp, sales.x) %>%
+  rename(sales = sales.x) %>%
+  arrange(msrp)
+matched_msrp_post <- merged %>%
+  select(msrp, sales.y) %>%
+  rename(sales = sales.y) %>%
+  arrange(msrp)
+
+ba_msrp <- diftrans(pre_main = matched_msrp_pre,
+                    post_main = matched_msrp_post,
+                    var = msrp,
+                    count = sales,
+                    sims_bandwidth_selection = 0,
+                    seed = 80)
+ba_msrp_df <- ba_msrp$empirical_table %>% select(bandwidth, result)
+
+load(here::here("scrapnotes/ba_transaction_price.RData"))
+ba_tp_df <- ba_transaction_price$empirical_table %>% select(bandwidth, result)
+
+plot_df <- merge(ba_msrp_df, ba_tp_df, by = "bandwidth") %>%
+  rename(msrp = result.x, tp = result.y) %>%
+  mutate(diff = abs(msrp - tp)) %>%
+  tidyr::pivot_longer(cols = c(msrp, tp, diff))
+
+ggplot(plot_df) +
+  geom_line(aes(x = bandwidth, y = 100 * value, color = name)) +
+  theme_bw() +
+  scale_y_continuous(breaks = seq(0, 90, 5)) +
+  scale_x_continuous(breaks = seq(0, 40000, 5000)) +
+  scale_color_discrete(name = "",
+                     labels = c("absolute difference", "msrp", "transaction price")) +
+  xlab("Bandwidth") +
+  ylab("Transport Cost (%)")
+
+ggsave(filename = "msrp_vs_transactionprice.jpg",
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 7,
+       height = 4)
