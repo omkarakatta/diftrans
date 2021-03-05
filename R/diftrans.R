@@ -271,7 +271,6 @@ diftrans <- function(pre_main = NULL,
 
 # Preliminaries ----------
 
-
   prelim <- preliminaries(
     pre_main = pre_main,
     post_main = post_main,
@@ -585,7 +584,7 @@ diftrans <- function(pre_main = NULL,
   filtered_real <- real[cand_bw_index, ]
 
   max_result <- max(filtered_real$result)
-  result_index <- which(cand_real$result == max_result)
+  result_index <- min(which(cand_real$result == max_result))
   result_column <- rep("-", nrow(cand_real))
   result_column[result_index] <- "*"
   result_real <- cbind(cand_real, "estimate" = result_column)

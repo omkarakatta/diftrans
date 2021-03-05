@@ -82,7 +82,7 @@ check_support <- function(pre_df, post_df, var) {
   } else {
     message <- "Everything looks good."
     status <- 0
-    support <- pre_support
+    support <- sort(pre_support)
   }
 
   list(message = message, status = status, support = support)

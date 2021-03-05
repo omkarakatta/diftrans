@@ -233,6 +233,8 @@ get_OTcost <- function(pre_df,
   }
 
   #~ obtain counts
+  pre_df <- pre_df %>% dplyr::arrange({{var}})
+  post_df <- post_df %>% dplyr::arrange({{var}})
   pre <- pre_df[[rlang::ensym(count)]]
   post <- post_df[[rlang::ensym(count)]]
 
