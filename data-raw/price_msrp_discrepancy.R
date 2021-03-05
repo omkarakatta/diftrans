@@ -207,10 +207,10 @@ ggplot() +
             aes(x = bandwidth, y = value, color = name), alpha = 0.75) +
   geom_line(data = plot_df %>%
             filter(name %in% c("msrp_sim")),
-            aes(x = bandwidth, y = value), color = "black", alpha = 0.5) +
+            aes(x = bandwidth, y = value), color = "black", alpha = 1) +
   geom_line(data = plot_df %>%
             filter(name %in% c("tp_sim")),
-            aes(x = bandwidth, y = value), color = "black", alpha = 0.5) +
+            aes(x = bandwidth, y = value), color = "black", alpha = 1) +
   scale_y_continuous(breaks = seq(0, 90, 5)) +
   scale_x_continuous(breaks = seq(0, 40000, 2500)) +
   xlab("Transport Cost (%)") +
