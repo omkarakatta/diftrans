@@ -428,17 +428,35 @@ ggplot() +
   geom_histogram(aes(x = pre_sample_dist$msrp,
                      y = ..density..),
                  alpha = 0.5,
-                 fill = "yellow", color = "white", binwidth = 20000)
+                 fill = "steelblue", color = "white", binwidth = 20000) +
+  ggtitle("Matched data (orange) vs Sampled MSRP data (blue) -- 2010") +
+  xlab("MSRP") +
+  theme_bw()
+
+ggsave("matched_vs_sample_2010.jpg",
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 7,
+       height = 4)
+
 
 ggplot() +
   geom_histogram(aes(x = matched_msrp_post_dist$msrp,
                      y = ..density..),
                  alpha = 0.5,
-                 fill = "red", color = "white", binwidth = 20000) +
+                 fill = "orange", color = "white", binwidth = 20000) +
   geom_histogram(aes(x = post_sample_dist$msrp,
                      y = ..density..),
                  alpha = 0.5,
-                 fill = "green", color = "white", binwidth = 20000)
+                 fill = "steelblue", color = "white", binwidth = 20000) +
+  ggtitle("Matched data (orange) vs Sampled MSRP data (blue) -- 2011") +
+  xlab("MSRP") +
+  theme_bw()
+
+ggsave("matched_vs_sample_2011.jpg",
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 7,
+       height = 4)
+
 
 head(matched)
 matched %>%
@@ -450,3 +468,30 @@ matched %>%
 # compare_2010_2011 <- matched_raw %>%
 #   filter(!is.na(avg_price)) %>%
 #   select(msrp, swtprice, color, noticenum, avg_price)
+
+# Compare the data I sent with the data they sent me
+
+# head(matched_raw)
+# head(Beijing_cleaned)
+Beijing_cleaned_2 <- Beijing_cleaned %>%
+  mutate(ym = as.character(ym)) %>%
+  distinct()
+matched_2 <- matched_raw %>%
+  arrange(v1) %>%
+  select(-v1, -avg_price) %>%
+  as_tibble() %>%
+  rename(MSRP = msrp, postBeijing = postbeijing, postTianjin = posttianjin, Beijing = beijing, Tianjin = tianjin, Shijiazhuang = shijiazhuang)
+dim(Beijing_cleaned_2)
+dim(matched_2)
+head(Beijing_cleaned_2)
+head(matched_2)
+all.equal(Beijing_cleaned_2, matched_2)
+identical(Beijing_cleaned_2$id, matched_2$id)
+identical(Beijing_cleaned_2$year, matched_2$year)
+identical(Beijing_cleaned_2$city, matched_2$city)
+identical(Beijing_cleaned_2$MSRP, matched_2$MSRP)
+identical(Beijing_cleaned_2$sales, matched_2$sales)
+all.equal(Beijing_cleaned_2$swtprice, matched_2$swtprice)
+Beijing_cleaned_2[Beijing_cleaned_2$swtprice == matched_2$swtprice, ]
+identical(Beijing_cleaned_2$color, matched_2$color)
+identical(Beijing_cleaned_2$noticenum, matched_2$noticenum)
