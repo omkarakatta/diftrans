@@ -163,7 +163,7 @@ post_total <- as.numeric(Beijing[Beijing$year == 2011, "sales"])
 
 # create samples from MSRP data that is of same size as transaction price data
 
-sims <- 100
+sims <- 500
 set.seed(50)
 pre_Beijing_dist <- unlist(tidyr::uncount(pre_Beijing, sales))
 post_Beijing_dist <- unlist(tidyr::uncount(post_Beijing, sales))
