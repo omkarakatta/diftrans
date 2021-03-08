@@ -344,9 +344,12 @@ ba_msrp <- diftrans(pre_main = matched_msrp_pre,
                     post_main = matched_msrp_post,
                     var = msrp,
                     count = sales,
-                    sims_bandwidth_selection = 0,
-                    seed = 80)
+                    sims_bandwidth_selection = 500,
+                    seed = 80,
+                    show_progress = TRUE)
 ba_msrp_df <- ba_msrp$empirical_table %>% select(bandwidth, result)
+
+save(ba_msrp, file = here::here("scrapnotes/ba_msrp.RData"))
 
 load(here::here("scrapnotes/ba_transaction_price.RData"))
 ba_tp_df <- ba_transaction_price$empirical_table %>% select(bandwidth, result)
