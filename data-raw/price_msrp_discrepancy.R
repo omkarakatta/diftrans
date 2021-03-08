@@ -395,3 +395,58 @@ ggsave(filename = "msrp_vs_transactionprice_ratio.jpg",
        path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
        width = 7,
        height = 4)
+
+# Compare matched and sampled distributions
+
+head(matched_msrp_pre)
+head(matched_msrp_post)
+head(pre_sample)
+head(post_sample)
+
+pre_sample_df <- data.frame(msrp = support, sales = pre_sample)
+post_sample_df <- data.frame(msrp = support, sales = post_sample)
+
+# matched_msrp <- full_join(matched_msrp_pre, matched_msrp_post, by = "msrp") %>%
+#   rename(matched_pre = sales.x,
+#          matched_post = sales.y)
+# sample_msrp <- data.frame(msrp = support,
+#                           samples_pre = pre_sample,
+#                           samples_post = post_sample)
+# plot_df <- full_join(matched_msrp, sample_msrp, by = "msrp") %>%
+#   tidyr::pivot_longer(cols = c(contains("pre"), contains("post")))
+
+matched_msrp_pre_dist <- tidyr::uncount(matched_msrp_pre, sales)
+matched_msrp_post_dist <- tidyr::uncount(matched_msrp_post, sales)
+pre_sample_dist <- tidyr::uncount(pre_sample_df, sales)
+post_sample_dist <- tidyr::uncount(post_sample_df, sales)
+
+ggplot() +
+  geom_histogram(aes(x = matched_msrp_pre_dist$msrp,
+                     y = ..density..),
+                 alpha = 0.5,
+                 fill = "orange", color = "white", binwidth = 20000) +
+  geom_histogram(aes(x = pre_sample_dist$msrp,
+                     y = ..density..),
+                 alpha = 0.5,
+                 fill = "yellow", color = "white", binwidth = 20000)
+
+ggplot() +
+  geom_histogram(aes(x = matched_msrp_post_dist$msrp,
+                     y = ..density..),
+                 alpha = 0.5,
+                 fill = "red", color = "white", binwidth = 20000) +
+  geom_histogram(aes(x = post_sample_dist$msrp,
+                     y = ..density..),
+                 alpha = 0.5,
+                 fill = "green", color = "white", binwidth = 20000)
+
+head(matched)
+matched %>%
+  group_by(year) %>%
+  summarize(mean = mean(msrp),
+            sd = sd(msrp),
+            q95 = quantile(msrp, 0.95))
+
+# compare_2010_2011 <- matched_raw %>%
+#   filter(!is.na(avg_price)) %>%
+#   select(msrp, swtprice, color, noticenum, avg_price)
