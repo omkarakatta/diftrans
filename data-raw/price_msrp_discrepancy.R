@@ -347,9 +347,11 @@ ba_msrp <- diftrans(pre_main = matched_msrp_pre,
                     sims_bandwidth_selection = 500,
                     seed = 80,
                     show_progress = TRUE)
-ba_msrp_df <- ba_msrp$empirical_table %>% select(bandwidth, result)
 
 save(ba_msrp, file = here::here("scrapnotes/ba_msrp.RData"))
+
+load(here::here("scrapnotes/ba_msrp.RData"))
+ba_msrp_df <- ba_msrp$empirical_table %>% select(bandwidth, result)
 
 load(here::here("scrapnotes/ba_transaction_price.RData"))
 ba_tp_df <- ba_transaction_price$empirical_table %>% select(bandwidth, result)
@@ -370,6 +372,26 @@ ggplot(plot_df) +
   ylab("Transport Cost (%)")
 
 ggsave(filename = "msrp_vs_transactionprice.jpg",
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 7,
+       height = 4)
+
+plot_df <- merge(ba_msrp_df, ba_tp_df, by = "bandwidth") %>%
+  rename(msrp = result.x, tp = result.y) %>%
+  mutate(ratio = msrp / tp) %>%
+  tidyr::pivot_longer(cols = c(msrp, tp, ratio))
+
+ggplot(plot_df) +
+  geom_line(aes(x = bandwidth, y = value, color = name)) +
+  theme_bw() +
+  scale_y_continuous(breaks = seq(0, 1.1, 0.2)) +
+  scale_x_continuous(breaks = seq(0, 40000, 5000)) +
+  scale_color_discrete(name = "",
+                     labels = c("MSRP", "Ratio", "Transaction Price")) +
+  xlab("Bandwidth") +
+  ylab("Transport Cost (%)")
+
+ggsave(filename = "msrp_vs_transactionprice_ratio.jpg",
        path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
        width = 7,
        height = 4)
