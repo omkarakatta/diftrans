@@ -495,3 +495,113 @@ all.equal(Beijing_cleaned_2$swtprice, matched_2$swtprice)
 Beijing_cleaned_2[Beijing_cleaned_2$swtprice == matched_2$swtprice, ]
 identical(Beijing_cleaned_2$color, matched_2$color)
 identical(Beijing_cleaned_2$noticenum, matched_2$noticenum)
+
+## Are matches a random sample of MSRP AND SALES?
+
+msrp_full_2010 <- (unlist(matched_raw[year == 2010, "msrp"]))
+msrp_full_2011 <- (unlist(matched_raw[year == 2011, "msrp"]))
+
+msrp_match_2010 <- (unlist(matched_raw[!is.na(matched_raw$avg_price) & year == 2010,
+                                      "msrp"]))
+msrp_match_2011 <- (unlist(matched_raw[!is.na(matched_raw$avg_price) & year == 2011,
+                                      "msrp"]))
+
+plot_df <- data.frame(
+  x = c(rep("full 2010", length(msrp_full_2010)),
+        rep("match 2010", length(msrp_match_2010)),
+        rep("full 2011", length(msrp_full_2011)),
+        rep("match 2011", length(msrp_match_2011))),
+  y = c(msrp_full_2010, msrp_match_2010, msrp_full_2011, msrp_match_2011)
+)
+
+
+full_color <- "black"
+match_color <- "black"
+alpha <- 0.25
+ggplot() +
+  # geom_boxplot(aes(x))
+  geom_point(aes(x = msrp_full_2010, y = "1"),
+             alpha = alpha, color = full_color, size = 0.5) +
+  geom_point(aes(x = msrp_match_2010, y = "2"),
+             alpha = alpha, color = match_color, size = 0.5) +
+  geom_point(aes(x = msrp_full_2011, y = "3"),
+             alpha = alpha, color =  full_color, size = 0.5) +
+  geom_point(aes(x = msrp_match_2011, y = "4"),
+             alpha = alpha, color = match_color, size = 0.5) +
+  theme_bw() +
+  scale_y_discrete(labels = c("1" = "full 2010",
+                              "2" = "match 2010",
+                              "3" = "full 2011",
+                              "4" = "match 2011"),
+                   limits = c("4", "3", "2", "1"))
+
+ggplot(plot_df) +
+  # geom_boxplot(aes(x = x, y = y))
+  geom_histogram(aes(x = y, y = ..density..),
+                 color = "white",
+                 binwidth = 25000) +
+  facet_wrap(vars(x)) +
+  theme_bw()
+
+
+
+msrp_full_2010 <- matched_raw %>%
+  filter(year == 2010) %>%
+  select(msrp, sales) %>%
+  uncount(sales) %>%
+  unlist()
+msrp_full_2011 <- matched_raw %>%
+  filter(year == 2011) %>%
+  select(msrp, sales) %>%
+  uncount(sales) %>%
+  unlist()
+
+msrp_match_2010 <- matched_raw %>%
+  filter(year == 2010) %>%
+  filter(!is.na(avg_price)) %>%
+  select(msrp, sales) %>%
+  uncount(sales) %>%
+  unlist()
+msrp_match_2011 <- matched_raw %>%
+  filter(year == 2011) %>%
+  filter(!is.na(avg_price)) %>%
+  select(msrp, sales) %>%
+  uncount(sales) %>%
+  unlist()
+
+plot_df <- data.frame(
+  x = c(rep("full 2010", length(msrp_full_2010)),
+        rep("match 2010", length(msrp_match_2010)),
+        rep("full 2011", length(msrp_full_2011)),
+        rep("match 2011", length(msrp_match_2011))),
+  y = c(msrp_full_2010, msrp_match_2010, msrp_full_2011, msrp_match_2011)
+)
+
+
+# full_color <- "black"
+# match_color <- "black"
+# alpha <- 0.25
+# ggplot() +
+#   # geom_boxplot(aes(x))
+#   geom_point(aes(x = msrp_full_2010, y = "1"),
+#              alpha = alpha, color = full_color, size = 0.5) +
+#   geom_point(aes(x = msrp_match_2010, y = "2"),
+#              alpha = alpha, color = match_color, size = 0.5) +
+#   geom_point(aes(x = msrp_full_2011, y = "3"),
+#              alpha = alpha, color =  full_color, size = 0.5) +
+#   geom_point(aes(x = msrp_match_2011, y = "4"),
+#              alpha = alpha, color = match_color, size = 0.5) +
+#   theme_bw() +
+#   scale_y_discrete(labels = c("1" = "full 2010",
+#                               "2" = "match 2010",
+#                               "3" = "full 2011",
+#                               "4" = "match 2011"),
+#                    limits = c("4", "3", "2", "1"))
+
+ggplot(plot_df) +
+  # geom_boxplot(aes(x = x, y = y))
+  geom_histogram(aes(x = y, y = ..density..),
+                 color = "white",
+                 binwidth = 25000) +
+  facet_wrap(vars(x)) +
+  theme_bw()
