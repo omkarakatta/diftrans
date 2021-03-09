@@ -545,7 +545,7 @@ ggplot(plot_df) +
 
 
 
-
+# Unweighted
 
 support <- unique(plot_df$y)
 
@@ -737,10 +737,182 @@ plot_df <- data.frame(
 #                               "4" = "match 2011"),
 #                    limits = c("4", "3", "2", "1"))
 
+tmp <- matched_raw %>%
+  filter(year == 2011) %>%
+  filter(!is.na(avg_price)) %>%
+  select(msrp, sales) %>%
+  group_by(msrp) %>%
+  summarize(sales = sum(sales)) %>%
+  arrange(desc(sales)) #  %>%
+  # mutate(prop = sales / (sum(sales) * 10000))
+
+tmp[1, ]
+
+
 ggplot(plot_df) +
   # geom_boxplot(aes(x = x, y = y))
+  geom_vline(xintercept = as.numeric(tmp[1, "msrp"])) +
   geom_histogram(aes(x = y, y = ..density..),
                  # color = "white",
+                 fill = "orange",
                  binwidth = 10000) +
   facet_wrap(vars(x)) +
   theme_bw()
+
+# ggplot(tmp) +
+#   geom_bar(aes(x = msrp, y = prop), stat = "identity")
+
+# Unweighted and Unique
+
+msrp_full_2010 <- unique(unlist(matched_raw[year == 2010, "msrp"]))
+msrp_full_2011 <- unique(unlist(matched_raw[year == 2011, "msrp"]))
+
+msrp_match_2010 <- unique(unlist(matched_raw[!is.na(matched_raw$avg_price) & year == 2010,
+                                      "msrp"]))
+msrp_match_2011 <- unique(unlist(matched_raw[!is.na(matched_raw$avg_price) & year == 2011,
+                                      "msrp"]))
+
+plot_df <- data.frame(
+  x = c(rep("full 2010", length(msrp_full_2010)),
+        rep("match 2010", length(msrp_match_2010)),
+        rep("full 2011", length(msrp_full_2011)),
+        rep("match 2011", length(msrp_match_2011))),
+  y = c(msrp_full_2010, msrp_match_2010, msrp_full_2011, msrp_match_2011)
+)
+
+
+support <- unique(plot_df$y)
+
+msrp_match_2010_count <- sapply(
+  seq_along(support),
+  function(i) {
+    supp <- support[[i]]
+    sum(msrp_match_2010 == supp)
+  }
+)
+msrp_match_2011_count <- sapply(
+  seq_along(support),
+  function(i) {
+    supp <- support[[i]]
+    sum(msrp_match_2011 == supp)
+  }
+)
+msrp_match_2010_df <- as.data.frame(cbind(support, count = msrp_match_2010_count))
+msrp_match_2011_df <- as.data.frame(cbind(support, count = msrp_match_2011_count))
+msrp_match_unweighted <- diftrans(pre_main = msrp_match_2010_df,
+                                 post_main = msrp_match_2011_df,
+                                 var = support,
+                                 count = count)
+match_results <- msrp_match_unweighted$empirical_table$result
+
+msrp_match_2010_count <- sapply(
+  seq_along(support),
+  function(i) {
+    supp <- support[[i]]
+    sum(msrp_match_2010 == supp)
+  }
+)
+msrp_match_2011_count <- sapply(
+  seq_along(support),
+  function(i) {
+    supp <- support[[i]]
+    sum(msrp_match_2011 == supp)
+  }
+)
+msrp_match_2010_df <- as.data.frame(cbind(support, count = msrp_match_2010_count))
+msrp_match_2011_df <- as.data.frame(cbind(support, count = msrp_match_2011_count))
+msrp_match_unweighted <- diftrans(pre_main = msrp_match_2010_df,
+                                 post_main = msrp_match_2011_df,
+                                 var = support,
+                                 count = count)
+match_results <- msrp_match_unweighted$empirical_table$result
+
+msrp_full_2010_count <- sapply(
+  seq_along(support),
+  function(i) {
+    supp <- support[[i]]
+    sum(msrp_full_2010 == supp)
+  }
+)
+msrp_full_2011_count <- sapply(
+  seq_along(support),
+  function(i) {
+    supp <- support[[i]]
+    sum(msrp_full_2011 == supp)
+  }
+)
+msrp_full_2010_df <- as.data.frame(cbind(support, count = msrp_full_2010_count))
+msrp_full_2011_df <- as.data.frame(cbind(support, count = msrp_full_2011_count))
+msrp_full_unweighted <- diftrans(pre_main = msrp_full_2010_df,
+                                 post_main = msrp_full_2011_df,
+                                 var = support,
+                                 count = count)
+full_results <- msrp_full_unweighted$empirical_table$result
+
+sims <- 500
+bandwidth_vec <- seq(0, 40000, 1000)
+results <- matrix(NA_real_, nrow = length(bandwidth_vec), ncol = sims)
+for (sim in seq_len(sims)) {
+  print(paste("Simulation", sim, "out of", sims))
+  msrp_sample_2010_unweighted <- sample(msrp_full_2010, length(msrp_match_2010))
+  msrp_sample_2011_unweighted <- sample(msrp_full_2011, length(msrp_match_2011))
+  msrp_full_2010_count <- sapply(
+    seq_along(support),
+    function(i) {
+      supp <- support[[i]]
+      sum(msrp_sample_2010_unweighted == supp)
+    }
+  )
+  msrp_full_2011_count <- sapply(
+    seq_along(support),
+    function(i) {
+      supp <- support[[i]]
+      sum(msrp_sample_2011_unweighted == supp)
+    }
+  )
+
+  msrp_full_2010_df <- as.data.frame(cbind(support, count = msrp_full_2010_count))
+  msrp_full_2011_df <- as.data.frame(cbind(support, count = msrp_full_2011_count))
+
+  msrp_full_unweighted <- diftrans(pre_main = msrp_full_2010_df,
+                                   post_main = msrp_full_2011_df,
+                                   var = support,
+                                   count = count,
+                                   bandwidth_vec = bandwidth_vec,
+                                   seed = NULL)
+  results[, sim] <- msrp_full_unweighted$empirical_table$result
+}
+
+save(results, file = here::here("scrapnotes/results_unweighted_unique.RData"))
+
+results_df <- as.data.frame(results)
+colnames(results_df) <- paste0("sim", seq_len(sims))
+
+plot_df <- cbind(bandwidth = bandwidth_vec,
+                 results_df,
+                 match_sim = match_results,
+                 full_sim = full_results) %>%
+  tidyr::pivot_longer(cols = contains("sim")) %>%
+  mutate(value = 100 * value)
+
+ggplot() +
+  geom_line(data = plot_df %>%
+            filter(!(name %in% c("full_sim", "match_sim"))),
+            aes(x = bandwidth, y = value, color = name), alpha = 0.75) +
+  geom_line(data = plot_df %>%
+            filter(name %in% c("full_sim")),
+            aes(x = bandwidth, y = value), color = "black", alpha = 1) +
+  geom_line(data = plot_df %>%
+            filter(name %in% c("match_sim")),
+            aes(x = bandwidth, y = value), color = "black", alpha = 1) +
+  scale_y_continuous(breaks = seq(0, 90, 5)) +
+  scale_x_continuous(breaks = seq(0, 40000, 2500)) +
+  xlab("Transport Cost (%)") +
+  ylab("Bandwidth") +
+  theme_bw() +
+  guides(color = FALSE)
+
+ggsave(filename = "before-and-after_unweighted_unique_MSRP.jpg",
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 7,
+       height = 4)
