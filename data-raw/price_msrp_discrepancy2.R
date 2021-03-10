@@ -175,6 +175,8 @@ save(store_indices, file = here::here("scrapnotes/subsample_unweighted_indices.R
 
 check_if_matched <- apply(store_indices, 2, function(x) {mean(x[matched$is_matched == 1] == 1)})
 summary(check_if_matched)
+check_if_matched <- apply(store_indices, 2, function(x) {all(x == matched$is_matched)})
+summary(check_if_matched)
 
 plot_df <- cbind(bandwidth = bandwidth_vec,
                  results_df,
