@@ -171,9 +171,9 @@ results_df <- as.data.frame(results)
 colnames(results_df) <- paste0("sim", seq_len(sims))
 
 save(results_df, file = here::here("scrapnotes/results_unweighted2.RData"))
-save(store_indices, file == here::here("scrapnotes/subsample_unweighted_indices.RData"))
+save(store_indices, file = here::here("scrapnotes/subsample_unweighted_indices.RData"))
 
-check_if_matched <- apply(store_indices, 2, function(x) {mean(x == matched$is_matched)})
+check_if_matched <- apply(store_indices, 2, function(x) {mean(x[matched$is_matched == 1] == 1)})
 summary(check_if_matched)
 
 plot_df <- cbind(bandwidth = bandwidth_vec,
