@@ -537,11 +537,15 @@ save(store_indices_2010, file = here::here("scrapnotes/compare_unweighted_indice
 save(store_indices_2011, file = here::here("scrapnotes/compare_unweighted_indices_2011.RData"))
 
 check_if_matched <- apply(store_indices_2010, 2, function(x) {mean(x[matched_2010$is_matched == 1])})
+summary(check_if_matched) # want this to be close to 1
+check_if_matched <- apply(store_indices_2010, 2, function(x) {mean(x[matched_2010$is_matched == 0])}) # want this to be close to 0
 summary(check_if_matched)
 check_if_matched <- apply(store_indices_2010, 2, function(x) {all(x == matched_2010$is_matched)})
 summary(as.numeric(check_if_matched))
 
 check_if_matched <- apply(store_indices_2011, 2, function(x) {mean(x[matched_2011$is_matched == 1])})
+summary(check_if_matched)
+check_if_matched <- apply(store_indices_2011, 2, function(x) {mean(x[matched_2011$is_matched == 0])}) # want this to be close to 0
 summary(check_if_matched)
 check_if_matched <- apply(store_indices_2011, 2, function(x) {all(x == matched_2011$is_matched)})
 summary(as.numeric(check_if_matched))
