@@ -180,7 +180,7 @@ results_df <- as.data.frame(results)
 colnames(results_df) <- paste0("sim", seq_len(sims))
 
 save(results_df, file = here::here("scrapnotes/results_unweighted2_byyear.RData"))
-save(store_indices, file = here::here("scrapnotes/subsample_unweighted_indices_byyear.RData"))
+save(store_indices, file = here::here("scrapnotes/subsample_unweighted_indices_byyear.RData")) # TODO: This is incorrect -- need to save 2010 and 2011 separately
 
 check_if_matched <- apply(store_indices, 2, function(x) {mean(x[matched$is_matched == 1])})
 summary(check_if_matched)
@@ -441,3 +441,188 @@ ggplot() +
   geom_line(aes(x = bandwidth_vec, y = compare_2010_results), color = "steelblue") +
   geom_line(aes(x = bandwidth_vec, y = compare_2011_results), color = "orange") +
   theme_bw()
+
+
+bandwidth_vec <- seq(0, 40000, 1000)
+full <- diftrans(pre_main = msrp_full_2010_values,
+                 post_main = msrp_full_2011_values,
+                 bandwidth_vec = bandwidth_vec,
+                 var = msrp,
+                 count = total)
+full_results <- full$empirical_table$result
+
+match <- diftrans(pre_main = msrp_match_2010_values,
+                  post_main = msrp_match_2011_values,
+                  bandwidth_vec = bandwidth_vec,
+                  var = msrp,
+                  count = total)
+match_results <- match$empirical_table$result
+
+
+matched_2010 <- matched %>% filter(year == 2010)
+matched_2011 <- matched %>% filter(year == 2011)
+sims <- 100
+results_2010 <- matrix(NA_real_, nrow = length(bandwidth_vec), ncol = sims)
+results_2011 <- matrix(NA_real_, nrow = length(bandwidth_vec), ncol = sims)
+results_sub <- matrix(NA_real_, nrow = length(bandwidth_vec), ncol = sims)
+store_indices_2010 <- matrix(NA_real_, nrow = nrow(matched_2010), ncol = sims)
+store_indices_2011 <- matrix(NA_real_, nrow = nrow(matched_2011), ncol = sims)
+
+for (sim in seq_len(sims)) {
+  print(paste("Simulation", sim, "out of", sims))
+
+  sub_index_2010 <- sample(seq_len(nrow(matched_2010)), sum(matched_2010$is_matched), replace = FALSE)
+  sub_index_2011 <- sample(seq_len(nrow(matched_2011)), sum(matched_2011$is_matched), replace = FALSE)
+  sub_df_2010 <- matched_2010[sub_index_2010, ]
+  sub_df_2011 <- matched_2011[sub_index_2011, ]
+  zeros_2010 <- rep(0, nrow(matched_2010))
+  zeros_2010[sub_index_2010] <- 1
+  zeros_2011 <- rep(0, nrow(matched_2011))
+  zeros_2011[sub_index_2011] <- 1
+  store_indices_2010[, sim] <- zeros_2010
+  store_indices_2011[, sim] <- zeros_2011
+
+  sub_2010 <- prep_msrp_values_pmf(
+    sub_df_2010,
+    2010,
+    FALSE,
+    msrp_support_values
+  )
+  sub_2011 <- prep_msrp_values_pmf(
+    sub_df_2011,
+    2011,
+    FALSE,
+    msrp_support_values
+  )
+
+  compare_sub_match_2010 <- diftrans(pre_main = sub_2010,
+                  post_main = msrp_match_2010_values,
+                  bandwidth_vec = bandwidth_vec,
+                  var = msrp,
+                  count = total,
+                  seed = NULL)
+  sub_results <- compare_sub_match_2010$empirical_table$result
+  results_2010[, sim] <- sub_results
+
+  compare_sub_match_2011 <- diftrans(pre_main = sub_2011,
+                  post_main = msrp_match_2011_values,
+                  bandwidth_vec = bandwidth_vec,
+                  var = msrp,
+                  count = total,
+                  seed = NULL)
+  sub_results <- compare_sub_match_2011$empirical_table$result
+  results_2011[, sim] <- sub_results
+
+  sub <- diftrans(pre_main = sub_2010,
+                  post_main = sub_2011,
+                  bandwidth_vec = bandwidth_vec,
+                  var = msrp,
+                  count = total,
+                  seed = NULL)
+  sub_results <- sub$empirical_table$result
+  results_sub[, sim] <- sub_results
+}
+
+results_df_2010 <- as.data.frame(results_2010)
+colnames(results_df_2010) <- paste0("sim", seq_len(sims))
+results_df_2011 <- as.data.frame(results_2011)
+colnames(results_df_2011) <- paste0("sim", seq_len(sims))
+results_df_sub <- as.data.frame(results_sub)
+colnames(results_df_sub) <- paste0("sim", seq_len(sims))
+
+save(results_df_2010, file = here::here("scrapnotes/compare_unweighted_2010.RData"))
+save(results_df_2011, file = here::here("scrapnotes/compare_unweighted_2011.RData"))
+save(results_df_sub, file = here::here("scrapnotes/sub_unweighted.RData"))
+save(store_indices_2010, file = here::here("scrapnotes/compare_unweighted_indices_2010.RData"))
+save(store_indices_2011, file = here::here("scrapnotes/compare_unweighted_indices_2011.RData"))
+
+check_if_matched <- apply(store_indices_2010, 2, function(x) {mean(x[matched_2010$is_matched == 1])})
+summary(check_if_matched)
+check_if_matched <- apply(store_indices_2010, 2, function(x) {all(x == matched_2010$is_matched)})
+summary(as.numeric(check_if_matched))
+
+check_if_matched <- apply(store_indices_2011, 2, function(x) {mean(x[matched_2011$is_matched == 1])})
+summary(check_if_matched)
+check_if_matched <- apply(store_indices_2011, 2, function(x) {all(x == matched_2011$is_matched)})
+summary(as.numeric(check_if_matched))
+
+plot_df_2010 <- cbind(bandwidth = bandwidth_vec,
+                 results_df_2010,
+                 sim_2010 = compare_2010_results) %>%
+  tidyr::pivot_longer(cols = contains("sim")) %>%
+  mutate(value = 100 * value)
+
+ggplot() +
+  geom_line(data = plot_df_2010 %>%
+            filter(!(name %in% c("sim_2010"))),
+            aes(x = bandwidth, y = value, color = name), alpha = 0.75) +
+  geom_line(data = plot_df_2010 %>%
+            filter(name %in% c("sim_2010")),
+            aes(x = bandwidth, y = value), color = "black", alpha = 1) +
+  scale_y_continuous(breaks = seq(0, 90, 5)) +
+  scale_x_continuous(breaks = seq(0, 40000, 2500)) +
+  xlab("Transport Cost (%)") +
+  ylab("Bandwidth") +
+  theme_bw() +
+  guides(color = FALSE)
+
+ggsave(filename = "compare_unweighted_2010.jpg",
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 7,
+       height = 4)
+
+
+plot_df_2011 <- cbind(bandwidth = bandwidth_vec,
+                 results_df_2011,
+                 sim_2011 = compare_2011_results) %>%
+  tidyr::pivot_longer(cols = contains("sim")) %>%
+  mutate(value = 100 * value)
+
+ggplot() +
+  geom_line(data = plot_df_2011 %>%
+            filter(!(name %in% c("sim_2011"))),
+            aes(x = bandwidth, y = value, color = name), alpha = 0.75) +
+  geom_line(data = plot_df_2011 %>%
+            filter(name %in% c("sim_2011")),
+            aes(x = bandwidth, y = value), color = "black", alpha = 1) +
+  scale_y_continuous(breaks = seq(0, 90, 5)) +
+  scale_x_continuous(breaks = seq(0, 40000, 2500)) +
+  xlab("Transport Cost (%)") +
+  ylab("Bandwidth") +
+  theme_bw() +
+  guides(color = FALSE)
+
+ggsave(filename = "compare_unweighted_2011.jpg",
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 7,
+       height = 4)
+
+plot_df <- cbind(bandwidth = bandwidth_vec,
+                 results_df_sub,
+                 match_sim = match_results,
+                 full_sim = full_results) %>%
+  tidyr::pivot_longer(cols = contains("sim")) %>%
+  mutate(value = 100 * value)
+
+ggplot() +
+  geom_line(data = plot_df %>%
+            filter(!(name %in% c("full_sim", "match_sim"))),
+            aes(x = bandwidth, y = value, color = name), alpha = 0.75) +
+  geom_line(data = plot_df %>%
+            filter(name %in% c("full_sim")),
+            aes(x = bandwidth, y = value), color = "black", alpha = 1) +
+  geom_line(data = plot_df %>%
+            filter(name %in% c("match_sim")),
+            aes(x = bandwidth, y = value), color = "black", alpha = 1) +
+  scale_y_continuous(breaks = seq(0, 90, 5)) +
+  scale_x_continuous(breaks = seq(0, 40000, 2500)) +
+  xlab("Transport Cost (%)") +
+  ylab("Bandwidth") +
+  theme_bw() +
+  guides(color = FALSE)
+
+ggsave(filename = "sub_unweighted.jpg",
+       path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
+       width = 7,
+       height = 4)
+
