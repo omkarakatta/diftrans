@@ -630,3 +630,34 @@ ggsave(filename = "sub_unweighted.jpg",
        width = 7,
        height = 4)
 
+### Matched in 2010 and 2011 -------------------------
+
+codebook_raw <- readxl::read_excel("~/BFI/3_BMP_GP/data-raw/msrp_models20210225.xlsx")
+
+rm_col <- c("year", "noticenum", "displacement...16")
+codebook_2010 <- codebook_raw %>%
+  filter(year == 2010) %>%
+  filter(!is.na(avg_price)) %>%
+  select(-all_of(rm_col))
+codebook_2011 <- codebook_raw %>%
+  filter(year == 2011) %>%
+  filter(!is.na(avg_price)) %>%
+  select(-all_of(rm_col))
+
+tmp <- inner_join(codebook_2010, codebook_2011)
+dim(tmp)
+
+matched_raw <- data.table::fread("~/BFI/3_BMP_GP/data-raw/Beijing_cleaned_merged.csv")
+
+rm_col <- c("v1", "noticenum")
+matched_2010 <- matched_raw %>%
+  filter(year == 2010) %>%
+  filter(!is.na(avg_price)) %>%
+  select(-all_of(rm_col))
+matched_2011 <- matched_raw %>%
+  filter(year == 2011) %>%
+  filter(!is.na(avg_price)) %>%
+  select(-all_of(rm_col))
+
+tmp <- inner_join(codebook_2010, codebook_2011)
+dim(tmp)
