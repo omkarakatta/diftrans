@@ -575,6 +575,15 @@ ggsave(filename = "compare_unweighted_2010.jpg",
        width = 7,
        height = 4)
 
+# p-value
+p_2010 <- sapply(
+  seq_along(bandwidth_vec),
+  function(row) {
+    sub_row <- results_df_2010[row, ]
+    actual <- compare_2010_results[[row]]
+    sum(actual >= sub_row) / length(sub_row)
+  }
+)
 
 plot_df_2011 <- cbind(bandwidth = bandwidth_vec,
                  results_df_2011,
@@ -600,6 +609,21 @@ ggsave(filename = "compare_unweighted_2011.jpg",
        path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
        width = 7,
        height = 4)
+
+# p-value
+p_2011 <- sapply(
+  seq_along(bandwidth_vec),
+  function(row) {
+    sub_row <- results_df_2011[row, ]
+    actual <- compare_2011_results[[row]]
+    sum(actual >= sub_row) / length(sub_row)
+  }
+)
+
+
+ggplot() +
+  geom_line(aes(x = bandwidth_vec, y = p_2010), color = "orange") +
+  geom_line(aes(x = bandwidth_vec, y = p_2011), color = "steelblue")
 
 plot_df <- cbind(bandwidth = bandwidth_vec,
                  results_df_sub,
@@ -629,6 +653,26 @@ ggsave(filename = "sub_unweighted.jpg",
        path = "~/BFI/3_BMP_GP/img/img_misc/price_msrp_discrepancy",
        width = 7,
        height = 4)
+
+
+### Study Mapping -------------------------
+
+matched_raw <- data.table::fread("~/BFI/3_BMP_GP/data-raw/Beijing_cleaned_merged.csv")
+
+mapping_matched_raw <- matched_raw %>%
+  filter(!is.na(avg_price)) %>%
+  select(year, msrp, avg_price, sales)
+
+mapping_matched <- mapping_matched_raw %>%
+  group_by(msrp, avg_price) %>%
+  summarize(total = sum(sales)) %>%
+  ungroup()
+
+ggplot(mapping_matched) +
+  geom_segment(aes(x = 0, xend = 5, y = msrp, yend = avg_price,
+                   color = total),
+               alpha = 0.2) +
+  theme_bw()
 
 ### Matched in 2010 and 2011 -------------------------
 
