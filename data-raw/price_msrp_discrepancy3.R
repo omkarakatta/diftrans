@@ -144,7 +144,7 @@ sub_vs_full <- function(full, sub_indices, sim) {
   raw$empirical_table$result
 }
 
-sims <- 500
+sims <- 50
 sub_vs_full_2010 <- matrix(NA_real_, nrow = length(bandwidth_vec), ncol = sims)
 sub_vs_full_2011 <- matrix(NA_real_, nrow = length(bandwidth_vec), ncol = sims)
 for (sim in seq_len(sims)) {
