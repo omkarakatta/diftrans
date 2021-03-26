@@ -110,7 +110,7 @@
 #' @param sims_bandwidth_selection Number of simulations for the bandwidth
 #'  selection process; defaults to 0
 #' @param precision Threshold to choose the bandwidth; defaults to 0.0005, i.e.,
-#'  5 percent.
+#'  0.05 percent.
 #' @param sensitivity_lag,sensitivity_lead,sensitivity_accept
 #'  See "Details" to understand how these parameters influence bandwidth
 #'  selection
