@@ -1044,20 +1044,21 @@ if (show_diff_in_diff) {
   stargazer(did_BT_reg, did_BS_reg, did_BST_reg,
             label = "tab:eight",
             type = "latex",
-            # covariate.labels = c("post", "Beijing", "Beijing $\\times$ post", "Constant"),
             order = c(2, 1, 3, 4),
             covariate.labels = c("Beijing", "post", "Beijing $\\times$ post", "Constant"),
             keep.stat = c("rsq","n"),
             align = T,
             p.auto = FALSE,
-            se = list(summary(did_BT_reg)$coefficients[,"t value"],
-                      summary(did_BS_reg)$coefficients[,"t value"],
-                      summary(did_BST_reg)$coefficients[,"t value"]),
+            # se = list(summary(did_BT_reg)$coefficients[,"t value"],
+            #           summary(did_BS_reg)$coefficients[,"t value"],
+            #           summary(did_BST_reg)$coefficients[,"t value"]),
+            # notes = c("t-statistics are in parentheses.")
+            # single.row = TRUE,
             column.labels = c("Tianjin", "Shijiazhuang", "Both"),
             model.numbers = FALSE,
             dep.var.caption = "",
             dep.var.labels.include = FALSE,
-            # single.row = TRUE,
-            notes = c("t-statistics are in parentheses."))
+            report = "vcs"
+  )
 }
 
