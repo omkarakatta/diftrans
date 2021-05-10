@@ -16,7 +16,7 @@
 #'   \item{city}{"Beijing"}
 #'   \item{MSRP}{manufacturer's suggested retail price, in RMB}
 #'   \item{sales}{number of car models sold in that particular year}
-#'   \item{swtprice}{price, in RMB 1000}
+#'   \item{swtprice}{sales-weighted price, in RMB 1000}
 #'   \item{color, noticenum}{uniquely identify car model}
 #'   \item{postBeijing}{1 if cars were sold after Beijing lottery in 2011, and 0 otherwise}
 #'   \item{postTianjin}{1 if cars were sold after Tianjin lottery/auction in 2014, and 0 otherwise}
@@ -48,7 +48,7 @@
 #'   \item{city}{"Tianjin"}
 #'   \item{MSRP}{manufacturer's suggested retail price, in RMB}
 #'   \item{sales}{number of car models sold in that particular year}
-#'   \item{swtprice}{price, in RMB 1000}
+#'   \item{swtprice}{sales-weighted price, in RMB 1000}
 #'   \item{color, noticenum}{uniquely identify car model}
 #'   \item{postBeijing}{1 if cars were sold after Beijing lottery in 2011, and 0 otherwise}
 #'   \item{postTianjin}{1 if cars were sold after Tianjin lottery/auction in 2014, and 0 otherwise}
@@ -80,7 +80,7 @@
 #'   \item{city}{"Shijiazhuang"}
 #'   \item{MSRP}{manufacturer's suggested retail price, in RMB}
 #'   \item{sales}{number of car models sold in that particular year}
-#'   \item{swtprice}{price, in RMB 1000}
+#'   \item{swtprice}{sales-weighted price, in RMB 1000}
 #'   \item{color, noticenum}{uniquely identify car model}
 #'   \item{postBeijing}{1 if cars were sold after Beijing lottery in 2011, and 0 otherwise}
 #'   \item{postTianjin}{1 if cars were sold after Tianjin lottery/auction in 2014, and 0 otherwise}
