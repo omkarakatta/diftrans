@@ -17,6 +17,7 @@
 ###       Hence, an anonymized version of the data set will be provided.
 ###       The results of this script will therefore differ slightly from the paper's results.
 ###
+###       This file will be deprecated by ./data-raw/reproduce_results2.R
 
 ### Preliminaries ---------------------------
 
