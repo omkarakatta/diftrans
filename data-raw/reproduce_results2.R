@@ -102,6 +102,8 @@ ba <- diftrans(
 
 save(ba, file = here::here("data", "ba.RData"))
 
+plot_empirical_placebo(ba) # Figure 7
+
 dit <- diftrans(
   pre_main = pre_Beijing,
   post_main = post_Beijing,
@@ -120,3 +122,5 @@ dit <- diftrans(
 )
 
 save(dit, file = here::here("data", "dit.RData"))
+
+plot_empirical(dit) # Figure 10
