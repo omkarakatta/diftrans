@@ -124,3 +124,20 @@ dit <- diftrans(
 save(dit, file = here::here("data", "dit.RData"))
 
 plot_empirical(dit) # Figure 10
+
+# Tianjin before-and-after
+
+ba_Tianjin <- diftrans(
+  pre_main = pre_Tianjin,
+  post_main = post_Tianjin,
+  sims_bandwidth_selection = 500,
+  sims_subsampling = 100,
+  pre_main_subsample_size = floor(sum(pre_Tianjin$count) * 0.75),
+  post_main_subsample_size = floor(sum(post_Tianjin$count) * 0.75),
+  seed = 1,
+  conservative = FALSE,
+  quietly = FALSE,
+  show_progress = TRUE
+)
+
+save(ba_Tianjin, file = here::here("data", "ba_Tianjin.RData"))
