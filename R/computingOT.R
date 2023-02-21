@@ -37,7 +37,7 @@ build_costmatrix2 <- function(support_pre, support_post, bandwidth = 0){
 ### Compute Transport Cost ---------------------------
 
 #' @importFrom transport transport
-get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSRP, costmat = NULL, costmat_ref = NULL){
+get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSRP, costmat = NULL){
   # given pre-data and post-data, compute optimal transport cost given bandwidth
   pre <- pre_df$count
   post <- post_df$count
@@ -74,33 +74,9 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
     costm
   )
 
-  if (is.null(costmat_ref)) {
-    # construct minimal support and determine cost
-    support_pre <- pre_df %>%
-      dplyr::filter(count != 0) %>%
-      dplyr::select({{var}}) %>%
-      dplyr::distinct({{var}}) %>%
-      dplyr::arrange({{var}}) %>%
-      dplyr::filter(!is.na({{var}})) %>%
-      unlist()
-
-    support_post <- post_df %>%
-      dplyr::filter(count != 0) %>%
-      dplyr::select({{var}}) %>%
-      dplyr::distinct({{var}}) %>%
-      dplyr::arrange({{var}}) %>%
-      dplyr::filter(!is.na({{var}})) %>%
-      unlist()
-
-    costm_ref <- build_costmatrix2(support_pre, support_post, bandwidth)
-
-  } else {
-    costm_ref <- costmat_ref
-  }
-
   temp <- as.data.frame(OT) %>%
     dplyr::rowwise() %>%
-    dplyr::mutate(cost = costm_ref[from, to]) %>%
+    dplyr::mutate(cost = costm[from, to]) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(cost = mass * cost)
 
@@ -129,9 +105,6 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 #' Since column 1 contains the full support of \code{var} and all these distributions
 #' are of \code{var}, column 1 must be the same for all distributions.
 #'
-#' The cost matrices specified by \code{costm} should use a common support of the respective distributions.
-#' However, \code{costm_ref} matrices should use the minimal support of the respective pre and post distributions.
-#'
 #' @param pre_main probability mass function (see "Details") for \code{var} of the
 #'     treated group before treatment occurs
 #' @param post_main probability mass function (see "Details") for \code{var} of the
@@ -159,12 +132,8 @@ get_OTcost <- function(pre_df, post_df, support = NULL, bandwidth = 0, var = MSR
 #'     well as the associated bandwidth will be returned
 #' @param costm_main if \code{NULL}, the cost matrix with common support will be such that if the transport 
 #'     distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.
-#' @param costm_ref_main if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be 
-#'     using the minimal support of main distributions
 #' @param costm_control if \code{NULL}, the cost matrix with common support will be such that if the transport 
 #'     distance is greater than what is specified in \code{bandwidth_seq}, cost is 1 and 0 otherwise.
-#' @param costm_ref_control if \code{NULL}, the cost matrix referenced by \code{transport::transport} will be 
-#'     using the minimal support of control distributions
 #'
 #' @return a data.frame with the transport costs associated with each value of \code{bandwidth_seq}.
 #' \itemize{
@@ -267,8 +236,8 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
                      quietly = F,
                      suppress_progress_bar = F,
                      save_dit = F,
-                     costm_main = NULL, costm_ref_main = NULL,
-                     costm_control = NULL, costm_ref_control = NULL){
+                     costm_main = NULL,
+                     costm_control = NULL){
   var <- rlang::enquo(var)
   # error checking
   if (is.null(pre_main) | is.null(post_main)){
@@ -312,9 +281,9 @@ diftrans <- function(pre_main = NULL, post_main = NULL,
     if (!suppress_progress_bar) utils::setTxtProgressBar(pb, i)
 
     bandwidth <- bandwidth_seq[i]
-    main_cost <- get_OTcost(pre_main, post_main, bandwidth = bandwidth, var = !!var, costmat = costm_main, costmat_ref = costm_ref_main)
-    if (conservative) maincons_cost <- get_OTcost(pre_main, post_main, bandwidth = 2*bandwidth, var = !!var, costmat = costm_main, costmat_ref = costm_ref_main)
-    if (est == "dit") control_cost <- get_OTcost(pre_control, post_control, bandwidth = bandwidth, var = !!var, costmat = costm_control, costmat_ref = costm_ref_control)
+    main_cost <- get_OTcost(pre_main, post_main, bandwidth = bandwidth, var = !!var, costmat = costm_main)
+    if (conservative) maincons_cost <- get_OTcost(pre_main, post_main, bandwidth = 2*bandwidth, var = !!var, costmat = costm_main)
+    if (est == "dit") control_cost <- get_OTcost(pre_control, post_control, bandwidth = bandwidth, var = !!var, costmat = costm_control)
 
     main_prop[i] <- main_cost$prop_bribe
     if (conservative) maincons_prop[i] <- maincons_cost$prop_bribe
