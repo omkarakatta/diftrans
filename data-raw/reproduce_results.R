@@ -45,6 +45,9 @@ if (!require(tidyr, quietly = T)){
 if (!require(stargazer, quietly = T)){
   install.packages("stargazer")
 }
+if (!require(here, quietly = T)){
+  install.packages("here")
+}
 
 library(diftrans)
 library(magrittr)
