@@ -71,33 +71,33 @@ version <- "original"
 
 # Do you want to see figures?
 show_fig <- TRUE
-show_fig1 <- FALSE
-show_fig2 <- FALSE
-show_fig3 <- FALSE
-show_footnote8 <- FALSE
-show_fig4 <- FALSE
-show_fig5 <- FALSE
-show_fig6 <- FALSE
-show_fig7 <- FALSE
-show_fig8 <- FALSE
-show_fig9 <- FALSE
-show_fig10 <- FALSE
+show_fig1 <- TRUE
+show_fig2 <- TRUE
+show_fig3 <- TRUE
+show_footnote8 <- TRUE
+show_fig4 <- TRUE
+show_fig5 <- TRUE
+show_fig6 <- TRUE
+show_fig7 <- TRUE
+show_fig8 <- TRUE
+show_fig9 <- TRUE
+show_fig10 <- TRUE
 
 # Do you want to save figures?
-save_fig <- FALSE
-save_fig1 <- FALSE
-save_fig2 <- FALSE
-save_fig3 <- FALSE
-save_fig4 <- FALSE
-save_fig5 <- FALSE
-save_fig6 <- FALSE
-save_fig7 <- FALSE
-save_fig8 <- FALSE
-save_fig9 <- FALSE
-save_fig10 <- FALSE
+save_fig <- TRUE
+save_fig1 <- TRUE
+save_fig2 <- TRUE
+save_fig3 <- TRUE
+save_fig4 <- TRUE
+save_fig5 <- TRUE
+save_fig6 <- TRUE
+save_fig7 <- TRUE
+save_fig8 <- TRUE
+save_fig9 <- TRUE
+save_fig10 <- TRUE
 
 # Do you want to run diff-in-diff analysis
-show_diff_in_diff <- FALSE
+show_diff_in_diff <- TRUE
 
 # Plotting Preferences
 
@@ -113,12 +113,12 @@ linetype3 <- "twodash"
 linetype4 <- "longdash"
 
 # Where will you store plots?
-# img_path <- ... # uncomment and replace ... with destination file path
-# suffix <- "_"  # naming convention
+img_path <- "~/misc/bmp-plots/" # uncomment and replace ... with destination file path
+suffix <- "_"  # naming convention
 
 # How large do you want your plots to be? (inches)
-# default_width <- 7
-# default_height <- 3
+default_width <- 7
+default_height <- 3
 
 ### Prepare Data ---------------------------
 
@@ -296,6 +296,19 @@ if (show_fig | show_fig3) {
 
 ### Footnote 8 ---------------------------
 
+# TODO: export this from the package
+build_costmatrix <- function(support, bandwidth = 0){
+  # create cost matrix using the common support provided
+  costmatrix <- matrix(NA_real_, nrow = length(support), ncol = length(support))
+  for (i in seq_along(support)){
+    dist <- abs(support[i] - support)
+    dist <- ifelse(dist > bandwidth, 1, 0)
+    costmatrix[i, ] <- dist
+  }
+  costmatrix
+}
+
+# BUG: getting errors here
 if (show_fig | show_footnote8) {
   support <- prep_data(data = Beijing, prep = "support")
   pre <- prep_data(Beijing, prep = "pmf",
@@ -327,7 +340,8 @@ if (show_fig | show_footnote8) {
   l1_cost <- Lpcost(support, support, 1)
   l0_cost <- build_costmatrix(support = support, bandwidth = d)
   cost_mat <- l0_cost + lambda + l1_cost
-  OT <- transport(
+  # TODO: install and load `transport` package
+  OT <- transport::transport(
       as.numeric(sum(post$count) / sum(pre$count) * pre$count),
       as.numeric(post$count),
       cost_mat
@@ -556,6 +570,7 @@ if (show_fig | show_fig5) {
 
 ### Figure 6 ---------------------------
 
+# NOTE: takes some time to run
 fignum <- "6"
 if (show_fig | show_fig6) {
 
@@ -712,6 +727,7 @@ if (show_fig | show_fig7) {
 
 ### Figure 8 ---------------------------
 
+# NOTE: takes a while to run
 fignum <- "8"
 if (show_fig | show_fig8) {
 
